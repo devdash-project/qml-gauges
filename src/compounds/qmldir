@@ -1,0 +1,6 @@
+module DevDash.Gauges.Compounds
+DigitalReadout 1.0 DigitalReadout.qml
+GaugeTickRing 1.0 GaugeTickRing.qml
+GaugeValueArc 1.0 GaugeValueArc.qml
+GaugeZoneArc 1.0 GaugeZoneArc.qml
+RollingDigitReadout 1.0 RollingDigitReadout.qml

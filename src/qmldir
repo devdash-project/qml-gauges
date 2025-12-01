@@ -1,0 +1,2 @@
+module DevDash.Gauges
+RadialGauge 1.0 radial/RadialGauge.qml

@@ -1,0 +1,9 @@
+module DevDash.Gauges.Primitives
+GaugeArc 1.0 GaugeArc.qml
+GaugeBezel 1.0 GaugeBezel.qml
+GaugeCenterCap 1.0 GaugeCenterCap.qml
+GaugeFace 1.0 GaugeFace.qml
+GaugeNeedleClassic 1.0 GaugeNeedleClassic.qml
+GaugeNeedleTapered 1.0 GaugeNeedleTapered.qml
+GaugeTick 1.0 GaugeTick.qml
+GaugeTickLabel 1.0 GaugeTickLabel.qml
