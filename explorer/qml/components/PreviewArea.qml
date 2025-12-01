@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import Explorer
 
 Rectangle {
     id: root
@@ -11,7 +12,7 @@ Rectangle {
     // Alias to allow pages to parent their component inside the container
     default property alias content: componentContainer.data
 
-    color: "#1a1a1a"  // Dark background for automotive aesthetic
+    color: Theme.previewBackground
 
     // Component container - centers the component
     Item {
@@ -27,7 +28,7 @@ Rectangle {
         anchors.left: parent.left
         anchors.right: parent.right
         height: 80
-        color: "#2a2a2a"
+        color: Theme.headerBackground
 
         ColumnLayout {
             anchors.fill: parent
@@ -37,7 +38,7 @@ Rectangle {
             Label {
                 text: "Animation Controls"
                 font.bold: true
-                color: "#ffffff"
+                color: Theme.textPrimary
                 Layout.alignment: Qt.AlignHCenter
             }
 
@@ -46,9 +47,24 @@ Rectangle {
                 spacing: 10
 
                 Button {
-                    text: root.animating ? "⏸ Pause" : "▶ Play"
+                    id: playButton
+                    text: root.animating ? "Pause" : "Play"
                     Layout.preferredWidth: 100
                     onClicked: root.animating = !root.animating
+
+                    contentItem: Text {
+                        text: parent.text
+                        font: parent.font
+                        color: Theme.textPrimary
+                        horizontalAlignment: Text.AlignHCenter
+                        verticalAlignment: Text.AlignVCenter
+                    }
+
+                    background: Rectangle {
+                        color: playButton.pressed ? Theme.accentColor : (playButton.hovered ? Theme.hoverBackground : Theme.inputBackground)
+                        border.color: Theme.inputBorder
+                        radius: 4
+                    }
                 }
 
                 Slider {
@@ -63,22 +79,63 @@ Rectangle {
                             root.animationValue = manualSlider.value
                         }
                     }
+
+                    background: Rectangle {
+                        x: manualSlider.leftPadding
+                        y: manualSlider.topPadding + manualSlider.availableHeight / 2 - height / 2
+                        width: manualSlider.availableWidth
+                        height: 4
+                        radius: 2
+                        color: Theme.sliderTrack
+
+                        Rectangle {
+                            width: manualSlider.visualPosition * parent.width
+                            height: parent.height
+                            color: Theme.accentColor
+                            radius: 2
+                        }
+                    }
+
+                    handle: Rectangle {
+                        x: manualSlider.leftPadding + manualSlider.visualPosition * (manualSlider.availableWidth - width)
+                        y: manualSlider.topPadding + manualSlider.availableHeight / 2 - height / 2
+                        width: 16
+                        height: 16
+                        radius: 8
+                        color: manualSlider.pressed ? Theme.accentHover : Theme.sliderHandle
+                        border.color: Theme.border
+                    }
                 }
 
                 Label {
                     text: root.animationValue.toFixed(0)
-                    color: "#ffffff"
+                    color: Theme.textValue
                     font.family: "monospace"
                     Layout.preferredWidth: 40
                     horizontalAlignment: Text.AlignRight
                 }
 
                 Button {
-                    text: "⟲ Reset"
+                    id: resetButton
+                    text: "Reset"
                     Layout.preferredWidth: 100
                     onClicked: {
                         root.animating = false
                         root.animationValue = 0
+                    }
+
+                    contentItem: Text {
+                        text: parent.text
+                        font: parent.font
+                        color: Theme.textPrimary
+                        horizontalAlignment: Text.AlignHCenter
+                        verticalAlignment: Text.AlignVCenter
+                    }
+
+                    background: Rectangle {
+                        color: resetButton.pressed ? Theme.accentColor : (resetButton.hovered ? Theme.hoverBackground : Theme.inputBackground)
+                        border.color: Theme.inputBorder
+                        radius: 4
                     }
                 }
             }

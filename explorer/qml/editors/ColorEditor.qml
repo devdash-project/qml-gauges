@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Dialogs
 import QtQuick.Layouts
+import Explorer
 
 RowLayout {
     id: root
@@ -15,13 +16,14 @@ RowLayout {
         text: root.propertyName
         Layout.preferredWidth: 120
         horizontalAlignment: Text.AlignLeft
+        color: Theme.textPrimary
     }
 
     Rectangle {
         Layout.preferredWidth: 80
         Layout.preferredHeight: 32
         color: root.value
-        border.color: "#888888"
+        border.color: Theme.border
         border.width: 1
         radius: 4
 

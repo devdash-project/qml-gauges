@@ -4,6 +4,7 @@ qt_add_qml_module(devdash_gauges_compounds
     VERSION 1.0
     QML_FILES
         DigitalReadout.qml
+        GaugeNeedle.qml
         GaugeTickRing.qml
         GaugeValueArc.qml
         GaugeZoneArc.qml
@@ -22,6 +23,7 @@ install(TARGETS devdash_gauges_compounds
 if(QMLLINT_EXECUTABLE)
     set(COMPOUNDS_QML_FILES
         ${CMAKE_CURRENT_SOURCE_DIR}/DigitalReadout.qml
+        ${CMAKE_CURRENT_SOURCE_DIR}/GaugeNeedle.qml
         ${CMAKE_CURRENT_SOURCE_DIR}/GaugeTickRing.qml
         ${CMAKE_CURRENT_SOURCE_DIR}/GaugeValueArc.qml
         ${CMAKE_CURRENT_SOURCE_DIR}/GaugeZoneArc.qml

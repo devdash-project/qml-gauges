@@ -3,6 +3,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import Explorer
 import "../editors"
 
 ScrollView {
@@ -22,13 +23,14 @@ ScrollView {
             text: "Properties"
             font.pixelSize: 16
             font.bold: true
+            color: Theme.textPrimary
             Layout.fillWidth: true
         }
 
         Rectangle {
             Layout.fillWidth: true
             Layout.preferredHeight: 1
-            color: "#cccccc"
+            color: Theme.divider
         }
 
         // Property editors

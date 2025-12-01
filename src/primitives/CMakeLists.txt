@@ -7,11 +7,12 @@ qt_add_qml_module(devdash_gauges_primitives
         GaugeBezel.qml
         GaugeCenterCap.qml
         GaugeFace.qml
-        GaugeNeedleClassic.qml
-        GaugeNeedleTapered.qml
-        GaugeNeedleVelocity.qml
         GaugeTick.qml
         GaugeTickLabel.qml
+        NeedleFrontBody.qml
+        NeedleHeadTip.qml
+        NeedleRearBody.qml
+        NeedleTailTip.qml
     RESOURCE_PREFIX /
     OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/qml/DevDash/Gauges/Primitives
 )
@@ -29,11 +30,12 @@ if(QMLLINT_EXECUTABLE)
         ${CMAKE_CURRENT_SOURCE_DIR}/GaugeBezel.qml
         ${CMAKE_CURRENT_SOURCE_DIR}/GaugeCenterCap.qml
         ${CMAKE_CURRENT_SOURCE_DIR}/GaugeFace.qml
-        ${CMAKE_CURRENT_SOURCE_DIR}/GaugeNeedleClassic.qml
-        ${CMAKE_CURRENT_SOURCE_DIR}/GaugeNeedleTapered.qml
-        ${CMAKE_CURRENT_SOURCE_DIR}/GaugeNeedleVelocity.qml
         ${CMAKE_CURRENT_SOURCE_DIR}/GaugeTick.qml
         ${CMAKE_CURRENT_SOURCE_DIR}/GaugeTickLabel.qml
+        ${CMAKE_CURRENT_SOURCE_DIR}/NeedleFrontBody.qml
+        ${CMAKE_CURRENT_SOURCE_DIR}/NeedleHeadTip.qml
+        ${CMAKE_CURRENT_SOURCE_DIR}/NeedleRearBody.qml
+        ${CMAKE_CURRENT_SOURCE_DIR}/NeedleTailTip.qml
     )
 
     add_custom_target(qmllint-primitives

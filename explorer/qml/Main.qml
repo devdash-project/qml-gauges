@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import Explorer
 import "components"
 
 ApplicationWindow {
@@ -17,12 +18,13 @@ ApplicationWindow {
         width: 280
         height: window.height
         modal: false
-        interactive: true
+        interactive: false  // Disable swipe gestures - use hamburger button instead
+        closePolicy: Popup.NoAutoClose  // Don't close on clicks outside
 
         Component.onCompleted: drawer.open()
 
         background: Rectangle {
-            color: "#1e1e1e"
+            color: Theme.sidebarBackground
         }
 
         ColumnLayout {
@@ -33,7 +35,7 @@ ApplicationWindow {
             Rectangle {
                 Layout.fillWidth: true
                 Layout.preferredHeight: 60
-                color: "#2a2a2a"
+                color: Theme.headerBackground
 
                 ColumnLayout {
                     anchors.centerIn: parent
@@ -43,14 +45,14 @@ ApplicationWindow {
                         text: "DevDash Gauges"
                         font.pixelSize: 18
                         font.bold: true
-                        color: "#ffffff"
+                        color: Theme.textPrimary
                         Layout.alignment: Qt.AlignHCenter
                     }
 
                     Label {
                         text: "Component Explorer"
                         font.pixelSize: 12
-                        color: "#999999"
+                        color: Theme.textSecondary
                         Layout.alignment: Qt.AlignHCenter
                     }
                 }
@@ -81,7 +83,7 @@ ApplicationWindow {
         Rectangle {
             Layout.fillWidth: true
             Layout.preferredHeight: 50
-            color: "#2a2a2a"
+            color: Theme.headerBackground
 
             RowLayout {
                 anchors.fill: parent
@@ -89,9 +91,22 @@ ApplicationWindow {
                 spacing: 15
 
                 ToolButton {
-                    text: "☰"
+                    text: "\u2630"  // Hamburger menu
                     font.pixelSize: 20
                     onClicked: drawer.visible ? drawer.close() : drawer.open()
+
+                    contentItem: Text {
+                        text: parent.text
+                        font: parent.font
+                        color: Theme.textPrimary
+                        horizontalAlignment: Text.AlignHCenter
+                        verticalAlignment: Text.AlignVCenter
+                    }
+
+                    background: Rectangle {
+                        color: parent.hovered ? Theme.hoverBackground : "transparent"
+                        radius: 4
+                    }
                 }
 
                 Label {
@@ -99,14 +114,37 @@ ApplicationWindow {
                     text: "Welcome"
                     font.pixelSize: 16
                     font.bold: true
-                    color: "#ffffff"
+                    color: Theme.textPrimary
                     Layout.fillWidth: true
+                }
+
+                // Theme toggle button
+                ToolButton {
+                    id: themeToggle
+                    text: Theme.dark ? "\u2600" : "\u263E"  // Sun (to switch to light) or Moon (to switch to dark)
+                    font.pixelSize: 18
+                    onClicked: Theme.toggle()
+                    ToolTip.visible: hovered
+                    ToolTip.text: Theme.dark ? "Switch to Light Mode" : "Switch to Dark Mode"
+
+                    contentItem: Text {
+                        text: parent.text
+                        font: parent.font
+                        color: Theme.textPrimary
+                        horizontalAlignment: Text.AlignHCenter
+                        verticalAlignment: Text.AlignVCenter
+                    }
+
+                    background: Rectangle {
+                        color: parent.hovered ? Theme.hoverBackground : "transparent"
+                        radius: 4
+                    }
                 }
 
                 Label {
                     text: "v1.0.0"
                     font.pixelSize: 12
-                    color: "#999999"
+                    color: Theme.textMuted
                 }
             }
         }
@@ -120,7 +158,7 @@ ApplicationWindow {
             initialItem: "pages/WelcomePage.qml"
 
             background: Rectangle {
-                color: "#1a1a1a"
+                color: Theme.windowBackground
             }
         }
     }

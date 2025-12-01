@@ -3,6 +3,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import Explorer
 
 ListView {
     id: root
@@ -60,27 +61,6 @@ ListView {
         }
         ListElement {
             category: "Primitives"
-            title: "GaugeNeedleClassic"
-            description: "Classic straight needle"
-            pagePath: "pages/GaugeNeedleClassicPage.qml"
-            isHeader: false
-        }
-        ListElement {
-            category: "Primitives"
-            title: "GaugeNeedleTapered"
-            description: "Modern tapered needle"
-            pagePath: "pages/GaugeNeedleTaperedPage.qml"
-            isHeader: false
-        }
-        ListElement {
-            category: "Primitives"
-            title: "GaugeNeedleVelocity"
-            description: "3D gradient needle with realistic shading"
-            pagePath: "pages/GaugeNeedleVelocityPage.qml"
-            isHeader: false
-        }
-        ListElement {
-            category: "Primitives"
             title: "GaugeTick"
             description: "Individual tick mark"
             pagePath: "pages/GaugeTickPage.qml"
@@ -109,6 +89,13 @@ ListView {
             title: "DigitalReadout"
             description: "Digital numeric display"
             pagePath: "pages/DigitalReadoutPage.qml"
+            isHeader: false
+        }
+        ListElement {
+            category: "Compounds"
+            title: "GaugeNeedle"
+            description: "Unified 4-part needle with multiple shapes"
+            pagePath: "pages/GaugeNeedlePage.qml"
             isHeader: false
         }
         ListElement {
@@ -175,7 +162,7 @@ ListView {
         Rectangle {
             visible: delegateRoot.isHeader
             anchors.fill: parent
-            color: "#3a3a3a"
+            color: Theme.categoryBackground
 
             Label {
                 anchors.left: parent.left
@@ -184,7 +171,7 @@ ListView {
                 text: delegateRoot.title
                 font.bold: true
                 font.pixelSize: 14
-                color: "#ffffff"
+                color: Theme.textPrimary
             }
         }
 
@@ -196,7 +183,7 @@ ListView {
             highlighted: root.currentIndex === delegateRoot.index
 
             background: Rectangle {
-                color: delegateItem.highlighted ? "#4a90e2" : (delegateItem.hovered ? "#2a2a2a" : "transparent")
+                color: delegateItem.highlighted ? Theme.selectedBackground : (delegateItem.hovered ? Theme.hoverBackground : "transparent")
             }
 
             contentItem: ColumnLayout {
@@ -207,7 +194,7 @@ ListView {
                     text: delegateRoot.title
                     font.pixelSize: 13
                     font.bold: true
-                    color: delegateItem.highlighted ? "#ffffff" : "#e0e0e0"
+                    color: delegateItem.highlighted ? "#ffffff" : Theme.textPrimary
                     elide: Text.ElideRight
                     Layout.fillWidth: true
                 }
@@ -215,7 +202,7 @@ ListView {
                 Label {
                     text: delegateRoot.description || ""
                     font.pixelSize: 11
-                    color: delegateItem.highlighted ? "#e0e0e0" : "#999999"
+                    color: delegateItem.highlighted ? "#e0e0e0" : Theme.textSecondary
                     elide: Text.ElideRight
                     Layout.fillWidth: true
                 }

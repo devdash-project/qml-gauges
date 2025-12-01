@@ -4,11 +4,15 @@ qt_add_executable(qml-gauges-explorer
     main.cpp
 )
 
+# Mark Theme.qml as singleton BEFORE adding to module
+set_source_files_properties(qml/Theme.qml PROPERTIES QT_QML_SINGLETON_TYPE TRUE)
+
 # Add QML module for the explorer UI
 qt_add_qml_module(qml-gauges-explorer
     URI Explorer
     VERSION 1.0
     QML_FILES
+        qml/Theme.qml
         qml/Main.qml
         qml/components/ComponentSidebar.qml
         qml/components/PropertyPanel.qml
@@ -24,9 +28,7 @@ qt_add_qml_module(qml-gauges-explorer
         qml/pages/GaugeBezelPage.qml
         qml/pages/GaugeCenterCapPage.qml
         qml/pages/GaugeFacePage.qml
-        qml/pages/GaugeNeedleClassicPage.qml
-        qml/pages/GaugeNeedleTaperedPage.qml
-        qml/pages/GaugeNeedleVelocityPage.qml
+        qml/pages/GaugeNeedlePage.qml
         qml/pages/GaugeTickPage.qml
         qml/pages/GaugeTickLabelPage.qml
         qml/pages/DigitalReadoutPage.qml

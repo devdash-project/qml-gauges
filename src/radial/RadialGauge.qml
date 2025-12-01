@@ -164,16 +164,16 @@ Item {
     // === Needle Customization ===
 
     /**
-     * @brief Width of needle at base (pixels).
-     * @default 4
+     * @brief Width of needle at pivot (pixels).
+     * @default 10
      */
-    property real needleWidth: 4
+    property real needlePivotWidth: 10
 
     /**
      * @brief Width of needle at tip (pixels).
-     * @default 2 (tapered)
+     * @default 4 (tapered)
      */
-    property real needleTipWidth: 2
+    property real needleTipWidth: 4
 
     /**
      * @brief Border width around needle edge (pixels).
@@ -188,23 +188,50 @@ Item {
     property color needleBorderColor: "transparent"
 
     /**
-     * @brief Needle type to use.
-     *
-     * Supported types:
-     * - "tapered": Thin tip, wide base (default - professional racing style)
-     * - "classic": Simple solid bar (vintage gauges)
-     * - "arrow": Open arrow outline (future)
-     * - "modern": Flat bar for digital gauges (future)
-     *
+     * @brief Front body shape style.
+     * Supported: "tapered", "straight", "convex", "concave"
      * @default "tapered"
      */
-    property string needleType: "tapered"
+    property string needleShape: "tapered"
 
     /**
-     * @brief Counterweight extension behind pivot (pixels).
-     * @default 0 (no counterweight)
+     * @brief Head tip shape style.
+     * Supported: "none", "pointed", "arrow", "rounded", "flat", "diamond"
+     * @default "pointed"
      */
-    property real needlePivotOffset: 0
+    property string needleHeadTipShape: "pointed"
+
+    /**
+     * @brief Rear body length as ratio of front length (0.0-1.0).
+     * Set to 0 for no rear section.
+     * @default 0.0
+     */
+    property real needleRearRatio: 0.0
+
+    /**
+     * @brief Rear body color (can differ from front).
+     * @default needleColor
+     */
+    property color needleRearColor: needleColor
+
+    /**
+     * @brief Tail tip shape style.
+     * Supported: "none", "tapered", "crescent", "counterweight", "wedge", "flat"
+     * @default "none"
+     */
+    property string needleTailTipShape: "none"
+
+    /**
+     * @brief Enable gradient shading on needle.
+     * @default false
+     */
+    property bool needleGradient: false
+
+    /**
+     * @brief Enable shadow effect on needle.
+     * @default false
+     */
+    property bool needleShadow: false
 
     // === Center Cap Customization ===
 
@@ -320,20 +347,6 @@ Item {
      */
     property real tickInnerCircleDiameter: 6
 
-    // === Internal Helpers ===
-
-    /**
-     * @brief Get needle QML file path based on type.
-     * @internal
-     */
-    function getNeedleSource(type) {
-        const needleMap = {
-            "tapered": "primitives/GaugeNeedleTapered.qml",
-            "classic": "primitives/GaugeNeedleClassic.qml"
-        }
-        return needleMap[type] || needleMap["tapered"]
-    }
-
     // === Implementation ===
 
     implicitWidth: 400
@@ -441,7 +454,7 @@ Item {
     Loader {
         active: root.showNeedle
         anchors.fill: parent
-        source: getNeedleSource(root.needleType)
+        source: "compounds/GaugeNeedle.qml"
 
         onLoaded: {
             // Calculate angle based on value
@@ -451,25 +464,36 @@ Item {
                 return root.startAngle + (root.sweepAngle * clamped)
             })
 
-            // Geometry
-            item.length = Math.min(root.width, root.height) / 2 - 60
-            item.needleWidth = Qt.binding(() => root.needleWidth)
+            // Front body geometry
+            item.frontLength = Math.min(root.width, root.height) / 2 - 60
+            item.frontPivotWidth = Qt.binding(() => root.needlePivotWidth)
+            item.frontTipWidth = Qt.binding(() => root.needleTipWidth)
+            item.frontShape = Qt.binding(() => root.needleShape)
+            item.frontColor = Qt.binding(() => root.needleColor)
+            item.frontGradient = Qt.binding(() => root.needleGradient)
+            item.frontBorderWidth = Qt.binding(() => root.needleBorderWidth)
+            item.frontBorderColor = Qt.binding(() => root.needleBorderColor)
 
-            // Tapered needle has tipWidth, classic doesn't
-            if (root.needleType === "tapered" && item.hasOwnProperty("tipWidth")) {
-                item.tipWidth = Qt.binding(() => root.needleTipWidth)
-                item.pivotOffset = Qt.binding(() => root.needlePivotOffset)
-            }
+            // Head tip
+            item.headTipShape = Qt.binding(() => root.needleHeadTipShape)
+            item.headTipColor = Qt.binding(() => root.needleColor)
+            item.headTipGradient = Qt.binding(() => root.needleGradient)
 
-            // Classic needle has counterweightRadius
-            if (root.needleType === "classic" && item.hasOwnProperty("counterweightRadius")) {
-                item.counterweightRadius = Qt.binding(() => root.needlePivotOffset)
-            }
+            // Rear body
+            item.rearRatio = Qt.binding(() => root.needleRearRatio)
+            item.rearShape = Qt.binding(() => root.needleShape)
+            item.rearColor = Qt.binding(() => root.needleRearColor)
+            item.rearGradient = Qt.binding(() => root.needleGradient)
+            item.rearBorderWidth = Qt.binding(() => root.needleBorderWidth)
+            item.rearBorderColor = Qt.binding(() => root.needleBorderColor)
 
-            // Appearance (all needle types)
-            item.color = Qt.binding(() => root.needleColor)
-            item.borderWidth = Qt.binding(() => root.needleBorderWidth)
-            item.borderColor = Qt.binding(() => root.needleBorderColor)
+            // Tail tip
+            item.tailTipShape = Qt.binding(() => root.needleTailTipShape)
+            item.tailTipColor = Qt.binding(() => root.needleRearColor)
+            item.tailTipGradient = Qt.binding(() => root.needleGradient)
+
+            // Shadow
+            item.hasShadow = Qt.binding(() => root.needleShadow)
         }
     }
 

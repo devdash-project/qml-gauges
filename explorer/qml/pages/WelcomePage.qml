@@ -1,11 +1,12 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import Explorer
 
 Item {
     Rectangle {
         anchors.fill: parent
-        color: "#1a1a1a"
+        color: Theme.windowBackground
 
         ColumnLayout {
             anchors.centerIn: parent
@@ -16,14 +17,14 @@ Item {
                 text: "Welcome to DevDash Gauges Explorer"
                 font.pixelSize: 32
                 font.bold: true
-                color: "#ffffff"
+                color: Theme.textPrimary
                 Layout.alignment: Qt.AlignHCenter
             }
 
             Label {
                 text: "Interactive component showcase for automotive gauge primitives and compounds"
                 font.pixelSize: 16
-                color: "#cccccc"
+                color: Theme.textSecondary
                 wrapMode: Text.WordWrap
                 horizontalAlignment: Text.AlignHCenter
                 Layout.fillWidth: true
@@ -33,7 +34,7 @@ Item {
             Rectangle {
                 Layout.preferredHeight: 1
                 Layout.fillWidth: true
-                color: "#444444"
+                color: Theme.divider
                 Layout.topMargin: 20
                 Layout.bottomMargin: 20
             }
@@ -46,7 +47,7 @@ Item {
                     text: "What's included:"
                     font.pixelSize: 18
                     font.bold: true
-                    color: "#ffffff"
+                    color: Theme.textPrimary
                 }
 
                 Repeater {
@@ -70,7 +71,7 @@ Item {
                             Layout.preferredWidth: 8
                             Layout.preferredHeight: 8
                             radius: 4
-                            color: "#4a90e2"
+                            color: Theme.accentColor
                         }
 
                         ColumnLayout {
@@ -81,13 +82,13 @@ Item {
                                 text: featureDelegate.modelData.category
                                 font.pixelSize: 14
                                 font.bold: true
-                                color: "#ffffff"
+                                color: Theme.textPrimary
                             }
 
                             Label {
                                 text: featureDelegate.modelData.desc
                                 font.pixelSize: 12
-                                color: "#999999"
+                                color: Theme.textSecondary
                             }
                         }
                     }
@@ -97,15 +98,15 @@ Item {
             Rectangle {
                 Layout.preferredHeight: 1
                 Layout.fillWidth: true
-                color: "#444444"
+                color: Theme.divider
                 Layout.topMargin: 20
                 Layout.bottomMargin: 10
             }
 
             Label {
-                text: "Select a component from the sidebar to begin exploring →"
+                text: "Select a component from the sidebar to begin exploring \u2192"
                 font.pixelSize: 14
-                color: "#4a90e2"
+                color: Theme.accentColor
                 Layout.alignment: Qt.AlignHCenter
             }
         }
