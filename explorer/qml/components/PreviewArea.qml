@@ -8,6 +8,7 @@ Rectangle {
 
     property bool animating: false    // Animation state
     property real animationValue: 0   // Current animation value (0-100)
+    property var properties: []       // Property metadata for documentation panel
 
     // Alias to allow pages to parent their component inside the container
     default property alias content: componentContainer.data
@@ -18,7 +19,18 @@ Rectangle {
     Item {
         id: componentContainer
         anchors.fill: parent
-        anchors.bottomMargin: controlBar.height + 20
+        anchors.bottomMargin: controlBar.height + docPanel.height + 20
+    }
+
+    // Documentation panel (collapsible, above animation controls)
+    DocumentationPanel {
+        id: docPanel
+        anchors.bottom: controlBar.top
+        anchors.left: parent.left
+        anchors.right: parent.right
+        height: collapsed ? 36 : 220
+        properties: root.properties
+        visible: root.properties.length > 0
     }
 
     // Animation controls at bottom

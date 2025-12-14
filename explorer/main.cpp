@@ -2,16 +2,11 @@
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 #include <QQuickStyle>
-#include <QSurfaceFormat>
+#include "stateserver.h"
 
 int main(int argc, char *argv[])
 {
-    // Enable multisampling antialiasing for smooth Shape edges
-    // This must be set before creating the QGuiApplication
-    QSurfaceFormat format;
-    format.setSamples(1000);  // Testing extreme MSAA
-    QSurfaceFormat::setDefaultFormat(format);
-
+    // Qt 6.10+ uses CurveRenderer for Shape antialiasing - no MSAA needed
     QGuiApplication app(argc, argv);
 
     // Set application metadata
@@ -23,8 +18,28 @@ int main(int argc, char *argv[])
     // Use Fusion style for better cross-platform appearance
     QQuickStyle::setStyle("Fusion");
 
+    // Create and start the WebSocket state server for MCP integration
+    StateServer stateServer;
+    int statePort = 9876;
+
+    // Allow port override via environment variable
+    if (qEnvironmentVariableIsSet("QML_GAUGES_STATE_PORT")) {
+        bool ok;
+        int envPort = qEnvironmentVariableIntValue("QML_GAUGES_STATE_PORT", &ok);
+        if (ok && envPort > 0 && envPort < 65536) {
+            statePort = envPort;
+        }
+    }
+
+    if (!stateServer.start(statePort)) {
+        qWarning() << "Failed to start state server - MCP integration disabled";
+    }
+
     // Create QML engine
     QQmlApplicationEngine engine;
+
+    // Expose state server to QML
+    engine.rootContext()->setContextProperty("stateServer", &stateServer);
 
     // Add QML import paths for the gauge library
     engine.addImportPath("qrc:/");

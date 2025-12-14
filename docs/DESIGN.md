@@ -102,9 +102,32 @@ QSG_VISUALIZE=batches ./gauge-explorer
 - **Smooth animations at 60fps** across multiple gauges is the target. Keep needle animations lightweight.
 - **No external dependencies** beyond QtQuick and QtQuick.Shapes—everything is programmatic rendering.
 
-### Shader Effects Note
+### Effects with MultiEffect (Qt 6.5+)
 
-Qt GraphicalEffects is deprecated in Qt 6. Any glow or blur effects should use custom shaders or be designed to work without them. Consider pre-rendered glow textures for expensive effects.
+Use Qt6 `MultiEffect` from `QtQuick.Effects` for glow, shadow, and blur effects:
+
+```qml
+import QtQuick.Effects
+
+Item {
+    layer.enabled: hasGlow || hasShadow
+    layer.effect: MultiEffect {
+        // Glow
+        blurEnabled: hasGlow
+        blur: 0.5
+        blurMax: 32
+
+        // Shadow
+        shadowEnabled: hasShadow
+        shadowColor: "#000000"
+        shadowHorizontalOffset: 2
+        shadowVerticalOffset: 2
+        shadowBlur: 0.25
+    }
+}
+```
+
+MultiEffect combines multiple effects efficiently in a single pass.
 
 ## Future Components
 

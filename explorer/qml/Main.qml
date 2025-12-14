@@ -12,6 +12,47 @@ ApplicationWindow {
     visible: true
     title: "DevDash Gauges Explorer"
 
+    // Page name to sidebar index mapping for navigation
+    readonly property var pageIndexMap: {
+        "Welcome": 0,
+        "GaugeArc": 2,
+        "GaugeBezel": 3,
+        "GaugeCenterCap": 4,
+        "GaugeFace": 5,
+        "GaugeTick": 6,
+        "GaugeTickLabel": 7,
+        "DigitalReadout": 9,
+        "GaugeNeedle": 10,
+        "GaugeTickRing": 11,
+        "GaugeValueArc": 12,
+        "GaugeZoneArc": 13,
+        "RollingDigitReadout": 14,
+        "RadialGauge": 16
+    }
+
+    // Connect to state server for MCP integration
+    Connections {
+        target: stateServer
+
+        function onNavigateRequested(page) {
+            // Find the page in sidebar and navigate to it
+            const index = window.pageIndexMap[page]
+            if (index !== undefined) {
+                sidebar.currentIndex = index
+                const pagePath = "pages/" + page + "Page.qml"
+                stackView.replace(Qt.resolvedUrl(pagePath))
+                currentPageTitle.text = page
+                stateServer.currentPage = page
+                stateServer.currentPageTitle = page
+            } else {
+                console.warn("StateServer: unknown page:", page)
+            }
+        }
+
+        // Note: setPropertyRequested is handled by PropertyPanel directly
+        // for bidirectional editor updates
+    }
+
     // Sidebar drawer
     Drawer {
         id: drawer
@@ -68,6 +109,10 @@ ApplicationWindow {
                     console.log("Loading page:", pagePath)
                     stackView.replace(Qt.resolvedUrl(pagePath))
                     currentPageTitle.text = pageTitle
+
+                    // Update state server
+                    stateServer.currentPage = pageTitle
+                    stateServer.currentPageTitle = pageTitle
                 }
             }
         }
@@ -118,6 +163,24 @@ ApplicationWindow {
                     Layout.fillWidth: true
                 }
 
+                // State server indicator
+                Rectangle {
+                    width: 8
+                    height: 8
+                    radius: 4
+                    color: stateServer.listening ? "#4caf50" : "#757575"
+                    ToolTip.visible: stateServerIndicatorMouse.containsMouse
+                    ToolTip.text: stateServer.listening
+                        ? "State server listening on port " + stateServer.port
+                        : "State server not running"
+
+                    MouseArea {
+                        id: stateServerIndicatorMouse
+                        anchors.fill: parent
+                        hoverEnabled: true
+                    }
+                }
+
                 // Theme toggle button
                 ToolButton {
                     id: themeToggle
@@ -160,6 +223,28 @@ ApplicationWindow {
             background: Rectangle {
                 color: Theme.windowBackground
             }
+
+            // Update state server when page changes
+            onCurrentItemChanged: {
+                if (currentItem) {
+                    // Give the page a reference to the state server for MCP integration
+                    // Check if the property exists (not undefined) and assign it
+                    if (typeof currentItem.stateServer !== "undefined") {
+                        currentItem.stateServer = stateServer
+                    }
+
+                    // Update property metadata when page loads
+                    if (currentItem.properties) {
+                        stateServer.propertyMetadata = currentItem.properties
+                    }
+                }
+            }
         }
+    }
+
+    // Initialize state server state on startup
+    Component.onCompleted: {
+        stateServer.currentPage = "Welcome"
+        stateServer.currentPageTitle = "Welcome"
     }
 }

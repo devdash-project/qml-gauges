@@ -8,9 +8,12 @@ This file provides context and guidelines for AI assistants working on this code
 
 ### The DevDash Ecosystem
 
-- **devdash** - Main dashboard application (C++/QML on Jetson Orin Nano)
-- **haltech-mock** - Python library for simulating Haltech ECU CAN bus data
-- **qml-gauges** - This library, standalone gauge components
+All projects are part of the [devdash-project](https://github.com/devdash-project) organization:
+
+- **[devdash](https://github.com/devdash-project/devdash)** - Main dashboard application (C++/QML on Jetson Orin Nano)
+- **[qml-gauges](https://github.com/devdash-project/qml-gauges)** - This library, standalone gauge components
+- **[devdash-haltech-mock](https://github.com/devdash-project/haltech-mock)** - Python library for simulating Haltech ECU CAN bus data (PyPI: `devdash-haltech-mock`)
+- **[devdash-mcp](https://github.com/devdash-project/devdash-mcp)** - MCP server for screenshot capture and AI tool integration
 
 ## Architecture
 
@@ -50,16 +53,19 @@ explorer/
 
 ## Build Commands
 
+**Requires Qt 6.10+** (for QtQuick.Effects and CurveRenderer).
+
 ```bash
-# Configure and build
-cmake -B build -G Ninja
+# Configure with Qt 6.10
+cmake -B build -G Ninja -DCMAKE_PREFIX_PATH=$HOME/Qt/6.10.1/gcc_arm64
+
+# Build
 cmake --build build
 
 # Run the explorer
-./build/explorer/gauge-explorer
+./build/explorer/qml-gauges-explorer
 
 # Lint QML files (MUST run after any QML changes)
-# Use Qt 6.10 qmllint for CurveRenderer support
 ~/Qt/6.10.1/gcc_arm64/bin/qmllint -I build/qml src/**/*.qml explorer/qml/**/*.qml
 ```
 
@@ -160,9 +166,9 @@ Supported types: `real`, `int`, `bool`, `color`, `string`, `enum`
 
 Target: Jetson Orin Nano driving dual displays with four live camera feeds at 60fps.
 
-- **No external dependencies** beyond QtQuick and QtQuick.Shapes
+- **No external dependencies** beyond QtQuick, QtQuick.Shapes, and QtQuick.Effects
 - **Blur/glow effects** are expensive - use `layer.enabled: true` for caching
-- **Qt GraphicalEffects is deprecated** in Qt 6 - use custom shaders or avoid
+- **Use Qt6 MultiEffect** from `QtQuick.Effects` for glow, shadow, and blur effects (requires Qt 6.5+)
 
 ### Performance Testing
 
@@ -192,8 +198,8 @@ Each component has its own opacity property (e.g., `arcOpacity`, `faceOpacity`, 
 
 ## MCP Server
 
-The project includes an MCP server for screenshot capture:
-- Location: `tools/mcp/qmlgauges_mcp/`
+The MCP server for screenshot capture is now a separate repository:
+- Repository: [devdash-mcp](https://github.com/devdash-project/devdash-mcp)
 - Use `mcp__qmlgauges__qmlgauges_list_windows` to find running explorer windows
 - Use `mcp__qmlgauges__qmlgauges_screenshot` to capture screenshots for verification
 

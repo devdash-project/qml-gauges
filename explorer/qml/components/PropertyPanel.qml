@@ -11,8 +11,39 @@ ScrollView {
 
     property var target          // The component instance to modify
     property var properties: []  // Property metadata array
+    property var stateServer: null  // Optional state server for MCP integration
+
+    // Map of property name -> editor item for bidirectional updates
+    property var editorMap: ({})
 
     clip: true
+
+    // Allow horizontal drags to pass through to child controls (sliders)
+    ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
+
+    // Handle external property changes (from MCP/WebSocket)
+    Connections {
+        target: root.stateServer
+        enabled: root.stateServer !== null
+
+        function onSetPropertyRequested(name, value) {
+            // Update the target component
+            if (root.target && root.target[name] !== undefined) {
+                root.target[name] = value
+            }
+
+            // Update the editor UI (bidirectional sync)
+            const editor = root.editorMap[name]
+            if (editor) {
+                editor.value = value
+            }
+
+            // Notify state server of the change
+            if (root.stateServer) {
+                root.stateServer.updateProperty(name, value)
+            }
+        }
+    }
 
     ColumnLayout {
         width: root.availableWidth
@@ -35,6 +66,7 @@ ScrollView {
 
         // Property editors
         Repeater {
+            id: editorRepeater
             model: root.properties
 
             Loader {
@@ -69,7 +101,9 @@ ScrollView {
                     // Set type-specific properties
                     if (propData.min !== undefined) item.min = propData.min
                     if (propData.max !== undefined) item.max = propData.max
+                    // Support both "values" and "options" for enum types
                     if (propData.values !== undefined) item.values = propData.values
+                    if (propData.options !== undefined) item.values = propData.options
 
                     // Set initial value from target or default
                     if (root.target && root.target[propData.name] !== undefined) {
@@ -81,17 +115,33 @@ ScrollView {
                         }
                     }
 
-                    // Two-way binding: target property → editor
-                    if (root.target) {
-                        item.value = Qt.binding(() => root.target[propData.name])
-                    }
+                    // Register editor in map for bidirectional updates
+                    root.editorMap[propData.name] = item
 
-                    // Two-way binding: editor → target property
+                    // One-way binding: editor → target property
+                    // (Don't use Qt.binding for target→editor as it conflicts with user input)
                     item.valueChanged.connect(() => {
                         if (root.target) {
                             root.target[propData.name] = item.value
+
+                            // Report to state server for MCP integration
+                            if (root.stateServer) {
+                                root.stateServer.updateProperty(propData.name, item.value)
+                            }
                         }
                     })
+
+                    // Initialize state server with current value
+                    if (root.stateServer && root.target) {
+                        root.stateServer.updateProperty(propData.name, item.value)
+                    }
+                }
+
+                Component.onDestruction: {
+                    // Clean up editor map entry
+                    if (modelData && modelData.name) {
+                        delete root.editorMap[modelData.name]
+                    }
                 }
             }
         }
@@ -100,6 +150,11 @@ ScrollView {
         Item {
             Layout.fillHeight: true
         }
+    }
+
+    // Clear editor map when properties change
+    onPropertiesChanged: {
+        root.editorMap = {}
     }
 
     // Editor component definitions

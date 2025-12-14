@@ -54,10 +54,14 @@ Item {
      * @brief Body shape style.
      *
      * Supported shapes:
-     * - "tapered": Linear taper from pivotWidth to tipWidth
+     * - "tapered": Linear taper from pivotWidth (at pivot) to tipWidth (at tail)
      * - "straight": Constant width (uses pivotWidth)
      * - "convex": Curved outward (barrel shape)
      * - "concave": Curved inward (hourglass shape)
+     *
+     * Note: For a seamless needle, set pivotWidth to match the front body's
+     * pivotWidth. Set tipWidth smaller for a continuous taper, or larger
+     * for a counterweight effect.
      *
      * @default "tapered"
      */

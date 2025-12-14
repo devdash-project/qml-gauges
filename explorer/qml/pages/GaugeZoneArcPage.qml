@@ -11,22 +11,31 @@ Item {
     property string title: "GaugeZoneArc"
     property string description: "Static colored zone arc for warning/redline regions. Displays a semi-transparent arc segment between startValue and endValue."
 
-    // Property definitions for the editor
+    // Property definitions for the editor (with descriptions for documentation panel)
     property var properties: [
         // Value Range
-        {name: "minValue", type: "real", min: 0, max: 1000, default: 0, category: "Value Range"},
-        {name: "maxValue", type: "real", min: 100, max: 10000, default: 100, category: "Value Range"},
-        {name: "startValue", type: "real", min: 0, max: 10000, default: 0, category: "Value Range"},
-        {name: "endValue", type: "real", min: 0, max: 10000, default: 100, category: "Value Range"},
+        {name: "minValue", type: "real", min: 0, max: 1000, default: 0, category: "Value Range",
+         description: "Minimum value of the gauge scale. Used to calculate zone arc position."},
+        {name: "maxValue", type: "real", min: 100, max: 10000, default: 100, category: "Value Range",
+         description: "Maximum value of the gauge scale. Used to calculate zone arc position."},
+        {name: "startValue", type: "real", min: 0, max: 10000, default: 0, category: "Value Range",
+         description: "Value where the zone arc begins. E.g., 6500 for redline start on 8000 RPM gauge."},
+        {name: "endValue", type: "real", min: 0, max: 10000, default: 100, category: "Value Range",
+         description: "Value where the zone arc ends. Typically maxValue for redline zones."},
 
         // Geometry
-        {name: "gaugeStartAngle", type: "real", min: -360, max: 360, default: -225, category: "Geometry"},
-        {name: "gaugeTotalSweep", type: "real", min: 0, max: 360, default: 270, category: "Geometry"},
-        {name: "strokeWidth", type: "real", min: 5, max: 50, default: 20, category: "Geometry"},
+        {name: "gaugeStartAngle", type: "real", min: -360, max: 360, default: -225, category: "Geometry",
+         description: "Starting angle of the gauge scale in degrees. Must match parent gauge for alignment."},
+        {name: "gaugeTotalSweep", type: "real", min: 0, max: 360, default: 270, category: "Geometry",
+         description: "Total sweep angle of the gauge scale. Must match parent gauge for alignment."},
+        {name: "strokeWidth", type: "real", min: 5, max: 50, default: 20, category: "Geometry",
+         description: "Thickness of the zone arc stroke in pixels. Often matches background arc width."},
 
         // Appearance
-        {name: "zoneColor", type: "color", default: "#aa2222", category: "Appearance"},
-        {name: "zoneOpacity", type: "real", min: 0, max: 1, default: 0.3, category: "Appearance"}
+        {name: "zoneColor", type: "color", default: "#aa2222", category: "Appearance",
+         description: "Fill color of the zone arc. Red for redline, amber for warning, etc."},
+        {name: "zoneOpacity", type: "real", min: 0, max: 1, default: 0.3, category: "Appearance",
+         description: "Opacity of the zone arc. Semi-transparent (0.3-0.5) allows ticks to show through."}
     ]
 
     RowLayout {
@@ -40,6 +49,7 @@ Item {
             Layout.fillHeight: true
             Layout.fillWidth: true
             Layout.preferredWidth: parent.width * 0.6
+            properties: root.properties
 
             Item {
                 anchors.centerIn: parent

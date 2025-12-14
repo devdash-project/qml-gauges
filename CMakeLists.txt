@@ -10,8 +10,8 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # Find Qt6
-# Minimum 6.2 for Ubuntu 22.04 LTS (JetPack 6 on Jetson Orin Nano)
-find_package(Qt6 6.2 REQUIRED COMPONENTS Quick Qml QuickControls2)
+# Minimum 6.10 for latest QtQuick.Effects features and CurveRenderer
+find_package(Qt6 6.10 REQUIRED COMPONENTS Quick Qml QuickControls2 QuickEffects WebSockets)
 
 # Build options
 option(BUILD_EXPLORER "Build the component explorer application" ON)

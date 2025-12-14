@@ -2,6 +2,8 @@
 
 qt_add_executable(qml-gauges-explorer
     main.cpp
+    stateserver.cpp
+    stateserver.h
 )
 
 # Mark Theme.qml as singleton BEFORE adding to module
@@ -17,6 +19,7 @@ qt_add_qml_module(qml-gauges-explorer
         qml/components/ComponentSidebar.qml
         qml/components/PropertyPanel.qml
         qml/components/PreviewArea.qml
+        qml/components/DocumentationPanel.qml
         qml/editors/RealEditor.qml
         qml/editors/IntEditor.qml
         qml/editors/ColorEditor.qml
@@ -41,11 +44,12 @@ qt_add_qml_module(qml-gauges-explorer
     OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/qml/Explorer
 )
 
-# Link against Qt
+# Link against Qt (including WebSockets for state server)
 target_link_libraries(qml-gauges-explorer PRIVATE
     Qt6::Quick
     Qt6::Qml
     Qt6::QuickControls2
+    Qt6::WebSockets
 )
 
 # Set QML import paths so the explorer can find DevDash.Gauges modules

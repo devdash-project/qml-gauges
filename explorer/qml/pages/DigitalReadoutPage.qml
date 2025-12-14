@@ -11,25 +11,35 @@ Item {
     property string title: "DigitalReadout"
     property string description: "Digital numeric display with unit label. Supports automatic color changes at warning and critical thresholds."
 
-    // Property definitions for the editor
+    // Property definitions for the editor (with descriptions for documentation panel)
     property var properties: [
         // Value
-        {name: "value", type: "real", min: 0, max: 10000, default: 0, category: "Value"},
-        {name: "unit", type: "string", default: "", category: "Value"},
-        {name: "precision", type: "int", min: 0, max: 3, default: 0, category: "Value"},
+        {name: "value", type: "real", min: 0, max: 10000, default: 0, category: "Value",
+         description: "Current numeric value to display. Automatically formatted based on precision setting."},
+        {name: "unit", type: "string", default: "", category: "Value",
+         description: "Unit label displayed below the value. E.g., 'RPM', 'MPH', 'PSI', '°C'."},
+        {name: "precision", type: "int", min: 0, max: 3, default: 0, category: "Value",
+         description: "Number of decimal places to show. 0 for integers, 1-3 for floating point values."},
 
         // Thresholds
-        {name: "warningThreshold", type: "real", min: 0, max: 10000, default: 6000, category: "Thresholds"},
-        {name: "criticalThreshold", type: "real", min: 0, max: 10000, default: 7000, category: "Thresholds"},
+        {name: "warningThreshold", type: "real", min: 0, max: 10000, default: 6000, category: "Thresholds",
+         description: "Value at which display switches to warningColor. Set above maxValue to disable."},
+        {name: "criticalThreshold", type: "real", min: 0, max: 10000, default: 7000, category: "Thresholds",
+         description: "Value at which display switches to criticalColor. Set above maxValue to disable."},
 
         // Typography
-        {name: "valueFontSize", type: "real", min: 16, max: 96, default: 48, category: "Typography"},
-        {name: "unitFontSize", type: "real", min: 8, max: 48, default: 24, category: "Typography"},
+        {name: "valueFontSize", type: "real", min: 16, max: 96, default: 48, category: "Typography",
+         description: "Font size for the main numeric value in pixels."},
+        {name: "unitFontSize", type: "real", min: 8, max: 48, default: 24, category: "Typography",
+         description: "Font size for the unit label in pixels. Typically smaller than value font."},
 
         // Colors
-        {name: "normalColor", type: "color", default: "#ffffff", category: "Colors"},
-        {name: "warningColor", type: "color", default: "#ffaa00", category: "Colors"},
-        {name: "criticalColor", type: "color", default: "#ff4444", category: "Colors"}
+        {name: "normalColor", type: "color", default: "#ffffff", category: "Colors",
+         description: "Text color in normal operating range (below warningThreshold)."},
+        {name: "warningColor", type: "color", default: "#ffaa00", category: "Colors",
+         description: "Text color in warning range (warningThreshold to criticalThreshold). Typically amber."},
+        {name: "criticalColor", type: "color", default: "#ff4444", category: "Colors",
+         description: "Text color in critical range (above criticalThreshold). Typically red."}
     ]
 
     RowLayout {
@@ -43,6 +53,7 @@ Item {
             Layout.fillHeight: true
             Layout.fillWidth: true
             Layout.preferredWidth: parent.width * 0.6
+            properties: root.properties
 
             DigitalReadout {
                 id: digitalReadout

@@ -64,10 +64,11 @@ Item {
     property real frontLength: 100
 
     /**
-     * @brief Width of front body at pivot end (pixels).
+     * @brief Width of needle at pivot point (pixels).
+     * This is where front and rear bodies meet.
      * @default 10
      */
-    property real frontPivotWidth: 10
+    property real pivotWidth: 10
 
     /**
      * @brief Width of front body at tip end (pixels).
@@ -128,6 +129,26 @@ Item {
      */
     property bool headTipGradient: false
 
+    /**
+     * @brief Head tip border width (pixels).
+     * @default 0
+     */
+    property real headTipBorderWidth: 0
+
+    /**
+     * @brief Head tip border color.
+     * @default "transparent"
+     */
+    property color headTipBorderColor: "transparent"
+
+    /**
+     * @brief Auto-align head tip base width to match front body's end width.
+     * When true, the tip baseWidth matches the body's actual end width based on shape.
+     * When false, uses frontTipWidth regardless of body shape.
+     * @default false
+     */
+    property bool headTipAutoAlign: false
+
     // === Rear Body Configuration ===
 
     /**
@@ -145,18 +166,11 @@ Item {
     property real rearRatio: 0.0
 
     /**
-     * @brief Width of rear body at pivot end (pixels).
-     * Defaults to match frontPivotWidth.
-     * @default frontPivotWidth
-     */
-    property real rearPivotWidth: frontPivotWidth
-
-    /**
-     * @brief Width of rear body at tip end (pixels).
+     * @brief Width of rear body at tail end (pixels).
      * This is where NeedleTailTip attaches.
-     * @default rearPivotWidth * 0.6
+     * @default 4
      */
-    property real rearTipWidth: rearPivotWidth * 0.6
+    property real rearTipWidth: 4
 
     /**
      * @brief Rear body fill color.
@@ -216,6 +230,26 @@ Item {
      * @default 0.5
      */
     property real tailTipCurveAmount: 0.5
+
+    /**
+     * @brief Tail tip border width (pixels).
+     * @default 0
+     */
+    property real tailTipBorderWidth: 0
+
+    /**
+     * @brief Tail tip border color.
+     * @default "transparent"
+     */
+    property color tailTipBorderColor: "transparent"
+
+    /**
+     * @brief Auto-align tail tip base width to match rear body's end width.
+     * When true, the tip baseWidth matches the body's actual end width based on shape.
+     * When false, uses rearTipWidth regardless of body shape.
+     * @default false
+     */
+    property bool tailTipAutoAlign: false
 
     // === Shadow Effect ===
 
@@ -288,6 +322,11 @@ Item {
     // Actual rear length computed from ratio
     readonly property real rearLength: frontLength * rearRatio
 
+    // Computed body end widths based on shape type
+    // "straight" bodies maintain pivotWidth throughout, all others taper to tipWidth
+    readonly property real frontBodyEndWidth: frontShape === "straight" ? pivotWidth : frontTipWidth
+    readonly property real rearBodyEndWidth: rearShape === "straight" ? pivotWidth : rearTipWidth
+
     // Total needle length (for sizing)
     readonly property real totalLength: frontLength + headTip.actualLength + rearLength + tailTip.actualLength
 
@@ -297,7 +336,7 @@ Item {
 
     // === Size ===
 
-    implicitWidth: Math.max(frontPivotWidth, rearPivotWidth, headTip.implicitWidth, tailTip.implicitWidth) + (hasShadow ? shadowOffset * 2 : 0)
+    implicitWidth: Math.max(pivotWidth, rearTipWidth, headTip.implicitWidth, tailTip.implicitWidth) + (hasShadow ? shadowOffset * 2 : 0)
     implicitHeight: totalLength + (hasShadow ? shadowOffset * 2 : 0)
 
     // === Shadow Layer ===
@@ -326,7 +365,7 @@ Item {
                 x: root.pivotX - implicitWidth / 2
                 y: root.pivotY - root.frontLength
                 length: root.frontLength
-                pivotWidth: root.frontPivotWidth
+                pivotWidth: root.pivotWidth
                 tipWidth: root.frontTipWidth
                 shape: root.frontShape
                 color: root.shadowColor
@@ -338,7 +377,7 @@ Item {
                 x: root.pivotX - implicitWidth / 2
                 y: root.pivotY - root.frontLength - actualLength
                 shape: root.headTipShape
-                baseWidth: root.frontTipWidth
+                baseWidth: root.headTipAutoAlign ? root.frontBodyEndWidth : root.frontTipWidth
                 length: root.headTipLength
                 color: root.shadowColor
                 hasGradient: false
@@ -348,9 +387,9 @@ Item {
             NeedleRearBody {
                 visible: root.rearRatio > 0
                 x: root.pivotX - implicitWidth / 2
-                y: root.pivotY
-                length: root.rearLength
-                pivotWidth: root.rearPivotWidth
+                y: root.pivotY - 1
+                length: root.rearLength + 1
+                pivotWidth: root.pivotWidth
                 tipWidth: root.rearTipWidth
                 shape: root.rearShape
                 color: root.shadowColor
@@ -363,7 +402,7 @@ Item {
                 x: root.pivotX - implicitWidth / 2
                 y: root.pivotY + root.rearLength
                 shape: root.tailTipShape
-                baseWidth: root.rearTipWidth
+                baseWidth: root.tailTipAutoAlign ? root.rearBodyEndWidth : root.rearTipWidth
                 length: root.tailTipLength
                 curveAmount: root.tailTipCurveAmount
                 color: root.shadowColor
@@ -403,7 +442,7 @@ Item {
             x: root.pivotX - implicitWidth / 2
             y: root.pivotY - root.frontLength
             length: root.frontLength
-            pivotWidth: root.frontPivotWidth
+            pivotWidth: root.pivotWidth
             tipWidth: root.frontTipWidth
             shape: root.frontShape
             color: root.frontColor
@@ -421,23 +460,26 @@ Item {
             x: root.pivotX - implicitWidth / 2
             y: root.pivotY - root.frontLength - actualLength
             shape: root.headTipShape
-            baseWidth: root.frontTipWidth
+            baseWidth: root.headTipAutoAlign ? root.frontBodyEndWidth : root.frontTipWidth
             length: root.headTipLength
             color: root.headTipColor
             hasGradient: root.headTipGradient
             gradientHighlight: Qt.lighter(root.headTipColor, 1.3)
             gradientShadow: Qt.darker(root.headTipColor, 1.3)
+            borderWidth: root.headTipBorderWidth
+            borderColor: root.headTipBorderColor
             antialiasing: root.antialiasing
         }
 
         // Rear Body (extends downward from pivot)
+        // Overlap by 1px to eliminate seam between front and rear bodies
         NeedleRearBody {
             id: rearBody
             visible: root.rearRatio > 0
             x: root.pivotX - implicitWidth / 2
-            y: root.pivotY
-            length: root.rearLength
-            pivotWidth: root.rearPivotWidth
+            y: root.pivotY - 1
+            length: root.rearLength + 1
+            pivotWidth: root.pivotWidth
             tipWidth: root.rearTipWidth
             shape: root.rearShape
             color: root.rearColor
@@ -456,13 +498,15 @@ Item {
             x: root.pivotX - implicitWidth / 2
             y: root.pivotY + root.rearLength
             shape: root.tailTipShape
-            baseWidth: root.rearTipWidth
+            baseWidth: root.tailTipAutoAlign ? root.rearBodyEndWidth : root.rearTipWidth
             length: root.tailTipLength
             curveAmount: root.tailTipCurveAmount
             color: root.tailTipColor
             hasGradient: root.tailTipGradient
             gradientHighlight: Qt.lighter(root.tailTipColor, 1.3)
             gradientShadow: Qt.darker(root.tailTipColor, 1.3)
+            borderWidth: root.tailTipBorderWidth
+            borderColor: root.tailTipBorderColor
             antialiasing: root.antialiasing
         }
     }
