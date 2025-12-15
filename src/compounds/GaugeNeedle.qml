@@ -91,6 +91,13 @@ Item {
     property bool frontGradient: false
 
     /**
+     * @brief Front body gradient style for 3D effect.
+     * Supported: "cylinder" (round 3D), "ridge" (raised center highlight)
+     * @default "cylinder"
+     */
+    property string frontGradientStyle: "cylinder"
+
+    /**
      * @brief Front body border width (pixels).
      * @default 0
      */
@@ -739,6 +746,7 @@ Item {
             shape: root.frontShape
             color: root.frontColor
             hasGradient: root.frontGradient
+            gradientStyle: root.frontGradientStyle
             gradientHighlight: Qt.lighter(root.frontColor, 1.3)
             gradientShadow: Qt.darker(root.frontColor, 1.3)
             borderWidth: root.frontBorderWidth

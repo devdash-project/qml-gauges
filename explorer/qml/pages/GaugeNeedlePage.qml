@@ -37,6 +37,8 @@ Item {
          description: "Fill color for the front needle body. Classic orange/red for visibility."},
         {name: "frontGradient", type: "bool", default: false, category: "Front Body",
          description: "Enable gradient shading on front body for 3D appearance."},
+        {name: "frontGradientStyle", type: "enum", options: ["cylinder", "ridge"], default: "cylinder", category: "Front Body",
+         description: "Gradient style: 'cylinder' = round 3D shading, 'ridge' = raised center highlight (embossed spine)."},
         {name: "frontBorderWidth", type: "real", min: 0, max: 5, default: 0, category: "Front Body",
          description: "Border stroke width around front body. 0 = no border."},
         {name: "frontBorderColor", type: "color", default: "#000000", category: "Front Body",

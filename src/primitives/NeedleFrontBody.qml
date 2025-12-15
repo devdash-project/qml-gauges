@@ -78,13 +78,24 @@ Item {
     property bool hasGradient: false
 
     /**
-     * @brief Gradient highlight color (left edge).
+     * @brief Gradient style for 3D effect.
+     *
+     * Supported styles:
+     * - "cylinder": Light on left edge, dark on right edge (round 3D look)
+     * - "ridge": Dark edges with bright center highlight (raised/embossed spine)
+     *
+     * @default "cylinder"
+     */
+    property string gradientStyle: "cylinder"
+
+    /**
+     * @brief Gradient highlight color (left edge for cylinder, center for ridge).
      * @default Qt.lighter(color, 1.3)
      */
     property color gradientHighlight: Qt.lighter(color, 1.3)
 
     /**
-     * @brief Gradient shadow color (right edge).
+     * @brief Gradient shadow color (right edge for cylinder, edges for ridge).
      * @default Qt.darker(color, 1.3)
      */
     property color gradientShadow: Qt.darker(color, 1.3)
@@ -144,9 +155,9 @@ Item {
     // Curve control point offset for convex/concave shapes (as fraction of length)
     readonly property real curveAmount: 0.3
 
-    // Gradient defined outside ShapePath to avoid pathElements conflict
+    // Cylinder gradient: light left edge, dark right edge (round 3D look)
     LinearGradient {
-        id: bodyGradient
+        id: cylinderGradient
         x1: 0
         y1: root.length / 2
         x2: root.implicitWidth
@@ -156,6 +167,22 @@ Item {
         GradientStop { position: 0.4; color: root.color }
         GradientStop { position: 1.0; color: root.gradientShadow }
     }
+
+    // Ridge gradient: dark edges with bright center highlight (raised/embossed spine)
+    LinearGradient {
+        id: ridgeGradient
+        x1: 0
+        y1: root.length / 2
+        x2: root.implicitWidth
+        y2: root.length / 2
+
+        GradientStop { position: 0.0; color: root.gradientShadow }
+        GradientStop { position: 0.5; color: root.gradientHighlight }
+        GradientStop { position: 1.0; color: root.gradientShadow }
+    }
+
+    // Select gradient based on style
+    readonly property var activeGradient: gradientStyle === "ridge" ? ridgeGradient : cylinderGradient
 
     Shape {
         id: bodyShape
@@ -174,8 +201,8 @@ Item {
             capStyle: ShapePath.RoundCap
             joinStyle: ShapePath.RoundJoin
 
-            // Gradient across needle width (left=highlight, right=shadow)
-            fillGradient: root.hasGradient ? bodyGradient : null
+            // Gradient across needle width (style determines distribution)
+            fillGradient: root.hasGradient ? root.activeGradient : null
 
             // Path depends on shape
             // Origin: pivot at bottom center, body extends upward
