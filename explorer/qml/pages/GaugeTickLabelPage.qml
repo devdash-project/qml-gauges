@@ -11,6 +11,12 @@ Item {
     property string title: "GaugeTickLabel"
     property string description: "Text label primitive for gauge scales. Automatically keeps text upright and readable. Supports value formatting with divisors, prefixes, and suffixes."
 
+    // State server for MCP integration (passed to PropertyPanel)
+    property var stateServer: null
+
+    // Expose property panel for external access
+    property alias propertyPanel: propertyPanel
+
     // Property definitions for the editor (with descriptions for documentation panel)
     property var properties: [
         // Position
@@ -97,6 +103,7 @@ Item {
 
             target: gaugeTickLabel
             properties: root.properties
+            stateServer: root.stateServer
         }
     }
 }

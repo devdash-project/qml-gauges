@@ -11,6 +11,12 @@ Item {
     property string title: "GaugeCenterCap"
     property string description: "Center cap primitive that covers the gauge needle pivot point. Supports solid colors and metallic gradients."
 
+    // State server for MCP integration (passed to PropertyPanel)
+    property var stateServer: null
+
+    // Expose property panel for external access
+    property alias propertyPanel: propertyPanel
+
     // Property definitions for the editor (with descriptions for documentation panel)
     property var properties: [
         // Geometry
@@ -72,6 +78,7 @@ Item {
 
             target: gaugeCenterCap
             properties: root.properties
+            stateServer: root.stateServer
         }
     }
 }

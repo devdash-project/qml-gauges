@@ -12,6 +12,12 @@ Item {
     property string title: "GaugeArc"
     property string description: "Atomic arc primitive for gauge components. The foundational building block for value arcs, warning zones, and background tracks."
 
+    // State server for MCP integration (passed to PropertyPanel)
+    property var stateServer: null
+
+    // Expose property panel for external access
+    property alias propertyPanel: propertyPanel
+
     // Property definitions for the editor (with descriptions for documentation panel)
     property var properties: [
         // Geometry
@@ -82,6 +88,7 @@ Item {
 
             target: gaugeArc
             properties: root.properties
+            stateServer: root.stateServer
         }
     }
 }

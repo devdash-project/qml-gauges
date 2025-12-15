@@ -11,6 +11,12 @@ Item {
     property string title: "GaugeTickRing"
     property string description: "Complete ring of major and minor tick marks with labels. Supports warning/critical zone coloring and classic gauge decorations."
 
+    // State server for MCP integration (passed to PropertyPanel)
+    property var stateServer: null
+
+    // Expose property panel for external access
+    property alias propertyPanel: propertyPanel
+
     // Property definitions for the editor (with descriptions for documentation panel)
     property var properties: [
         // Value Range
@@ -105,6 +111,7 @@ Item {
 
             target: gaugeTickRing
             properties: root.properties
+            stateServer: root.stateServer
         }
     }
 }

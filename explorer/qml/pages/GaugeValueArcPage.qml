@@ -11,6 +11,12 @@ Item {
     property string title: "GaugeValueArc"
     property string description: "Value-driven arc that fills from minValue to current value. Automatically changes color at warning and critical thresholds."
 
+    // State server for MCP integration (passed to PropertyPanel)
+    property var stateServer: null
+
+    // Expose property panel for external access
+    property alias propertyPanel: propertyPanel
+
     // Property definitions for the editor (with descriptions for documentation panel)
     property var properties: [
         // Value
@@ -89,6 +95,7 @@ Item {
 
             target: gaugeValueArc
             properties: root.properties
+            stateServer: root.stateServer
         }
     }
 }

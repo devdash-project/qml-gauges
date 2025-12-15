@@ -11,6 +11,12 @@ Item {
     property string title: "DigitalReadout"
     property string description: "Digital numeric display with unit label. Supports automatic color changes at warning and critical thresholds."
 
+    // State server for MCP integration (passed to PropertyPanel)
+    property var stateServer: null
+
+    // Expose property panel for external access
+    property alias propertyPanel: propertyPanel
+
     // Property definitions for the editor (with descriptions for documentation panel)
     property var properties: [
         // Value
@@ -78,6 +84,7 @@ Item {
 
             target: digitalReadout
             properties: root.properties
+            stateServer: root.stateServer
         }
     }
 }

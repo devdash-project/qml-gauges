@@ -95,6 +95,32 @@ Item {
      */
     property color borderColor: "transparent"
 
+    // === Bevel Effect ===
+
+    /**
+     * @brief Enable 3D bevel effect.
+     * @default false
+     */
+    property bool hasBevel: false
+
+    /**
+     * @brief Bevel stroke width (pixels).
+     * @default 1.0
+     */
+    property real bevelWidth: 1.0
+
+    /**
+     * @brief Bevel highlight color (left edge).
+     * @default Qt.lighter(color, 1.4)
+     */
+    property color bevelHighlight: Qt.lighter(color, 1.4)
+
+    /**
+     * @brief Bevel shadow color (right edge).
+     * @default Qt.darker(color, 1.4)
+     */
+    property color bevelShadow: Qt.darker(color, 1.4)
+
     // === Advanced ===
 
     /**
@@ -154,6 +180,36 @@ Item {
                     PathLine { x: pointedPath.cx; y: 0 }  // To point
                     PathLine { x: pointedPath.cx + root.baseWidth / 2; y: root.actualLength }  // To right corner
                     PathLine { x: pointedPath.cx - root.baseWidth / 2; y: root.actualLength }  // Close
+                }
+
+                // Bevel highlight (left edge to point)
+                ShapePath {
+                    strokeColor: root.hasBevel ? root.bevelHighlight : "transparent"
+                    strokeWidth: root.bevelWidth
+                    fillColor: "transparent"
+                    capStyle: ShapePath.RoundCap
+
+                    readonly property real cx: root.implicitWidth / 2
+
+                    startX: cx - root.baseWidth / 2
+                    startY: root.actualLength
+
+                    PathLine { x: cx; y: 0 }
+                }
+
+                // Bevel shadow (right edge from point)
+                ShapePath {
+                    strokeColor: root.hasBevel ? root.bevelShadow : "transparent"
+                    strokeWidth: root.bevelWidth
+                    fillColor: "transparent"
+                    capStyle: ShapePath.RoundCap
+
+                    readonly property real cx: root.implicitWidth / 2
+
+                    startX: cx
+                    startY: 0
+
+                    PathLine { x: cx + root.baseWidth / 2; y: root.actualLength }
                 }
             }
         }

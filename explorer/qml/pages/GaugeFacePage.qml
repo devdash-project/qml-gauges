@@ -11,6 +11,12 @@ Item {
     property string title: "GaugeFace"
     property string description: "Background face/dial plate primitive. Supports solid colors, gradients, and configurable opacity for video overlay mode."
 
+    // State server for MCP integration (passed to PropertyPanel)
+    property var stateServer: null
+
+    // Expose property panel for external access
+    property alias propertyPanel: propertyPanel
+
     // Property definitions for the editor (with descriptions for documentation panel)
     property var properties: [
         // Geometry
@@ -70,6 +76,7 @@ Item {
 
             target: gaugeFace
             properties: root.properties
+            stateServer: root.stateServer
         }
     }
 }

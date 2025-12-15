@@ -11,6 +11,12 @@ Item {
     property string title: "RollingDigitReadout"
     property string description: "Classic mechanical counter with animated rolling digits. Perfect for engine hours, mileage, trip counters, or any cumulative metric."
 
+    // State server for MCP integration (passed to PropertyPanel)
+    property var stateServer: null
+
+    // Expose property panel for external access
+    property alias propertyPanel: propertyPanel
+
     // Property definitions for the editor (with descriptions for documentation panel)
     property var properties: [
         // Value
@@ -76,6 +82,7 @@ Item {
 
             target: rollingDigitReadout
             properties: root.properties
+            stateServer: root.stateServer
         }
     }
 }

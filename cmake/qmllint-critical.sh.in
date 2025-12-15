@@ -1,0 +1,59 @@
+#!/bin/bash
+# qmllint-critical.sh - Run qmllint and fail only on critical errors
+#
+# Generated from cmake/qmllint-critical.sh.in
+# Critical errors are those that will break QML loading at runtime:
+# - "no property X exists" - assigning to non-existent properties
+# - "is not a type" - using undefined types
+# - "Cannot assign" - type mismatches that prevent loading
+
+QMLLINT="@QMLLINT_EXECUTABLE@"
+BUILD_DIR="@CMAKE_BINARY_DIR@"
+SOURCE_DIR="@CMAKE_SOURCE_DIR@"
+
+# Collect QML files
+QML_FILES=$(find "${SOURCE_DIR}/src" "${SOURCE_DIR}/explorer/qml" -name "*.qml" 2>/dev/null)
+
+if [ -z "$QML_FILES" ]; then
+    echo "No QML files found"
+    exit 0
+fi
+
+# Run qmllint and capture output
+OUTPUT=$("$QMLLINT" -I "${BUILD_DIR}/qml" $QML_FILES 2>&1)
+LINT_EXIT=$?
+
+# Filter for critical errors that break runtime
+# These patterns indicate errors that will prevent QML from loading
+# Note: Qt 6.10+ uses "Could not find property" instead of "no property exists"
+CRITICAL_PATTERNS='no property.*exists|Could not find property|is not a type|Cannot assign to non-existent|Type.*unavailable'
+
+CRITICAL_ERRORS=$(echo "$OUTPUT" | grep -E "$CRITICAL_PATTERNS" | grep -v "QtQuick.Effects" || true)
+
+if [ -n "$CRITICAL_ERRORS" ]; then
+    echo "=========================================="
+    echo "CRITICAL QML ERRORS DETECTED"
+    echo "=========================================="
+    echo "$CRITICAL_ERRORS"
+    echo "=========================================="
+    echo ""
+    echo "These errors will prevent QML components from loading at runtime."
+    echo "Fix them before building."
+    echo ""
+    echo "Common fixes:"
+    echo "  - 'no property X exists' on ShapePath: Use conditional strokeColor instead of visible"
+    echo "  - 'is not a type': Check imports and CMakeLists.txt registration"
+    echo ""
+    exit 1
+fi
+
+# If there were other warnings, show them but don't fail
+if [ $LINT_EXIT -ne 0 ] && [ -n "$OUTPUT" ]; then
+    echo "QML lint warnings (non-critical):"
+    echo "$OUTPUT" | head -20
+    echo "..."
+    echo "(Run 'cmake --build build --target qmllint' for full output)"
+fi
+
+echo "QML critical error check passed"
+exit 0

@@ -59,44 +59,56 @@ explorer/
 # Configure with Qt 6.10
 cmake -B build -G Ninja -DCMAKE_PREFIX_PATH=$HOME/Qt/6.10.1/gcc_arm64
 
-# Build
+# Build (automatically runs qmllint critical error check)
 cmake --build build
 
 # Run the explorer
 ./build/explorer/qml-gauges-explorer
 
-# Lint QML files (MUST run after any QML changes)
-~/Qt/6.10.1/gcc_arm64/bin/qmllint -I build/qml src/**/*.qml explorer/qml/**/*.qml
+# Run full qmllint manually (shows all warnings)
+cmake --build build --target qmllint
+
+# Disable lint-on-build if needed (not recommended)
+cmake -B build -DLINT_ON_BUILD=OFF
 ```
 
 ## Code Quality Requirements
 
-**IMPORTANT**: After creating or modifying ANY QML file, you MUST:
-1. Run qmllint to check for static errors
-2. Check IDE diagnostics via `mcp__ide__getDiagnostics` for language server errors
+**IMPORTANT**: The build automatically runs critical QML error checks via `qmllint`. Builds will fail if critical errors are detected.
 
-### QML Linting with qmllint (MANDATORY)
+### Automated Lint-on-Build (ENABLED BY DEFAULT)
 
-**Always run qmllint before considering QML changes complete.** This catches syntax errors, type issues, and circular dependencies at development time.
+The CMake build system automatically runs `qmllint` before compiling, filtering for **critical errors** that would break runtime:
+- `Could not find property "X"` / `no property "X" exists` - Non-existent property assignments
+- `Type X unavailable` - Failed component loading
+- `is not a type` - Undefined types
+
+Non-critical warnings (like QtQuick.Effects path hints) are ignored to avoid false positives.
+
+```bash
+# Build will fail on critical QML errors
+cmake --build build
+
+# Run full lint with all warnings
+cmake --build build --target qmllint
+```
+
+### Manual QML Linting
+
+For targeted linting during development:
 
 ```bash
 # Lint specific file
-/usr/lib/qt6/bin/qmllint path/to/file.qml
+/usr/lib/qt6/bin/qmllint -I build/qml path/to/file.qml
 
 # Lint all QML in a directory
-/usr/lib/qt6/bin/qmllint src/primitives/*.qml
-/usr/lib/qt6/bin/qmllint explorer/qml/pages/*.qml
+/usr/lib/qt6/bin/qmllint -I build/qml src/primitives/*.qml
 ```
 
-The build directory must exist for qmllint to resolve module imports:
-```bash
-/usr/lib/qt6/bin/qmllint -I build/qml path/to/file.qml
-```
-
-**Common qmllint warnings to fix:**
-- `ComponentName is not a type` - Module import or registration issue
-- `Cannot read property 'X' of null` - Accessing properties on non-existent parent
-- `unknown grouped property scope` - Invalid property group usage
+**Common critical errors to fix:**
+- `Could not find property "visible"` on ShapePath - Use conditional `strokeColor` instead
+- `ComponentName is not a type` - Check module import and CMakeLists.txt registration
+- `Type X unavailable` - Dependency component failed to load (check its errors first)
 
 ### QML Language Server / IDE Diagnostics (MANDATORY)
 

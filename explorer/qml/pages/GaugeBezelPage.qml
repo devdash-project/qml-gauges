@@ -11,6 +11,12 @@ Item {
     property string title: "GaugeBezel"
     property string description: "Decorative bezel/frame primitive for gauge exterior. Supports flat, chrome, and textured styles."
 
+    // State server for MCP integration (passed to PropertyPanel)
+    property var stateServer: null
+
+    // Expose property panel for external access
+    property alias propertyPanel: propertyPanel
+
     // Property definitions for the editor (with descriptions for documentation panel)
     property var properties: [
         // Geometry
@@ -71,6 +77,7 @@ Item {
 
             target: gaugeBezel
             properties: root.properties
+            stateServer: root.stateServer
         }
     }
 }

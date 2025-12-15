@@ -12,6 +12,12 @@ Item {
     property string title: "GaugeNeedle"
     property string description: "Unified gauge needle compound with 4-part architecture: front body, head tip, rear body, and tail tip. Supports multiple shapes, independent colors, gradients, and shadow effects."
 
+    // State server for MCP integration (passed to PropertyPanel)
+    property var stateServer: null
+
+    // Expose property panel for external access
+    property alias propertyPanel: propertyPanel
+
     // Property definitions for the editor (with descriptions for documentation panel)
     property var properties: [
         // Rotation
@@ -100,6 +106,46 @@ Item {
         {name: "damping", type: "real", min: 0.1, max: 1, default: 0.25, category: "Animation",
          description: "Damping factor for animation. Lower = more oscillation/bounce, higher = less overshoot."},
 
+        // Lighting (shared)
+        {name: "lightAngle", type: "real", min: -180, max: 180, default: -45, category: "Lighting",
+         description: "Virtual light source angle in degrees. Affects pivot shadow direction and dynamic highlight. -45° = upper-left lighting."},
+
+        // Pivot Shadow
+        {name: "hasPivotShadow", type: "bool", default: false, category: "Pivot Shadow",
+         description: "Enable angle-aware shadow that changes direction based on needle rotation and light angle."},
+        {name: "pivotShadowDistance", type: "real", min: 1, max: 20, default: 5, category: "Pivot Shadow",
+         description: "Maximum shadow offset distance in pixels. Larger = needle appears higher above face."},
+        {name: "pivotShadowBlur", type: "real", min: 0, max: 1, default: 0.3, category: "Pivot Shadow",
+         description: "Shadow blur/softness amount. 0 = sharp edge, 1 = very soft/diffuse."},
+        {name: "pivotShadowColor", type: "color", default: "#000000", category: "Pivot Shadow",
+         description: "Shadow color. Usually black or dark gray."},
+
+        // Inner Glow (self-illumination)
+        {name: "hasInnerGlow", type: "bool", default: false, category: "Inner Glow",
+         description: "Enable inner glow effect making needle appear self-illuminated. Good for night mode."},
+        {name: "innerGlowColor", type: "color", default: "#ff6600", category: "Inner Glow",
+         description: "Color of the inner glow. Usually matches or complements needle color."},
+        {name: "innerGlowIntensity", type: "real", min: 0, max: 1, default: 0.5, category: "Inner Glow",
+         description: "Intensity of the inner glow brightness boost. 0 = off, 1 = very bright."},
+
+        // Outer Glow (neon halo)
+        {name: "hasOuterGlow", type: "bool", default: false, category: "Outer Glow",
+         description: "Enable neon/LED-style glow halo around needle. Creates a luminescent effect."},
+        {name: "outerGlowColor", type: "color", default: "#ff6600", category: "Outer Glow",
+         description: "Color of the outer glow halo. Often matches needle color."},
+        {name: "outerGlowSpread", type: "real", min: 0, max: 1, default: 0.4, category: "Outer Glow",
+         description: "Spread/blur amount of outer glow. 0 = tight glow, 1 = wide diffuse halo."},
+
+        // 3D Bevel
+        {name: "hasBevel", type: "bool", default: false, category: "3D Bevel",
+         description: "Enable 3D bevel effect with light/dark edges creating depth illusion."},
+        {name: "bevelWidth", type: "real", min: 0.5, max: 4, default: 1.0, category: "3D Bevel",
+         description: "Width of the bevel edge strokes in pixels."},
+        {name: "bevelHighlight", type: "color", default: "#ff9944", category: "3D Bevel",
+         description: "Highlight color for the left/top bevel edge. Lighter than needle color."},
+        {name: "bevelShadow", type: "color", default: "#993300", category: "3D Bevel",
+         description: "Shadow color for the right/bottom bevel edge. Darker than needle color."},
+
         // Advanced
         {name: "antialiasing", type: "bool", default: true, category: "Advanced",
          description: "Enable smooth edge rendering. Disable for pixel-perfect but jagged edges."},
@@ -182,6 +228,7 @@ Item {
 
             target: gaugeNeedle
             properties: root.properties
+            stateServer: root.stateServer
         }
     }
 }

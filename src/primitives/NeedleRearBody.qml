@@ -105,6 +105,32 @@ Item {
      */
     property color borderColor: "transparent"
 
+    // === Bevel Effect ===
+
+    /**
+     * @brief Enable 3D bevel effect.
+     * @default false
+     */
+    property bool hasBevel: false
+
+    /**
+     * @brief Bevel stroke width (pixels).
+     * @default 1.0
+     */
+    property real bevelWidth: 1.0
+
+    /**
+     * @brief Bevel highlight color (left edge).
+     * @default Qt.lighter(color, 1.4)
+     */
+    property color bevelHighlight: Qt.lighter(color, 1.4)
+
+    /**
+     * @brief Bevel shadow color (right edge).
+     * @default Qt.darker(color, 1.4)
+     */
+    property color bevelShadow: Qt.darker(color, 1.4)
+
     // === Advanced ===
 
     /**
@@ -181,6 +207,48 @@ Item {
             // Close path back to start
             PathLine {
                 x: bodyPath.centerX - root.pivotWidth / 2
+                y: 0
+            }
+        }
+
+        // Bevel highlight (left edge) - lighter color
+        ShapePath {
+            id: bevelHighlightPath
+            strokeColor: root.hasBevel ? root.bevelHighlight : "transparent"
+            strokeWidth: root.bevelWidth
+            fillColor: "transparent"
+            capStyle: ShapePath.RoundCap
+
+            readonly property real centerX: root.implicitWidth / 2
+            readonly property real bottomWidth: root.shape === "straight" ? root.pivotWidth : root.tipWidth
+
+            // Draw left edge from top to bottom
+            startX: centerX - root.pivotWidth / 2
+            startY: 0
+
+            PathLine {
+                x: bevelHighlightPath.centerX - bevelHighlightPath.bottomWidth / 2
+                y: root.length
+            }
+        }
+
+        // Bevel shadow (right edge) - darker color
+        ShapePath {
+            id: bevelShadowPath
+            strokeColor: root.hasBevel ? root.bevelShadow : "transparent"
+            strokeWidth: root.bevelWidth
+            fillColor: "transparent"
+            capStyle: ShapePath.RoundCap
+
+            readonly property real centerX: root.implicitWidth / 2
+            readonly property real bottomWidth: root.shape === "straight" ? root.pivotWidth : root.tipWidth
+
+            // Draw right edge from bottom to top
+            startX: centerX + bottomWidth / 2
+            startY: root.length
+
+            PathLine {
+                x: bevelShadowPath.centerX + root.pivotWidth / 2
                 y: 0
             }
         }

@@ -11,6 +11,12 @@ Item {
     property string title: "GaugeZoneArc"
     property string description: "Static colored zone arc for warning/redline regions. Displays a semi-transparent arc segment between startValue and endValue."
 
+    // State server for MCP integration (passed to PropertyPanel)
+    property var stateServer: null
+
+    // Expose property panel for external access
+    property alias propertyPanel: propertyPanel
+
     // Property definitions for the editor (with descriptions for documentation panel)
     property var properties: [
         // Value Range
@@ -89,6 +95,7 @@ Item {
 
             target: gaugeZoneArc
             properties: root.properties
+            stateServer: root.stateServer
         }
     }
 }

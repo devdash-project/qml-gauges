@@ -11,6 +11,12 @@ Item {
     property string title: "RadialGauge"
     property string description: "Complete analog radial gauge template. Composes all primitives and compounds into a professional gauge display with extensive customization."
 
+    // State server for MCP integration (passed to PropertyPanel)
+    property var stateServer: null
+
+    // Expose property panel for external access
+    property alias propertyPanel: propertyPanel
+
     // Property definitions for the editor (with descriptions for documentation panel)
     property var properties: [
         // Value
@@ -165,6 +171,7 @@ Item {
 
             target: radialGauge
             properties: root.properties
+            stateServer: root.stateServer
         }
     }
 }

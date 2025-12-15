@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Effects
 import DevDash.Gauges.Primitives
 
 /**
@@ -271,6 +272,116 @@ Item {
      */
     property real shadowOffset: 2
 
+    // === Lighting ===
+
+    /**
+     * @brief Virtual light source angle in degrees.
+     * Controls both highlight position and pivot shadow direction.
+     * 0 = light from top, 90 = light from right, -90 = light from left.
+     * @default -45 (light from upper-left)
+     */
+    property real lightAngle: -45
+
+    // === Pivot Shadow (Angle-Aware) ===
+
+    /**
+     * @brief Enable realistic pivot shadow that follows light angle.
+     * Unlike hasShadow (fixed offset), pivot shadow direction changes
+     * based on needle rotation relative to light source.
+     * @default false
+     */
+    property bool hasPivotShadow: false
+
+    /**
+     * @brief Maximum pivot shadow offset distance in pixels.
+     * @default 5
+     */
+    property real pivotShadowDistance: 5
+
+    /**
+     * @brief Pivot shadow blur amount (0.0-1.0).
+     * Higher values create softer shadows.
+     * @default 0.3
+     */
+    property real pivotShadowBlur: 0.3
+
+    /**
+     * @brief Pivot shadow color.
+     * @default Qt.rgba(0, 0, 0, 0.4)
+     */
+    property color pivotShadowColor: Qt.rgba(0, 0, 0, 0.4)
+
+    // === Inner Glow (Luminescence) ===
+
+    /**
+     * @brief Enable inner glow effect (self-illumination).
+     * Makes the needle appear to emit light from within.
+     * @default false
+     */
+    property bool hasInnerGlow: false
+
+    /**
+     * @brief Inner glow color.
+     * @default frontColor
+     */
+    property color innerGlowColor: frontColor
+
+    /**
+     * @brief Inner glow intensity (brightness boost, 0.0-1.0).
+     * Higher values create brighter self-illumination.
+     * @default 0.5
+     */
+    property real innerGlowIntensity: 0.5
+
+    // === Outer Glow (Neon/LED) ===
+
+    /**
+     * @brief Enable outer glow effect (neon halo).
+     * Creates a glowing halo extending outward from needle edges.
+     * @default false
+     */
+    property bool hasOuterGlow: false
+
+    /**
+     * @brief Outer glow color.
+     * @default frontColor
+     */
+    property color outerGlowColor: frontColor
+
+    /**
+     * @brief Outer glow spread (blur amount, 0.0-1.0).
+     * Higher values create wider, softer glow.
+     * @default 0.4
+     */
+    property real outerGlowSpread: 0.4
+
+    // === 3D Bevel Effect ===
+
+    /**
+     * @brief Enable 3D bevel effect on needle edges.
+     * Creates depth illusion with light/dark edge highlighting.
+     * @default false
+     */
+    property bool hasBevel: false
+
+    /**
+     * @brief Bevel stroke width in pixels.
+     * @default 1.0
+     */
+    property real bevelWidth: 1.0
+
+    /**
+     * @brief Bevel highlight color (left/top edges).
+     * @default Qt.lighter(frontColor, 1.4)
+     */
+    property color bevelHighlight: Qt.lighter(frontColor, 1.4)
+
+    /**
+     * @brief Bevel shadow color (right/bottom edges).
+     * @default Qt.darker(frontColor, 1.4)
+     */
+    property color bevelShadow: Qt.darker(frontColor, 1.4)
+
     // === Animation ===
 
     /**
@@ -319,6 +430,12 @@ Item {
 
     // === Internal Computed Properties ===
 
+    // Pivot shadow offset calculation based on light angle relative to needle angle
+    // Shadow falls opposite to light direction
+    readonly property real pivotShadowAngleRad: (lightAngle - rotationTransform.angle + 180) * Math.PI / 180
+    readonly property real pivotShadowOffsetX: Math.sin(pivotShadowAngleRad) * pivotShadowDistance
+    readonly property real pivotShadowOffsetY: -Math.cos(pivotShadowAngleRad) * pivotShadowDistance
+
     // Actual rear length computed from ratio
     readonly property real rearLength: frontLength * rearRatio
 
@@ -336,8 +453,14 @@ Item {
 
     // === Size ===
 
-    implicitWidth: Math.max(pivotWidth, rearTipWidth, headTip.implicitWidth, tailTip.implicitWidth) + (hasShadow ? shadowOffset * 2 : 0)
-    implicitHeight: totalLength + (hasShadow ? shadowOffset * 2 : 0)
+    // Shadow margin calculation (use larger of fixed shadow or pivot shadow)
+    readonly property real shadowMargin: Math.max(
+        hasShadow ? shadowOffset : 0,
+        hasPivotShadow ? pivotShadowDistance : 0
+    )
+
+    implicitWidth: Math.max(pivotWidth, rearTipWidth, headTip.implicitWidth, tailTip.implicitWidth) + shadowMargin * 2
+    implicitHeight: totalLength + shadowMargin * 2
 
     // === Shadow Layer ===
 
@@ -412,12 +535,181 @@ Item {
         }
     }
 
+    // === Pivot Shadow Layer (Angle-Aware) ===
+
+    Loader {
+        active: root.hasPivotShadow
+        anchors.fill: parent
+
+        sourceComponent: Item {
+            id: pivotShadowContainer
+
+            // Layer for MultiEffect blur
+            layer.enabled: root.pivotShadowBlur > 0
+            layer.effect: MultiEffect {
+                blurEnabled: true
+                blur: root.pivotShadowBlur
+                blurMax: 32
+            }
+
+            // Shadow offset applied after rotation - follows light source
+            transform: [
+                Rotation {
+                    origin.x: root.pivotX
+                    origin.y: root.pivotY
+                    angle: rotationTransform.angle
+                },
+                Translate {
+                    x: root.pivotShadowOffsetX
+                    y: root.pivotShadowOffsetY
+                }
+            ]
+
+            // Shadow copies of each component
+            NeedleFrontBody {
+                x: root.pivotX - implicitWidth / 2
+                y: root.pivotY - root.frontLength
+                length: root.frontLength
+                pivotWidth: root.pivotWidth
+                tipWidth: root.frontTipWidth
+                shape: root.frontShape
+                color: root.pivotShadowColor
+                hasGradient: false
+                antialiasing: root.antialiasing
+            }
+
+            NeedleHeadTip {
+                x: root.pivotX - implicitWidth / 2
+                y: root.pivotY - root.frontLength - actualLength
+                shape: root.headTipShape
+                baseWidth: root.headTipAutoAlign ? root.frontBodyEndWidth : root.frontTipWidth
+                length: root.headTipLength
+                color: root.pivotShadowColor
+                hasGradient: false
+                antialiasing: root.antialiasing
+            }
+
+            NeedleRearBody {
+                visible: root.rearRatio > 0
+                x: root.pivotX - implicitWidth / 2
+                y: root.pivotY - 1
+                length: root.rearLength + 1
+                pivotWidth: root.pivotWidth
+                tipWidth: root.rearTipWidth
+                shape: root.rearShape
+                color: root.pivotShadowColor
+                hasGradient: false
+                antialiasing: root.antialiasing
+            }
+
+            NeedleTailTip {
+                visible: root.rearRatio > 0 && root.tailTipShape !== "none"
+                x: root.pivotX - implicitWidth / 2
+                y: root.pivotY + root.rearLength
+                shape: root.tailTipShape
+                baseWidth: root.tailTipAutoAlign ? root.rearBodyEndWidth : root.rearTipWidth
+                length: root.tailTipLength
+                curveAmount: root.tailTipCurveAmount
+                color: root.pivotShadowColor
+                hasGradient: false
+                antialiasing: root.antialiasing
+            }
+        }
+    }
+
+    // === Outer Glow Layer (Neon Halo) ===
+    // Renders a blurred copy of the needle behind the main needle for glow effect
+
+    Loader {
+        active: root.hasOuterGlow
+        anchors.fill: parent
+
+        sourceComponent: Item {
+            id: outerGlowContainer
+
+            // Layer with blur for outer glow
+            layer.enabled: true
+            layer.effect: MultiEffect {
+                blurEnabled: true
+                blur: root.outerGlowSpread
+                blurMax: 64
+                colorization: 0.8
+                colorizationColor: root.outerGlowColor
+                brightness: 0.2
+            }
+
+            transform: Rotation {
+                origin.x: root.pivotX
+                origin.y: root.pivotY
+                angle: rotationTransform.angle
+            }
+
+            // Glow copies of each component
+            NeedleFrontBody {
+                x: root.pivotX - implicitWidth / 2
+                y: root.pivotY - root.frontLength
+                length: root.frontLength
+                pivotWidth: root.pivotWidth
+                tipWidth: root.frontTipWidth
+                shape: root.frontShape
+                color: root.outerGlowColor
+                hasGradient: false
+                antialiasing: root.antialiasing
+            }
+
+            NeedleHeadTip {
+                x: root.pivotX - implicitWidth / 2
+                y: root.pivotY - root.frontLength - actualLength
+                shape: root.headTipShape
+                baseWidth: root.headTipAutoAlign ? root.frontBodyEndWidth : root.frontTipWidth
+                length: root.headTipLength
+                color: root.outerGlowColor
+                hasGradient: false
+                antialiasing: root.antialiasing
+            }
+
+            NeedleRearBody {
+                visible: root.rearRatio > 0
+                x: root.pivotX - implicitWidth / 2
+                y: root.pivotY - 1
+                length: root.rearLength + 1
+                pivotWidth: root.pivotWidth
+                tipWidth: root.rearTipWidth
+                shape: root.rearShape
+                color: root.outerGlowColor
+                hasGradient: false
+                antialiasing: root.antialiasing
+            }
+
+            NeedleTailTip {
+                visible: root.rearRatio > 0 && root.tailTipShape !== "none"
+                x: root.pivotX - implicitWidth / 2
+                y: root.pivotY + root.rearLength
+                shape: root.tailTipShape
+                baseWidth: root.tailTipAutoAlign ? root.rearBodyEndWidth : root.rearTipWidth
+                length: root.tailTipLength
+                curveAmount: root.tailTipCurveAmount
+                color: root.outerGlowColor
+                hasGradient: false
+                antialiasing: root.antialiasing
+            }
+        }
+    }
+
     // === Main Needle Container ===
 
     Item {
         id: needleContainer
         anchors.fill: parent
         opacity: root.needleOpacity
+
+        // Layer for inner glow effect only (brightness/colorization for self-illumination)
+        layer.enabled: root.hasInnerGlow
+        layer.effect: MultiEffect {
+            brightness: root.innerGlowIntensity * 0.5
+            colorization: root.innerGlowIntensity * 0.3
+            colorizationColor: root.innerGlowColor
+        }
 
         transform: Rotation {
             id: rotationTransform
@@ -451,6 +743,10 @@ Item {
             gradientShadow: Qt.darker(root.frontColor, 1.3)
             borderWidth: root.frontBorderWidth
             borderColor: root.frontBorderColor
+            hasBevel: root.hasBevel
+            bevelWidth: root.bevelWidth
+            bevelHighlight: root.bevelHighlight
+            bevelShadow: root.bevelShadow
             antialiasing: root.antialiasing
         }
 
@@ -468,6 +764,10 @@ Item {
             gradientShadow: Qt.darker(root.headTipColor, 1.3)
             borderWidth: root.headTipBorderWidth
             borderColor: root.headTipBorderColor
+            hasBevel: root.hasBevel
+            bevelWidth: root.bevelWidth
+            bevelHighlight: root.bevelHighlight
+            bevelShadow: root.bevelShadow
             antialiasing: root.antialiasing
         }
 
@@ -488,6 +788,10 @@ Item {
             gradientShadow: Qt.darker(root.rearColor, 1.3)
             borderWidth: root.rearBorderWidth
             borderColor: root.rearBorderColor
+            hasBevel: root.hasBevel
+            bevelWidth: root.bevelWidth
+            bevelHighlight: root.bevelHighlight
+            bevelShadow: root.bevelShadow
             antialiasing: root.antialiasing
         }
 
@@ -507,6 +811,10 @@ Item {
             gradientShadow: Qt.darker(root.tailTipColor, 1.3)
             borderWidth: root.tailTipBorderWidth
             borderColor: root.tailTipBorderColor
+            hasBevel: root.hasBevel
+            bevelWidth: root.bevelWidth
+            bevelHighlight: root.bevelHighlight
+            bevelShadow: root.bevelShadow
             antialiasing: root.antialiasing
         }
     }
