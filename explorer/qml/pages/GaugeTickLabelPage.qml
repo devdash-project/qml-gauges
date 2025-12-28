@@ -41,8 +41,8 @@ Item {
 
         // Typography
         {name: "fontFamily", type: "enum", default: "sans-serif", category: "Typography",
-         options: Qt.fontFamilies(),
-         description: "Font family for the label. Sans-serif fonts are typically best for gauge readability."},
+         options: ["sans-serif", "serif", "monospace"].concat(Qt.fontFamilies()),
+         description: "Font family for the label. Generic names (sans-serif, serif, monospace) or any installed system font."},
         {name: "fontSize", type: "int", min: 8, max: 48, default: 18, category: "Typography",
          description: "Font size in pixels. Larger sizes for primary readings, smaller for minor labels."},
         {name: "fontWeight", type: "enum", default: 75, category: "Typography",
