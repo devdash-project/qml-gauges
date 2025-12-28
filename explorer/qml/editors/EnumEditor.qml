@@ -94,7 +94,7 @@ RowLayout {
         popup: Popup {
             y: comboBox.height - 1
             width: comboBox.width
-            implicitHeight: contentItem.implicitHeight
+            implicitHeight: Math.min(contentItem.contentHeight + 2, 300)
             padding: 1
 
             contentItem: ListView {
@@ -102,8 +102,12 @@ RowLayout {
                 implicitHeight: contentHeight
                 model: comboBox.popup.visible ? comboBox.delegateModel : null
                 currentIndex: comboBox.highlightedIndex
+                boundsBehavior: Flickable.StopAtBounds
 
-                ScrollIndicator.vertical: ScrollIndicator { }
+                ScrollBar.vertical: ScrollBar {
+                    active: true
+                    policy: ScrollBar.AsNeeded
+                }
             }
 
             background: Rectangle {
