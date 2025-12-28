@@ -8,7 +8,21 @@ RowLayout {
 
     property string propertyName
     property var values: []  // Array of strings: ["tapered", "classic"]
-    property string value
+    property var valueMap: ({})  // Optional: map display labels to actual values (for enums like Font.Bold)
+    property var value  // Can be string or mapped value type
+
+    // Internal: get the display label for current value
+    readonly property string displayLabel: {
+        if (Object.keys(root.valueMap).length > 0) {
+            // Find label by value in valueMap
+            for (var label in root.valueMap) {
+                if (root.valueMap[label] === root.value) {
+                    return label
+                }
+            }
+        }
+        return root.value
+    }
 
     spacing: 10
 
@@ -23,9 +37,15 @@ RowLayout {
         id: comboBox
         Layout.fillWidth: true
         model: root.values
-        currentIndex: root.values.indexOf(root.value)
+        currentIndex: root.values.indexOf(root.displayLabel)
         onActivated: (index) => {
-            root.value = root.values[index]
+            var label = root.values[index]
+            // Use mapped value if available, otherwise use label directly
+            if (Object.keys(root.valueMap).length > 0 && root.valueMap[label] !== undefined) {
+                root.value = root.valueMap[label]
+            } else {
+                root.value = label
+            }
         }
 
         contentItem: Text {

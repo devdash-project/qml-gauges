@@ -27,15 +27,27 @@ Item {
 
         // Content
         {name: "text", type: "string", default: "0", category: "Content",
-         description: "The text to display. Typically a numeric value from the gauge scale."},
+         description: "The text to display. Set directly, or leave as '0' to use auto-formatted value."},
+        {name: "value", type: "real", min: 0, max: 10000, default: 0, category: "Content",
+         description: "Numeric value for auto-formatting. When set (and text is '0'), generates display text using precision and divisor."},
+        {name: "precision", type: "int", min: 0, max: 3, default: 0, category: "Content",
+         description: "Decimal places for value formatting. 0 = integer, 1 = one decimal place, etc."},
+        {name: "divisor", type: "real", min: 1, max: 1000, default: 1, category: "Content",
+         description: "Divide value by this before display. E.g., 1000 shows '8' instead of '8000' for RPM gauges."},
         {name: "prefix", type: "string", default: "", category: "Content",
          description: "Text prepended before the main value. E.g., '$' for currency displays."},
         {name: "suffix", type: "string", default: "", category: "Content",
          description: "Text appended after the main value. E.g., '°C' for temperature displays."},
 
         // Typography
+        {name: "fontFamily", type: "string", default: "sans-serif", category: "Typography",
+         description: "Font family name. Common choices: 'Roboto', 'Arial', 'Helvetica', 'monospace'."},
         {name: "fontSize", type: "int", min: 8, max: 48, default: 18, category: "Typography",
          description: "Font size in pixels. Larger sizes for primary readings, smaller for minor labels."},
+        {name: "fontWeight", type: "enum", default: 75, category: "Typography",
+         options: ["Light", "Normal", "Medium", "DemiBold", "Bold", "Black"],
+         valueMap: {"Light": 25, "Normal": 50, "Medium": 57, "DemiBold": 63, "Bold": 75, "Black": 87},
+         description: "Font weight/thickness. Bold is common for gauge labels for better visibility."},
         {name: "color", type: "color", default: "#888888", category: "Typography",
          description: "Text color. Use zone colors (normal/warning/critical) to match tick ring styling."},
 

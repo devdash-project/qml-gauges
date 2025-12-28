@@ -104,6 +104,8 @@ ScrollView {
                     // Support both "values" and "options" for enum types
                     if (propData.values !== undefined) item.values = propData.values
                     if (propData.options !== undefined) item.values = propData.options
+                    // Support value mapping for enums (e.g., Font.Bold -> 75)
+                    if (propData.valueMap !== undefined) item.valueMap = propData.valueMap
 
                     // Set initial value from target or default
                     if (root.target && root.target[propData.name] !== undefined) {
