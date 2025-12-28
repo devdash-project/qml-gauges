@@ -1,0 +1,21 @@
+{
+  "name": "AutoMeter",
+  "description": "Classic AutoMeter-style needle with orange body, dark counterweight, and raised center ridge effect",
+  "source": "docs/example-gauges/Screenshot_20251129-194748.png",
+  "properties": {
+    "frontColor": "#FF2200",
+    "frontGradient": true,
+    "frontGradientStyle": "ridge",
+    "frontLength": 110,
+    "pivotWidth": 5,
+    "frontTipWidth": 1,
+    "headTipShape": "none",
+    "rearColor": "#222222",
+    "rearRatio": 0.15,
+    "tailTipShape": "flat",
+    "tailTipColor": "#222222",
+    "hasBevel": false,
+    "hasGlow": false,
+    "hasShadow": false
+  }
+}
