@@ -221,6 +221,159 @@ The MCP server for screenshot capture is now a separate repository:
 - `docs/EXTRACTION_PLAN.md` - Original extraction plan from devdash
 - Component documentation is in Doxygen-style comments within QML files
 
+## QML Best Practices
+
+### Use Qt's Dynamic APIs Over Hardcoded Values
+
+Prefer Qt's runtime discovery APIs over static lists:
+
+```qml
+// ❌ Brittle - hardcoded list may not match system
+options: ["Arial", "Roboto", "Helvetica"]
+
+// ✅ Robust - uses Qt's runtime discovery
+options: Qt.fontFamilies()
+```
+
+Other dynamic Qt APIs to use:
+- `Qt.fontFamilies()` - Available system fonts
+- `Qt.platform.os` - Platform detection
+- `Screen.pixelDensity` - DPI-aware sizing
+
+### Property Type Safety
+
+Use typed properties instead of `var` for compile-time checking:
+
+```qml
+// ❌ Loose - var accepts anything, no qmllint checks
+property var angle
+property var color
+
+// ✅ Typed - errors caught by qmllint
+property real angle: 0
+property color fillColor: "#ffffff"
+property int count: 0
+property string label: ""
+```
+
+### Readonly for Computed Properties
+
+Mark derived/computed properties as readonly to prevent accidental modification:
+
+```qml
+// ❌ Can be accidentally overwritten
+property real trigAngle: (angle - 90) * Math.PI / 180
+
+// ✅ Clear intent, compile-time protection
+readonly property real trigAngle: (angle - 90) * Math.PI / 180
+```
+
+### Use pragma ComponentBehavior: Bound
+
+For components with Repeaters or delegate contexts, use strict scoping:
+
+```qml
+pragma ComponentBehavior: Bound
+
+Repeater {
+    model: someModel
+    delegate: Item {
+        required property int index        // Must explicitly declare
+        required property var modelData    // Must explicitly declare
+    }
+}
+```
+
+### Performance: CurveRenderer with Fallback
+
+For smooth curves on Qt 6.10+, with fallback for older versions:
+
+```qml
+Shape {
+    preferredRendererType: typeof Shape.CurveRenderer !== 'undefined'
+        ? Shape.CurveRenderer
+        : Shape.GeometryRenderer
+}
+```
+
+### Performance: Layer Caching for Effects
+
+Cache expensive items (blur, glow, complex shapes) to texture:
+
+```qml
+Item {
+    layer.enabled: true  // Renders to texture once
+    layer.smooth: true
+
+    MultiEffect {
+        // Effect only recalculates when layer content changes
+    }
+}
+```
+
+### Component Documentation
+
+Use Doxygen-style comments for all public properties:
+
+```qml
+/**
+ * @brief Rotation angle in degrees (0 = 3 o'clock).
+ * @default 0
+ */
+property real angle: 0
+
+/**
+ * @brief Distance from gauge center to label center (pixels).
+ *
+ * Larger values position labels further from center.
+ * Typically set slightly inside the tick ring.
+ *
+ * @default 80
+ */
+property real distanceFromCenter: 80
+```
+
+### Anti-Patterns to Avoid
+
+**Don't mix anchors with explicit positioning:**
+```qml
+// ❌ Conflicting - anchors take precedence, x/y ignored
+Text {
+    anchors.centerIn: parent
+    x: computedX  // This is ignored!
+}
+
+// ✅ Use one positioning system
+Text {
+    x: computedX
+    y: computedY
+}
+```
+
+**Don't hardcode sizes - use relative sizing:**
+```qml
+// ❌ Fixed pixels don't scale across displays
+width: 400
+
+// ✅ Relative to parent or use implicit size
+width: parent.width * 0.8
+implicitWidth: 400  // Suggestion, can be overridden
+```
+
+**Don't use Loader when direct instantiation works:**
+```qml
+// ❌ Unnecessary indirection, slower, no type checking
+Loader { source: "GaugeTick.qml" }
+
+// ✅ Direct instantiation (faster, type-checked by qmllint)
+GaugeTick { }
+```
+
+Use Loader only when needed:
+- Conditional loading (`active: someCondition`)
+- Dynamic component switching at runtime
+- Deferred loading for startup performance
+
 ## Future Components (Planned)
 
 - **BarGauge** - Linear horizontal/vertical gauge
