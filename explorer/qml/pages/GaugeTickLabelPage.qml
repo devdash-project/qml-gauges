@@ -40,8 +40,9 @@ Item {
          description: "Text appended after the main value. E.g., '°C' for temperature displays."},
 
         // Typography
-        {name: "fontFamily", type: "string", default: "sans-serif", category: "Typography",
-         description: "Font family name. Common choices: 'Roboto', 'Arial', 'Helvetica', 'monospace'."},
+        {name: "fontFamily", type: "enum", default: "sans-serif", category: "Typography",
+         options: ["sans-serif", "Roboto", "Arial", "Helvetica", "Verdana", "Tahoma", "monospace", "Courier New"],
+         description: "Font family for the label. Sans-serif fonts are typically best for gauge readability."},
         {name: "fontSize", type: "int", min: 8, max: 48, default: 18, category: "Typography",
          description: "Font size in pixels. Larger sizes for primary readings, smaller for minor labels."},
         {name: "fontWeight", type: "enum", default: 75, category: "Typography",
