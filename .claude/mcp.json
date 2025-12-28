@@ -1,9 +1,0 @@
-{
-  "mcpServers": {
-    "qmlgauges": {
-      "command": "/home/dev/.venv/devdash/bin/python",
-      "args": ["-m", "qmlgauges_mcp"],
-      "cwd": "/home/dev/Projects/personal/devdash/qml-gauges/tools/mcp"
-    }
-  }
-}
