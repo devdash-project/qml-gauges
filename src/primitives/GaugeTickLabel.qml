@@ -163,14 +163,16 @@ Item {
         style: root.showOutline ? Text.Outline : Text.Normal
         styleColor: root.outlineColor
 
-        // Center the label
-        anchors.centerIn: parent
-
         // Position at specified radius from center
-        x: (parent.width / 2) + (root.distanceFromCenter * Math.cos(root.angle * Math.PI / 180)) - (width / 2)
-        y: (parent.height / 2) + (root.distanceFromCenter * Math.sin(root.angle * Math.PI / 180)) - (height / 2)
+        // Convert from gauge angle convention (0° = 12 o'clock, clockwise positive)
+        // to standard trig (0° = 3 o'clock), by subtracting 90°
+        readonly property real trigAngle: (root.angle - 90) * Math.PI / 180
+        x: (parent.width / 2) + (root.distanceFromCenter * Math.cos(trigAngle)) - (width / 2)
+        y: (parent.height / 2) + (root.distanceFromCenter * Math.sin(trigAngle)) - (height / 2)
 
         // Rotate to keep upright (if enabled)
-        rotation: root.keepUpright ? -root.angle : 0
+        // When keepUpright is true, text stays horizontal (no rotation)
+        // When false, text rotates tangent to the gauge arc
+        rotation: root.keepUpright ? 0 : root.angle
     }
 }

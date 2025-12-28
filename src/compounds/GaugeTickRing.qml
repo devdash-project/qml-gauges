@@ -1,6 +1,7 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
+import DevDash.Gauges.Primitives 1.0
 
 /**
  * @brief Complete ring of tick marks and labels for a radial gauge.
@@ -221,6 +222,7 @@ Item {
 
         delegate: Item {
             id: majorTickDelegate
+            anchors.fill: parent
 
             required property int index
 
@@ -229,37 +231,31 @@ Item {
             readonly property color tickColor: root.getColorForValue(tickValue)
 
             // Major tick mark
-            Loader {
-                anchors.fill: parent
-                source: "../primitives/GaugeTick.qml"
-                onLoaded: {
-                    item.angle = majorTickDelegate.tickAngle
-                    item.distanceFromCenter = root.innerRadius
-                    item.length = root.majorTickLength
-                    item.tickWidth = root.majorTickWidth
-                    item.color = majorTickDelegate.tickColor
-                    item.showInnerCircle = root.showInnerCircles
-                    item.innerCircleDiameter = root.innerCircleDiameter
-                    item.innerCircleColor = majorTickDelegate.tickColor
-                }
+            GaugeTick {
+                anchors.centerIn: parent
+                angle: majorTickDelegate.tickAngle
+                distanceFromCenter: root.innerRadius
+                length: root.majorTickLength
+                tickWidth: root.majorTickWidth
+                color: majorTickDelegate.tickColor
+                showInnerCircle: root.showInnerCircles
+                innerCircleDiameter: root.innerCircleDiameter
+                innerCircleColor: majorTickDelegate.tickColor
             }
 
             // Tick label
-            Loader {
-                anchors.fill: parent
-                source: "../primitives/GaugeTickLabel.qml"
-                onLoaded: {
-                    item.angle = majorTickDelegate.tickAngle
-                    item.distanceFromCenter = root.labelRadius
-                    item.text = (majorTickDelegate.tickValue / root.labelDivisor).toFixed(root.labelDivisor >= 1000 ? 0 : 1)
-                    item.fontSize = root.fontSize
-                    item.fontFamily = root.fontFamily
-                    item.fontWeight = root.fontWeight
-                    item.color = majorTickDelegate.tickColor
-                    item.showOutline = root.showLabelOutline
-                    item.outlineColor = root.labelOutlineColor
-                    item.keepUpright = true
-                }
+            GaugeTickLabel {
+                anchors.centerIn: parent
+                angle: majorTickDelegate.tickAngle
+                distanceFromCenter: root.labelRadius
+                text: (majorTickDelegate.tickValue / root.labelDivisor).toFixed(root.labelDivisor >= 1000 ? 0 : 1)
+                fontSize: root.fontSize
+                fontFamily: root.fontFamily
+                fontWeight: root.fontWeight
+                color: majorTickDelegate.tickColor
+                showOutline: root.showLabelOutline
+                outlineColor: root.labelOutlineColor
+                keepUpright: true
             }
         }
     }
@@ -274,6 +270,7 @@ Item {
 
         delegate: Item {
             id: minorTickDelegate
+            anchors.fill: parent
 
             required property int index
 
@@ -283,20 +280,17 @@ Item {
             readonly property bool isMajorTick: (tickValue % root.majorTickInterval) === 0
 
             // Only render if not a major tick position
-            Loader {
-                active: !minorTickDelegate.isMajorTick
-                anchors.fill: parent
-                source: "../primitives/GaugeTick.qml"
-                onLoaded: {
-                    item.angle = minorTickDelegate.tickAngle
-                    item.distanceFromCenter = root.innerRadius
-                    item.length = root.minorTickLength
-                    item.tickWidth = root.minorTickWidth
-                    item.color = minorTickDelegate.tickColor
-                    item.showInnerCircle = root.showInnerCircles
-                    item.innerCircleDiameter = root.innerCircleDiameter * 0.7 // Smaller for minor ticks
-                    item.innerCircleColor = minorTickDelegate.tickColor
-                }
+            GaugeTick {
+                visible: !minorTickDelegate.isMajorTick
+                anchors.centerIn: parent
+                angle: minorTickDelegate.tickAngle
+                distanceFromCenter: root.innerRadius
+                length: root.minorTickLength
+                tickWidth: root.minorTickWidth
+                color: minorTickDelegate.tickColor
+                showInnerCircle: root.showInnerCircles
+                innerCircleDiameter: root.innerCircleDiameter * 0.7 // Smaller for minor ticks
+                innerCircleColor: minorTickDelegate.tickColor
             }
         }
     }
