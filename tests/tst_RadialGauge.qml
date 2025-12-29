@@ -95,15 +95,15 @@ TestCase {
     }
 
     function test_needleCustomization() {
-        gauge.needleType = "tapered"
-        compare(gauge.needleType, "tapered", "Tapered needle")
+        gauge.needleShape = "tapered"
+        compare(gauge.needleShape, "tapered", "Tapered needle")
 
-        gauge.needleType = "classic"
-        compare(gauge.needleType, "classic", "Classic needle")
+        gauge.needleShape = "straight"
+        compare(gauge.needleShape, "straight", "Straight needle")
 
-        gauge.needleWidth = 6
+        gauge.needlePivotWidth = 6
         gauge.needleTipWidth = 1
-        compare(gauge.needleWidth, 6, "Needle width")
+        compare(gauge.needlePivotWidth, 6, "Needle pivot width")
         compare(gauge.needleTipWidth, 1, "Needle tip width")
     }
 

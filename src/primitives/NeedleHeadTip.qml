@@ -184,6 +184,7 @@ Item {
 
                 // Bevel highlight (left edge to point)
                 ShapePath {
+                    id: pointedBevelHighlight
                     strokeColor: root.hasBevel ? root.bevelHighlight : "transparent"
                     strokeWidth: root.bevelWidth
                     fillColor: "transparent"
@@ -191,14 +192,15 @@ Item {
 
                     readonly property real cx: root.implicitWidth / 2
 
-                    startX: cx - root.baseWidth / 2
+                    startX: pointedBevelHighlight.cx - root.baseWidth / 2
                     startY: root.actualLength
 
-                    PathLine { x: cx; y: 0 }
+                    PathLine { x: pointedBevelHighlight.cx; y: 0 }
                 }
 
                 // Bevel shadow (right edge from point)
                 ShapePath {
+                    id: pointedBevelShadow
                     strokeColor: root.hasBevel ? root.bevelShadow : "transparent"
                     strokeWidth: root.bevelWidth
                     fillColor: "transparent"
@@ -206,10 +208,10 @@ Item {
 
                     readonly property real cx: root.implicitWidth / 2
 
-                    startX: cx
+                    startX: pointedBevelShadow.cx
                     startY: 0
 
-                    PathLine { x: cx + root.baseWidth / 2; y: root.actualLength }
+                    PathLine { x: pointedBevelShadow.cx + root.baseWidth / 2; y: root.actualLength }
                 }
             }
         }

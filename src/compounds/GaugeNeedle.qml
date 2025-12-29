@@ -421,6 +421,39 @@ Item {
      */
     property real epsilon: 0.25
 
+    // === Internal Animated Property ===
+    // Behavior with binding doesn't work - Behaviors only intercept imperative assignments
+    // Use explicit SpringAnimation triggered by onAngleChanged
+    property real _displayAngle: root.angle  // Initial value
+
+    onAngleChanged: {
+        if (root.animated) {
+            needleAnimation.to = root.angle
+            needleAnimation.restart()
+        } else {
+            needleAnimation.stop()
+            _displayAngle = root.angle
+        }
+    }
+
+    onAnimatedChanged: {
+        if (!root.animated) {
+            // Stop any running animation and snap to current angle
+            needleAnimation.stop()
+            _displayAngle = root.angle
+        }
+    }
+
+    SpringAnimation {
+        id: needleAnimation
+        target: root
+        property: "_displayAngle"
+        spring: root.spring
+        damping: root.damping
+        mass: root.mass
+        epsilon: root.epsilon
+    }
+
     // === Advanced ===
 
     /**
@@ -722,17 +755,7 @@ Item {
             id: rotationTransform
             origin.x: root.pivotX
             origin.y: root.pivotY
-            angle: root.angle
-
-            Behavior on angle {
-                enabled: root.animated
-                SpringAnimation {
-                    spring: root.spring
-                    damping: root.damping
-                    mass: root.mass
-                    epsilon: root.epsilon
-                }
-            }
+            angle: root._displayAngle
         }
 
         // Front Body (extends upward from pivot)

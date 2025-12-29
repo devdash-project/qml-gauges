@@ -1,86 +1,118 @@
 import QtQuick
 import QtTest
-import DevDash.Gauges
+import DevDash.Gauges.Primitives 1.0
 
 /**
- * @brief Unit tests for gauge needle primitives
+ * @brief Unit tests for needle primitive components
+ *
+ * Tests the atomic needle parts: NeedleFrontBody, NeedleRearBody,
+ * NeedleHeadTip, NeedleTailTip
  */
 TestCase {
     id: testCase
-    name: "GaugeNeedleTests"
+    name: "NeedlePrimitiveTests"
     when: windowShown
 
     width: 400
     height: 400
 
-    // Test tapered needle
-    GaugeNeedleTapered {
-        id: taperedNeedle
-        anchors.centerIn: parent
-        angle: 0
+    // Test front body (main needle portion)
+    NeedleFrontBody {
+        id: frontBody
+        x: 200
+        y: 200
         length: 100
-        needleWidth: 8
+        pivotWidth: 8
         tipWidth: 2
+        shape: "tapered"
         color: "#ff6600"
     }
 
-    // Test classic needle
-    GaugeNeedleClassic {
-        id: classicNeedle
-        anchors.centerIn: parent
+    // Test rear body (counterweight portion)
+    NeedleRearBody {
+        id: rearBody
+        x: 200
+        y: 200
         visible: false
-        angle: 0
-        length: 100
-        needleWidth: 4
-        color: "#ffffff"
+        length: 30
+        pivotWidth: 8
+        tipWidth: 4
+        shape: "tapered"
+        color: "#333333"
     }
 
-    function test_taperedNeedle_defaultProperties() {
-        compare(taperedNeedle.angle, 0, "Default angle")
-        compare(taperedNeedle.length, 100, "Default length")
-        compare(taperedNeedle.needleWidth, 8, "Needle width")
-        compare(taperedNeedle.tipWidth, 2, "Tip width (tapered)")
+    // Test head tip
+    NeedleHeadTip {
+        id: headTip
+        x: 200
+        y: 100
+        visible: false
+        shape: "pointed"
+        baseWidth: 2
+        length: 10
+        color: "#ff6600"
     }
 
-    function test_taperedNeedle_angleRotation() {
-        taperedNeedle.angle = 45
-        compare(taperedNeedle.angle, 45, "Angle set to 45")
-
-        taperedNeedle.angle = -90
-        compare(taperedNeedle.angle, -90, "Negative angle")
-
-        taperedNeedle.angle = 360
-        compare(taperedNeedle.angle, 360, "Full rotation")
+    function test_frontBody_defaultProperties() {
+        compare(frontBody.length, 100, "Default length")
+        compare(frontBody.pivotWidth, 8, "Pivot width")
+        compare(frontBody.tipWidth, 2, "Tip width")
+        compare(frontBody.shape, "tapered", "Shape")
     }
 
-    function test_taperedNeedle_animation() {
-        taperedNeedle.animated = true
-        compare(taperedNeedle.animated, true, "Animation enabled")
+    function test_frontBody_shapes() {
+        frontBody.shape = "tapered"
+        compare(frontBody.shape, "tapered", "Tapered shape")
 
-        taperedNeedle.spring = 5.0
-        compare(taperedNeedle.spring, 5.0, "Spring stiffness")
+        frontBody.shape = "straight"
+        compare(frontBody.shape, "straight", "Straight shape")
 
-        taperedNeedle.damping = 0.5
-        compare(taperedNeedle.damping, 0.5, "Damping factor")
+        // Reset
+        frontBody.shape = "tapered"
     }
 
-    function test_classicNeedle_properties() {
-        compare(classicNeedle.needleWidth, 4, "Classic needle width")
-        compare(classicNeedle.counterweightRadius, 0, "No counterweight by default")
+    function test_frontBody_color() {
+        frontBody.color = "#00ff00"
+        compare(frontBody.color.toString(), "#00ff00", "Color change")
 
-        classicNeedle.counterweightRadius = 10
-        compare(classicNeedle.counterweightRadius, 10, "Counterweight set")
+        // Reset
+        frontBody.color = "#ff6600"
     }
 
-    function test_needleColor() {
-        taperedNeedle.color = "#00ff00"
-        compare(taperedNeedle.color.toString(), "#00ff00", "Color change")
+    function test_rearBody_properties() {
+        compare(rearBody.length, 30, "Rear length")
+        compare(rearBody.pivotWidth, 8, "Pivot width")
+        compare(rearBody.tipWidth, 4, "Tip width")
     }
 
-    function test_needleBorder() {
-        taperedNeedle.borderWidth = 2
-        taperedNeedle.borderColor = "#000000"
-        compare(taperedNeedle.borderWidth, 2, "Border width")
-        compare(taperedNeedle.borderColor.toString(), "#000000", "Border color")
+    function test_headTip_shapes() {
+        headTip.shape = "pointed"
+        compare(headTip.shape, "pointed", "Pointed shape")
+
+        headTip.shape = "arrow"
+        compare(headTip.shape, "arrow", "Arrow shape")
+
+        headTip.shape = "rounded"
+        compare(headTip.shape, "rounded", "Rounded shape")
+
+        headTip.shape = "flat"
+        compare(headTip.shape, "flat", "Flat shape")
+
+        headTip.shape = "diamond"
+        compare(headTip.shape, "diamond", "Diamond shape")
+
+        // Reset
+        headTip.shape = "pointed"
+    }
+
+    function test_headTip_dimensions() {
+        headTip.baseWidth = 4
+        headTip.length = 15
+        compare(headTip.baseWidth, 4, "Base width")
+        compare(headTip.length, 15, "Length")
+
+        // Reset
+        headTip.baseWidth = 2
+        headTip.length = 10
     }
 }

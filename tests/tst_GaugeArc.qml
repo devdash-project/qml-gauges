@@ -1,6 +1,6 @@
 import QtQuick
 import QtTest
-import DevDash.Gauges
+import DevDash.Gauges.Primitives 1.0
 
 /**
  * @brief Unit tests for GaugeArc primitive
@@ -17,15 +17,23 @@ TestCase {
     GaugeArc {
         id: arc
         anchors.fill: parent
-        startAngle: -225
-        sweepAngle: 270
         strokeWidth: 20
         strokeColor: "#00aaff"
     }
 
-    function test_defaultProperties() {
-        compare(arc.startAngle, -225, "Default startAngle")
-        compare(arc.sweepAngle, 270, "Default sweepAngle")
+    function init() {
+        // Reset state before each test
+        arc.startAngle = -225
+        arc.sweepAngle = 270
+        arc.strokeWidth = 20
+        arc.strokeColor = "#00aaff"
+        arc.arcOpacity = 1.0
+        arc.animated = false
+    }
+
+    function test_configuredProperties() {
+        compare(arc.startAngle, -225, "Configured startAngle")
+        compare(arc.sweepAngle, 270, "Configured sweepAngle")
         compare(arc.strokeWidth, 20, "Stroke width")
     }
 

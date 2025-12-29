@@ -35,6 +35,7 @@ qt_add_qml_module(qml-gauges-tests
     QML_FILES
         tst_GaugeArc.qml
         tst_GaugeNeedle.qml
+        tst_GaugeNeedleCompound.qml
         tst_RadialGauge.qml
     IMPORT_PATH ${CMAKE_BINARY_DIR}/qml
 )
