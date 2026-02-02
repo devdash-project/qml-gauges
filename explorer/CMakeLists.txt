@@ -40,6 +40,9 @@ qt_add_qml_module(qml-gauges-explorer
         qml/pages/GaugeZoneArcPage.qml
         qml/pages/RollingDigitReadoutPage.qml
         qml/pages/RadialGaugePage.qml
+        qml/pages/RadialGauge3DPage.qml
+        qml/pages/Bezel3DPage.qml
+        qml/pages/CenterCap3DPage.qml
     RESOURCE_PREFIX /
     OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/qml/Explorer
 )

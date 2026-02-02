@@ -74,6 +74,22 @@ ListView {
             isHeader: false
         }
 
+        // 3D Primitives (Qt Quick 3D)
+        ListElement {
+            category: "Primitives"
+            title: "Bezel3D"
+            description: "True 3D bezel with PBR chrome"
+            pagePath: "pages/Bezel3DPage.qml"
+            isHeader: false
+        }
+        ListElement {
+            category: "Primitives"
+            title: "CenterCap3D"
+            description: "True 3D center cap with PBR chrome"
+            pagePath: "pages/CenterCap3DPage.qml"
+            isHeader: false
+        }
+
         // Compounds category header
         ListElement {
             category: "Compounds"
@@ -142,6 +158,13 @@ ListView {
             title: "RadialGauge"
             description: "Complete radial gauge template"
             pagePath: "pages/RadialGaugePage.qml"
+            isHeader: false
+        }
+        ListElement {
+            category: "Templates"
+            title: "RadialGauge3D"
+            description: "Premium 3D showcase gauge"
+            pagePath: "pages/RadialGauge3DPage.qml"
             isHeader: false
         }
     }

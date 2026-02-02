@@ -183,6 +183,48 @@ Item {
      */
     property real shadowOpacity: 0.5
 
+    // === Raised/Bevel Properties ===
+
+    /**
+     * @brief Enable raised/embossed 3D appearance.
+     *
+     * Adds light and dark edges to create the illusion of depth,
+     * as if the tick mark is raised from the gauge face.
+     *
+     * @default false
+     */
+    property bool raised: false
+
+    /**
+     * @brief Bevel edge width (pixels).
+     * @default 1
+     */
+    property real bevelWidth: 1
+
+    /**
+     * @brief Bevel highlight color (top/left edge).
+     * @default Qt.lighter(color, 1.5)
+     */
+    property color bevelHighlight: Qt.lighter(color, 1.5)
+
+    /**
+     * @brief Bevel shadow color (bottom/right edge).
+     * @default Qt.darker(color, 1.5)
+     */
+    property color bevelShadow: Qt.darker(color, 1.5)
+
+    /**
+     * @brief Bevel highlight opacity.
+     * @default 0.7
+     */
+    property real bevelHighlightOpacity: 0.7
+
+    /**
+     * @brief Bevel shadow opacity.
+     * @default 0.5
+     */
+    property real bevelShadowOpacity: 0.5
+
     // === Inner Circle Decoration ===
 
     /**
@@ -263,6 +305,42 @@ Item {
                 origin.y: root.distanceFromCenter
                 angle: root.angle
             }
+
+            // Bevel highlight edge (left side - catches light)
+            Rectangle {
+                visible: root.raised
+                anchors.left: parent.left
+                anchors.top: parent.top
+                anchors.bottom: parent.bottom
+                width: root.bevelWidth
+                radius: parent.radius
+                color: root.bevelHighlight
+                opacity: root.bevelHighlightOpacity
+            }
+
+            // Bevel shadow edge (right side - in shadow)
+            Rectangle {
+                visible: root.raised
+                anchors.right: parent.right
+                anchors.top: parent.top
+                anchors.bottom: parent.bottom
+                width: root.bevelWidth
+                radius: parent.radius
+                color: root.bevelShadow
+                opacity: root.bevelShadowOpacity
+            }
+
+            // Top highlight (outer end catches light)
+            Rectangle {
+                visible: root.raised
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.top: parent.top
+                height: root.bevelWidth
+                radius: parent.radius
+                color: root.bevelHighlight
+                opacity: root.bevelHighlightOpacity * 0.7
+            }
         }
 
         // Block shape (thick flat rectangle)
@@ -281,6 +359,50 @@ Item {
                 origin.x: root.tickWidth / 2
                 origin.y: root.distanceFromCenter
                 angle: root.angle
+            }
+
+            // Bevel highlight edge (left side)
+            Rectangle {
+                visible: root.raised
+                anchors.left: parent.left
+                anchors.top: parent.top
+                anchors.bottom: parent.bottom
+                width: root.bevelWidth
+                color: root.bevelHighlight
+                opacity: root.bevelHighlightOpacity
+            }
+
+            // Bevel shadow edge (right side)
+            Rectangle {
+                visible: root.raised
+                anchors.right: parent.right
+                anchors.top: parent.top
+                anchors.bottom: parent.bottom
+                width: root.bevelWidth
+                color: root.bevelShadow
+                opacity: root.bevelShadowOpacity
+            }
+
+            // Top highlight (outer end)
+            Rectangle {
+                visible: root.raised
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.top: parent.top
+                height: root.bevelWidth
+                color: root.bevelHighlight
+                opacity: root.bevelHighlightOpacity * 0.7
+            }
+
+            // Bottom shadow (inner end)
+            Rectangle {
+                visible: root.raised
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.bottom: parent.bottom
+                height: root.bevelWidth
+                color: root.bevelShadow
+                opacity: root.bevelShadowOpacity * 0.7
             }
         }
 

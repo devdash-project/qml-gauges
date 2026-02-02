@@ -125,7 +125,52 @@ Item {
         {name: "tickLabelFontSize", type: "int", min: 10, max: 32, default: 18, category: "Typography",
          description: "Font size for tick labels around the gauge in pixels."},
         {name: "gaugeLabelFontSize", type: "int", min: 10, max: 32, default: 18, category: "Typography",
-         description: "Font size for the gauge label on the face in pixels."}
+         description: "Font size for the gauge label on the face in pixels."},
+
+        // === 3D EFFECTS ===
+
+        // Needle 3D Effects
+        {name: "needleGradient", type: "bool", default: false, category: "Needle 3D",
+         description: "Enable gradient shading on needle for 3D cylindrical appearance."},
+        {name: "needleGradientStyle", type: "enum", default: "cylinder", category: "Needle 3D",
+         options: ["cylinder", "ridge"],
+         description: "Gradient style: 'cylinder' for round 3D look, 'ridge' for raised center highlight."},
+        {name: "needleBevel", type: "bool", default: false, category: "Needle 3D",
+         description: "Enable bevel effect with light/dark edge highlighting for depth."},
+        {name: "needleBevelWidth", type: "real", min: 0.5, max: 3, default: 1.0, category: "Needle 3D",
+         description: "Width of bevel highlight/shadow strokes in pixels."},
+        {name: "needleShadow", type: "bool", default: false, category: "Needle 3D",
+         description: "Enable basic drop shadow behind needle."},
+        {name: "needlePivotShadow", type: "bool", default: false, category: "Needle 3D",
+         description: "Enable realistic pivot shadow that follows light angle as needle rotates."},
+        {name: "needleLightAngle", type: "real", min: -180, max: 180, default: -45, category: "Needle 3D",
+         description: "Virtual light source angle. Controls highlight position and shadow direction."},
+        {name: "needleInnerGlow", type: "bool", default: false, category: "Needle 3D",
+         description: "Enable inner glow (self-illumination) effect."},
+        {name: "needleInnerGlowColor", type: "color", default: "#ffffff", category: "Needle 3D",
+         description: "Color of the inner glow effect."},
+        {name: "needleOuterGlow", type: "bool", default: false, category: "Needle 3D",
+         description: "Enable outer glow (neon halo) effect around needle edges."},
+        {name: "needleOuterGlowColor", type: "color", default: "#ffffff", category: "Needle 3D",
+         description: "Color of the outer glow halo."},
+
+        // Tick 3D Effects
+        {name: "tickGradient", type: "bool", default: false, category: "Tick 3D",
+         description: "Enable gradient fill on tick marks for depth."},
+        {name: "tickGlow", type: "bool", default: false, category: "Tick 3D",
+         description: "Enable glow effect on ticks for luminous paint appearance."},
+        {name: "tickGlowBlur", type: "real", min: 0.1, max: 1.0, default: 0.4, category: "Tick 3D",
+         description: "Tick glow blur amount. Higher = softer glow."},
+        {name: "tickShadow", type: "bool", default: false, category: "Tick 3D",
+         description: "Enable drop shadow on ticks for raised appearance."},
+        {name: "tickShadowBlur", type: "real", min: 0.1, max: 1.0, default: 0.25, category: "Tick 3D",
+         description: "Tick shadow blur amount."},
+
+        // Center Cap 3D Effects
+        {name: "centerCapShadow", type: "bool", default: false, category: "Cap 3D",
+         description: "Enable drop shadow on center cap for raised appearance."},
+        {name: "centerCapHighlight", type: "bool", default: false, category: "Cap 3D",
+         description: "Enable highlight ring for domed/beveled 3D appearance."}
     ]
 
     RowLayout {

@@ -208,12 +208,88 @@ Consistent across all gauge types:
 ### Component Opacity Properties
 Each component has its own opacity property (e.g., `arcOpacity`, `faceOpacity`, `needleOpacity`) rather than using the inherited `opacity` property, for finer control.
 
-## MCP Server
+## MCP Server & Visual Verification
 
-The MCP server for screenshot capture is now a separate repository:
-- Repository: [devdash-mcp](https://github.com/devdash-project/devdash-mcp)
-- Use `mcp__qmlgauges__qmlgauges_list_windows` to find running explorer windows
-- Use `mcp__qmlgauges__qmlgauges_screenshot` to capture screenshots for verification
+The MCP server (`devdash-mcp`) provides tools for interacting with the explorer and verifying visual output.
+
+### CRITICAL: State vs Visual Verification
+
+**DO NOT assume UI is working just because MCP state tools return property values.**
+
+The explorer exposes two types of verification:
+1. **State verification** (`qml_explorer_get_state`) - Reports property values. Does NOT verify rendering.
+2. **Visual verification** (`screenshot_gauge_preview`) - Actually captures what's rendered on screen.
+
+**Always use `screenshot_gauge_preview` to confirm visual changes.** Claiming "effects are working" based on state alone is incorrect.
+
+### Explorer Screenshot Tools
+
+```
+# PRIMARY TOOL - Use this for all gauge visual verification
+mcp__devdash__screenshot_gauge_preview
+
+# This captures:
+# - Left 60% of window (preview pane only, excludes property panel)
+# - Center 80% of that (focuses on gauge)
+# - Scaled to 50%
+# - Uses ~5k tokens (not 25k like full screenshots)
+```
+
+The explorer layout is fixed:
+```
++---------------------------+----------------+
+|     Preview Area (60%)    | Property Panel |
+|                           |     (40%)      |
+|     +---------------+     |                |
+|     |               |     |  [Scrollable   |
+|     |    Gauge      |     |   properties]  |
+|     |   (centered)  |     |                |
+|     +---------------+     |                |
++---------------------------+----------------+
+```
+
+### Explorer Property Tools
+
+```
+# Navigate to a component page
+mcp__devdash__qml_explorer_navigate(page="RadialGauge")
+
+# Get current state (page, all property values)
+mcp__devdash__qml_explorer_get_state
+
+# Get/set individual properties
+mcp__devdash__qml_explorer_get_property(name="needleGradient")
+mcp__devdash__qml_explorer_set_property(name="needleGradient", value=true)
+
+# List all properties with documentation
+mcp__devdash__qml_explorer_list_properties
+```
+
+### Workflow for Verifying Visual Changes
+
+1. **Make code changes** to component
+2. **Build** with `cmake --build build`
+3. **Restart explorer** if running (code changes require restart)
+4. **Navigate** to component page with `qml_explorer_navigate`
+5. **Set properties** to test the feature
+6. **Capture screenshot** with `screenshot_gauge_preview` to verify visually
+7. **Do not claim success** until screenshot shows expected result
+
+### Process Management
+
+```
+# Check if explorer is running
+mcp__devdash__qml_explorer_status
+
+# Build the explorer
+mcp__devdash__qml_explorer_build
+
+# Launch explorer
+mcp__devdash__qml_explorer_launch
+
+# Kill explorer (needed to pick up code changes)
+mcp__devdash__qml_explorer_kill
+```
 
 ## Documentation
 
@@ -373,6 +449,19 @@ Use Loader only when needed:
 - Conditional loading (`active: someCondition`)
 - Dynamic component switching at runtime
 - Deferred loading for startup performance
+
+**NEVER use relative file paths across QML module boundaries:**
+```qml
+// ❌ CRITICAL: Fails silently at runtime when loaded from qrc://
+// Each QML module is a separate .so with its own resource file
+Loader { source: "../Primitives/GaugeFace.qml" }
+
+// ✅ Import the module and use component types directly
+import DevDash.Gauges.Primitives 1.0
+GaugeFace { }
+```
+
+This is a **silent failure** - qmllint won't catch it, builds succeed, but components fail to load at runtime. The build includes `verify-qml-loaders` target that catches cross-module Loader paths.
 
 ## Future Components (Planned)
 

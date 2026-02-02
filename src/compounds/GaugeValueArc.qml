@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Shapes
+import DevDash.Gauges.Primitives 1.0
 
 /**
  * @brief Value-driven arc that fills from minValue to currentValue.
@@ -148,33 +149,22 @@ Item {
     implicitWidth: 400
     implicitHeight: 400
 
-    Loader {
-        id: arcLoader
+    GaugeArc {
+        id: arc
         anchors.fill: parent
-        source: "../primitives/GaugeArc.qml"
 
-        onLoaded: {
-            // Set geometry
-            item.startAngle = Qt.binding(() => root.startAngle)
-            item.radius = Qt.binding(() => root.radius)
-            item.strokeWidth = Qt.binding(() => root.strokeWidth)
+        // Geometry
+        startAngle: root.startAngle
+        sweepAngle: root.valueSweepAngle
+        radius: root.radius
+        strokeWidth: root.strokeWidth
 
-            // Set appearance
-            item.strokeColor = Qt.binding(() => root.currentColor)
-            item.fillColor = "transparent"
-            item.capStyle = ShapePath.RoundCap
+        // Appearance
+        strokeColor: root.currentColor
+        fillColor: "transparent"
+        capStyle: ShapePath.RoundCap
 
-            // Set animation
-            item.animated = Qt.binding(() => root.animated)
-
-            // Bind sweep with SmoothedAnimation
-            const sweepBinding = Qt.binding(() => root.valueSweepAngle)
-            if (root.animated) {
-                item.sweepAngle = root.valueSweepAngle
-                // Note: SmoothedAnimation is applied in the primitive's Behavior
-            } else {
-                item.sweepAngle = sweepBinding
-            }
-        }
+        // Animation
+        animated: root.animated
     }
 }

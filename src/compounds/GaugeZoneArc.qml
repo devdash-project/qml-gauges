@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Shapes
+import DevDash.Gauges.Primitives 1.0
 
 /**
  * @brief Colored zone arc for warning/redline regions.
@@ -120,26 +121,23 @@ Item {
     implicitWidth: 400
     implicitHeight: 400
 
-    Loader {
-        id: arcLoader
+    GaugeArc {
+        id: arc
         anchors.fill: parent
-        source: "../primitives/GaugeArc.qml"
 
-        onLoaded: {
-            // Set geometry
-            item.startAngle = Qt.binding(() => root.zoneStartAngle)
-            item.sweepAngle = Qt.binding(() => root.zoneSweepAngle)
-            item.radius = Qt.binding(() => root.radius)
-            item.strokeWidth = Qt.binding(() => root.strokeWidth)
+        // Geometry
+        startAngle: root.zoneStartAngle
+        sweepAngle: root.zoneSweepAngle
+        radius: root.radius
+        strokeWidth: root.strokeWidth
 
-            // Set appearance
-            item.strokeColor = Qt.binding(() => root.zoneColor)
-            item.fillColor = "transparent"
-            item.capStyle = ShapePath.FlatCap
-            item.arcOpacity = Qt.binding(() => root.zoneOpacity)
+        // Appearance
+        strokeColor: root.zoneColor
+        fillColor: "transparent"
+        capStyle: ShapePath.FlatCap
+        arcOpacity: root.zoneOpacity
 
-            // No animation for static zones
-            item.animated = false
-        }
+        // No animation for static zones
+        animated: false
     }
 }

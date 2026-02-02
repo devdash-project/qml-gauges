@@ -13,6 +13,16 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 # Minimum 6.10 for latest QtQuick.Effects features and CurveRenderer
 find_package(Qt6 6.10 REQUIRED COMPONENTS Quick Qml QuickControls2 QuickEffects WebSockets)
 
+# Qt Quick 3D is optional - enables Bezel3D, CenterCap3D components
+find_package(Qt6 COMPONENTS Quick3D QUIET)
+if(Qt6Quick3D_FOUND)
+    message(STATUS "Qt6::Quick3D found - 3D gauge components enabled")
+    set(HAVE_QUICK3D TRUE)
+else()
+    message(STATUS "Qt6::Quick3D not found - 3D gauge components disabled")
+    set(HAVE_QUICK3D FALSE)
+endif()
+
 # Build options
 option(BUILD_EXPLORER "Build the component explorer application" ON)
 option(BUILD_EXAMPLES "Build example applications" OFF)
@@ -76,19 +86,34 @@ if(QMLLINT_EXECUTABLE)
         VERBATIM
     )
 
-    # Make explorer depend on lint check when LINT_ON_BUILD is enabled
+    # QML Loader cross-module verification
+    # Catches runtime failures from Loader source paths crossing QML module boundaries
+    find_package(Python3 REQUIRED)
+    add_custom_target(verify-qml-loaders
+        COMMAND ${Python3_EXECUTABLE} "${CMAKE_SOURCE_DIR}/scripts/verify-qml-loaders.py" "${CMAKE_BINARY_DIR}"
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+        COMMENT "Verifying QML Loader source paths..."
+        VERBATIM
+    )
+
+    # Make explorer depend on both lint check AND loader verification when LINT_ON_BUILD is enabled
     if(LINT_ON_BUILD AND BUILD_EXPLORER)
-        add_dependencies(qml-gauges-explorer qmllint-critical)
-        message(STATUS "QML lint-on-build enabled - explorer will check for critical QML errors")
+        add_dependencies(qml-gauges-explorer qmllint-critical verify-qml-loaders)
+        message(STATUS "QML lint-on-build enabled - explorer will check for critical QML errors and loader paths")
     endif()
 
-    # Also add as a test so `ctest` can run it
+    # Also add as tests so `ctest` can run them
     enable_testing()
     add_test(
         NAME qmllint
         COMMAND ${QMLLINT_EXECUTABLE}
             -I "${CMAKE_BINARY_DIR}/qml"
             ${ALL_QML_FILES}
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    )
+    add_test(
+        NAME verify-qml-loaders
+        COMMAND ${Python3_EXECUTABLE} "${CMAKE_SOURCE_DIR}/scripts/verify-qml-loaders.py" "${CMAKE_BINARY_DIR}"
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
     )
 else()

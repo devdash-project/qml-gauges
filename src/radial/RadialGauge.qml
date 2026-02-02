@@ -1,4 +1,6 @@
 import QtQuick
+import DevDash.Gauges.Primitives 1.0
+import DevDash.Gauges.Compounds 1.0
 
 /**
  * @brief Complete analog radial gauge template.
@@ -233,6 +235,67 @@ Item {
      */
     property bool needleShadow: false
 
+    /**
+     * @brief Gradient style for 3D needle effect.
+     * Supported: "cylinder" (round 3D), "ridge" (raised center highlight)
+     * @default "cylinder"
+     */
+    property string needleGradientStyle: "cylinder"
+
+    /**
+     * @brief Enable 3D bevel effect on needle edges.
+     * Creates depth illusion with light/dark edge highlighting.
+     * @default false
+     */
+    property bool needleBevel: false
+
+    /**
+     * @brief Bevel stroke width in pixels.
+     * @default 1.0
+     */
+    property real needleBevelWidth: 1.0
+
+    /**
+     * @brief Enable realistic pivot shadow that follows light angle.
+     * Shadow direction changes based on needle rotation relative to light.
+     * @default false
+     */
+    property bool needlePivotShadow: false
+
+    /**
+     * @brief Virtual light source angle in degrees.
+     * Controls highlight position and pivot shadow direction.
+     * 0 = light from top, 90 = from right, -45 = upper-left (default).
+     * @default -45
+     */
+    property real needleLightAngle: -45
+
+    /**
+     * @brief Enable inner glow effect (self-illumination).
+     * Makes the needle appear to emit light from within.
+     * @default false
+     */
+    property bool needleInnerGlow: false
+
+    /**
+     * @brief Inner glow color.
+     * @default needleColor
+     */
+    property color needleInnerGlowColor: needleColor
+
+    /**
+     * @brief Enable outer glow effect (neon halo).
+     * Creates a glowing halo extending outward from needle edges.
+     * @default false
+     */
+    property bool needleOuterGlow: false
+
+    /**
+     * @brief Outer glow color.
+     * @default needleColor
+     */
+    property color needleOuterGlowColor: needleColor
+
     // === Center Cap Customization ===
 
     /**
@@ -276,6 +339,20 @@ Item {
      * @default "#444444"
      */
     property color centerCapGradientBottom: "#444444"
+
+    /**
+     * @brief Enable drop shadow on center cap.
+     * Creates raised appearance.
+     * @default false
+     */
+    property bool centerCapShadow: false
+
+    /**
+     * @brief Enable highlight ring on center cap.
+     * Creates domed/beveled 3D appearance.
+     * @default false
+     */
+    property bool centerCapHighlight: false
 
     // === Typography Customization ===
 
@@ -347,191 +424,226 @@ Item {
      */
     property real tickInnerCircleDiameter: 6
 
+    // === Tick 3D Effects ===
+
+    /**
+     * @brief Enable gradient fill on tick marks.
+     * @default false
+     */
+    property bool tickGradient: false
+
+    /**
+     * @brief Enable glow effect on tick marks.
+     * Creates luminous paint appearance.
+     * @default false
+     */
+    property bool tickGlow: false
+
+    /**
+     * @brief Tick glow blur amount (0.0-1.0).
+     * @default 0.4
+     */
+    property real tickGlowBlur: 0.4
+
+    /**
+     * @brief Enable drop shadow on tick marks.
+     * Creates raised/3D appearance.
+     * @default false
+     */
+    property bool tickShadow: false
+
+    /**
+     * @brief Tick shadow blur amount (0.0-1.0).
+     * @default 0.25
+     */
+    property real tickShadowBlur: 0.25
+
     // === Implementation ===
 
     implicitWidth: 400
     implicitHeight: 400
 
+    // Computed: needle angle based on value
+    readonly property real _needleAngle: {
+        const norm = (root.value - root.minValue) / (root.maxValue - root.minValue)
+        const clamped = Math.max(0, Math.min(1, norm))
+        return root.startAngle + (root.sweepAngle * clamped)
+    }
+
     // Layer 1: Background face
-    Loader {
-        active: root.showFace
-        anchors.fill: parent
-        source: "primitives/GaugeFace.qml"
-        onLoaded: {
-            item.diameter = Qt.binding(() => Math.min(root.width, root.height))
-            item.color = Qt.binding(() => root.faceColor)
-        }
+    GaugeFace {
+        anchors.centerIn: parent
+        visible: root.showFace
+        diameter: Math.min(root.width, root.height)
+        color: root.faceColor
     }
 
     // Layer 2: Background arc track
-    Loader {
-        active: root.showBackgroundArc
+    GaugeArc {
         anchors.fill: parent
-        source: "primitives/GaugeArc.qml"
-        onLoaded: {
-            item.startAngle = Qt.binding(() => root.startAngle)
-            item.sweepAngle = Qt.binding(() => root.sweepAngle)
-            item.strokeColor = Qt.binding(() => root.backgroundArcColor)
-            item.strokeWidth = 20
-            item.animated = false
-        }
+        visible: root.showBackgroundArc
+        startAngle: root.startAngle
+        sweepAngle: root.sweepAngle
+        strokeColor: root.backgroundArcColor
+        strokeWidth: 20
+        animated: false
     }
 
     // Layer 3: Redline zone arc
-    Loader {
-        active: root.showRedline && root.redlineStart < root.maxValue
+    GaugeZoneArc {
         anchors.fill: parent
-        source: "compounds/GaugeZoneArc.qml"
-        onLoaded: {
-            item.minValue = Qt.binding(() => root.minValue)
-            item.maxValue = Qt.binding(() => root.maxValue)
-            item.startValue = Qt.binding(() => root.redlineStart)
-            item.endValue = Qt.binding(() => root.maxValue)
-            item.gaugeStartAngle = Qt.binding(() => root.startAngle)
-            item.gaugeTotalSweep = Qt.binding(() => root.sweepAngle)
-            item.zoneColor = Qt.binding(() => root.redlineColor)
-            item.zoneOpacity = 0.3
-            item.strokeWidth = 20
-        }
+        visible: root.showRedline && root.redlineStart < root.maxValue
+        minValue: root.minValue
+        maxValue: root.maxValue
+        startValue: root.redlineStart
+        endValue: root.maxValue
+        gaugeStartAngle: root.startAngle
+        gaugeTotalSweep: root.sweepAngle
+        zoneColor: root.redlineColor
+        zoneOpacity: 0.3
+        strokeWidth: 20
     }
 
     // Layer 4: Tick ring
-    Loader {
-        active: root.showTicks
+    GaugeTickRing {
         anchors.fill: parent
-        source: "compounds/GaugeTickRing.qml"
-        onLoaded: {
-            // Values and geometry
-            item.minValue = Qt.binding(() => root.minValue)
-            item.maxValue = Qt.binding(() => root.maxValue)
-            item.majorTickInterval = Qt.binding(() => root.majorTickInterval)
-            item.minorTickInterval = Qt.binding(() => root.minorTickInterval)
-            item.labelDivisor = Qt.binding(() => root.labelDivisor)
-            item.startAngle = Qt.binding(() => root.startAngle)
-            item.sweepAngle = Qt.binding(() => root.sweepAngle)
+        visible: root.showTicks
 
-            // Colors
-            item.warningStart = Qt.binding(() => root.warningThreshold)
-            item.criticalStart = Qt.binding(() => root.redlineStart)
-            item.normalColor = Qt.binding(() => root.tickColor)
-            item.warningColor = Qt.binding(() => root.warningColor)
-            item.criticalColor = Qt.binding(() => root.criticalColor)
+        // Values and geometry
+        minValue: root.minValue
+        maxValue: root.maxValue
+        majorTickInterval: root.majorTickInterval
+        minorTickInterval: root.minorTickInterval
+        labelDivisor: root.labelDivisor
+        startAngle: root.startAngle
+        sweepAngle: root.sweepAngle
 
-            // Typography
-            item.fontSize = Qt.binding(() => root.tickLabelFontSize)
-            item.fontFamily = Qt.binding(() => root.tickLabelFontFamily)
-            item.fontWeight = Qt.binding(() => root.tickLabelFontWeight)
-            item.showLabelOutline = Qt.binding(() => root.showTickLabelOutline)
-            item.labelOutlineColor = Qt.binding(() => root.tickLabelOutlineColor)
+        // Colors
+        warningStart: root.warningThreshold
+        criticalStart: root.redlineStart
+        normalColor: root.tickColor
+        warningColor: root.warningColor
+        criticalColor: root.criticalColor
 
-            // Decorations
-            item.showInnerCircles = Qt.binding(() => root.showTickInnerCircles)
-            item.innerCircleDiameter = Qt.binding(() => root.tickInnerCircleDiameter)
-        }
+        // Typography
+        fontSize: root.tickLabelFontSize
+        fontFamily: root.tickLabelFontFamily
+        fontWeight: root.tickLabelFontWeight
+        showLabelOutline: root.showTickLabelOutline
+        labelOutlineColor: root.tickLabelOutlineColor
+
+        // Decorations
+        showInnerCircles: root.showTickInnerCircles
+        innerCircleDiameter: root.tickInnerCircleDiameter
+
+        // 3D Effects
+        tickGradient: root.tickGradient
+        tickGlow: root.tickGlow
+        tickGlowBlur: root.tickGlowBlur
+        tickShadow: root.tickShadow
+        tickShadowBlur: root.tickShadowBlur
     }
 
     // Layer 5: Value arc
-    Loader {
-        active: root.showValueArc
+    GaugeValueArc {
         anchors.fill: parent
-        source: "compounds/GaugeValueArc.qml"
-        onLoaded: {
-            item.value = Qt.binding(() => root.value)
-            item.minValue = Qt.binding(() => root.minValue)
-            item.maxValue = Qt.binding(() => root.maxValue)
-            item.startAngle = Qt.binding(() => root.startAngle)
-            item.totalSweepAngle = Qt.binding(() => root.sweepAngle)
-            item.warningThreshold = Qt.binding(() => root.warningThreshold)
-            item.criticalThreshold = Qt.binding(() => root.redlineStart)
-            item.normalColor = Qt.binding(() => root.valueArcColor)
-            item.warningColor = Qt.binding(() => root.warningColor)
-            item.criticalColor = Qt.binding(() => root.criticalColor)
-            item.strokeWidth = 22
-        }
+        visible: root.showValueArc
+        value: root.value
+        minValue: root.minValue
+        maxValue: root.maxValue
+        startAngle: root.startAngle
+        totalSweepAngle: root.sweepAngle
+        warningThreshold: root.warningThreshold
+        criticalThreshold: root.redlineStart
+        normalColor: root.valueArcColor
+        warningColor: root.warningColor
+        criticalColor: root.criticalColor
+        strokeWidth: 22
     }
 
     // Layer 6: Needle
-    Loader {
-        active: root.showNeedle
+    GaugeNeedle {
         anchors.fill: parent
-        source: "compounds/GaugeNeedle.qml"
+        visible: root.showNeedle
 
-        onLoaded: {
-            // Calculate angle based on value
-            item.angle = Qt.binding(() => {
-                const norm = (root.value - root.minValue) / (root.maxValue - root.minValue)
-                const clamped = Math.max(0, Math.min(1, norm))
-                return root.startAngle + (root.sweepAngle * clamped)
-            })
+        // Angle
+        angle: root._needleAngle
 
-            // Front body geometry
-            item.frontLength = Math.min(root.width, root.height) / 2 - 60
-            item.frontPivotWidth = Qt.binding(() => root.needlePivotWidth)
-            item.frontTipWidth = Qt.binding(() => root.needleTipWidth)
-            item.frontShape = Qt.binding(() => root.needleShape)
-            item.frontColor = Qt.binding(() => root.needleColor)
-            item.frontGradient = Qt.binding(() => root.needleGradient)
-            item.frontBorderWidth = Qt.binding(() => root.needleBorderWidth)
-            item.frontBorderColor = Qt.binding(() => root.needleBorderColor)
+        // Front body geometry
+        frontLength: Math.min(root.width, root.height) / 2 - 60
+        pivotWidth: root.needlePivotWidth
+        frontTipWidth: root.needleTipWidth
+        frontShape: root.needleShape
+        frontColor: root.needleColor
+        frontGradient: root.needleGradient
+        frontBorderWidth: root.needleBorderWidth
+        frontBorderColor: root.needleBorderColor
 
-            // Head tip
-            item.headTipShape = Qt.binding(() => root.needleHeadTipShape)
-            item.headTipColor = Qt.binding(() => root.needleColor)
-            item.headTipGradient = Qt.binding(() => root.needleGradient)
+        // Head tip
+        headTipShape: root.needleHeadTipShape
+        headTipColor: root.needleColor
+        headTipGradient: root.needleGradient
 
-            // Rear body
-            item.rearRatio = Qt.binding(() => root.needleRearRatio)
-            item.rearShape = Qt.binding(() => root.needleShape)
-            item.rearColor = Qt.binding(() => root.needleRearColor)
-            item.rearGradient = Qt.binding(() => root.needleGradient)
-            item.rearBorderWidth = Qt.binding(() => root.needleBorderWidth)
-            item.rearBorderColor = Qt.binding(() => root.needleBorderColor)
+        // Rear body
+        rearRatio: root.needleRearRatio
+        rearShape: root.needleShape
+        rearColor: root.needleRearColor
+        rearGradient: root.needleGradient
+        rearBorderWidth: root.needleBorderWidth
+        rearBorderColor: root.needleBorderColor
 
-            // Tail tip
-            item.tailTipShape = Qt.binding(() => root.needleTailTipShape)
-            item.tailTipColor = Qt.binding(() => root.needleRearColor)
-            item.tailTipGradient = Qt.binding(() => root.needleGradient)
+        // Tail tip
+        tailTipShape: root.needleTailTipShape
+        tailTipColor: root.needleRearColor
+        tailTipGradient: root.needleGradient
 
-            // Shadow
-            item.hasShadow = Qt.binding(() => root.needleShadow)
-        }
+        // 3D Effects
+        frontGradientStyle: root.needleGradientStyle
+        hasShadow: root.needleShadow
+        hasBevel: root.needleBevel
+        bevelWidth: root.needleBevelWidth
+        hasPivotShadow: root.needlePivotShadow
+        lightAngle: root.needleLightAngle
+        hasInnerGlow: root.needleInnerGlow
+        innerGlowColor: root.needleInnerGlowColor
+        hasOuterGlow: root.needleOuterGlow
+        outerGlowColor: root.needleOuterGlowColor
     }
 
     // Layer 7: Center cap
-    Loader {
-        active: root.showCenterCap
+    GaugeCenterCap {
         anchors.centerIn: parent
-        source: "primitives/GaugeCenterCap.qml"
-        onLoaded: {
-            // Geometry
-            item.diameter = Qt.binding(() => root.centerCapDiameter)
-            item.borderWidth = Qt.binding(() => root.centerCapBorderWidth)
+        visible: root.showCenterCap
 
-            // Appearance
-            item.color = Qt.binding(() => root.centerCapColor)
-            item.borderColor = Qt.binding(() => root.centerCapBorderColor)
+        // Geometry
+        diameter: root.centerCapDiameter
+        borderWidth: root.centerCapBorderWidth
 
-            // Gradient effect (for metallic look)
-            item.hasGradient = Qt.binding(() => root.centerCapGradient)
-            item.gradientTop = Qt.binding(() => root.centerCapGradientTop)
-            item.gradientBottom = Qt.binding(() => root.centerCapGradientBottom)
-        }
+        // Appearance
+        color: root.centerCapColor
+        borderColor: root.centerCapBorderColor
+
+        // Gradient effect (for metallic look)
+        hasGradient: root.centerCapGradient
+        gradientTop: root.centerCapGradientTop
+        gradientBottom: root.centerCapGradientBottom
+
+        // 3D Effects
+        hasShadow: root.centerCapShadow
+        hasHighlight: root.centerCapHighlight
     }
 
     // Layer 8: Digital readout (center)
-    Loader {
-        active: root.showDigitalReadout
+    DigitalReadout {
         anchors.centerIn: parent
         anchors.verticalCenterOffset: Math.min(root.width, root.height) / 4
-        source: "compounds/DigitalReadout.qml"
-        onLoaded: {
-            item.value = Qt.binding(() => root.value)
-            item.unit = Qt.binding(() => root.unit)
-            item.precision = 0
-            item.valueFontSize = 32
-            item.warningThreshold = Qt.binding(() => root.warningThreshold)
-            item.criticalThreshold = Qt.binding(() => root.redlineStart)
-        }
+        visible: root.showDigitalReadout
+        value: root.value
+        unit: root.unit
+        precision: 0
+        valueFontSize: 32
+        warningThreshold: root.warningThreshold
+        criticalThreshold: root.redlineStart
     }
 
     // Layer 9: Label (bottom)
@@ -548,14 +660,11 @@ Item {
     }
 
     // Layer 10: Bezel (outermost)
-    Loader {
-        active: root.showBezel
+    GaugeBezel {
         anchors.fill: parent
-        source: "primitives/GaugeBezel.qml"
-        onLoaded: {
-            item.outerRadius = Qt.binding(() => Math.min(root.width, root.height) / 2)
-            item.bezelWidth = 20
-            item.bezelColor = Qt.binding(() => root.bezelColor)
-        }
+        visible: root.showBezel
+        outerRadius: Math.min(root.width, root.height) / 2
+        borderWidth: 20
+        borderColor: root.bezelColor
     }
 }

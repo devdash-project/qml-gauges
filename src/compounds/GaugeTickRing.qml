@@ -173,6 +173,52 @@ Item {
      */
     property color labelOutlineColor: "#000000"
 
+    // === Tick 3D Effect Properties ===
+
+    /**
+     * @brief Enable gradient fill on tick marks.
+     * @default false
+     */
+    property bool tickGradient: false
+
+    /**
+     * @brief Enable glow effect on tick marks.
+     * Creates luminous paint appearance.
+     * @default false
+     */
+    property bool tickGlow: false
+
+    /**
+     * @brief Glow blur amount (0.0-1.0).
+     * @default 0.4
+     */
+    property real tickGlowBlur: 0.4
+
+    /**
+     * @brief Enable drop shadow on tick marks.
+     * Creates raised/3D appearance.
+     * @default false
+     */
+    property bool tickShadow: false
+
+    /**
+     * @brief Shadow blur amount (0.0-1.0).
+     * @default 0.25
+     */
+    property real tickShadowBlur: 0.25
+
+    /**
+     * @brief Shadow horizontal offset (pixels).
+     * @default 2
+     */
+    property real tickShadowOffsetX: 2
+
+    /**
+     * @brief Shadow vertical offset (pixels).
+     * @default 2
+     */
+    property real tickShadowOffsetY: 2
+
     // === Tick Decoration Properties ===
 
     /**
@@ -241,6 +287,17 @@ Item {
                 showInnerCircle: root.showInnerCircles
                 innerCircleDiameter: root.innerCircleDiameter
                 innerCircleColor: majorTickDelegate.tickColor
+                // 3D Effects
+                hasGradient: root.tickGradient
+                gradientStart: majorTickDelegate.tickColor
+                gradientEnd: Qt.darker(majorTickDelegate.tickColor, 1.3)
+                hasGlow: root.tickGlow
+                glowColor: majorTickDelegate.tickColor
+                glowBlur: root.tickGlowBlur
+                hasShadow: root.tickShadow
+                shadowBlur: root.tickShadowBlur
+                shadowOffsetX: root.tickShadowOffsetX
+                shadowOffsetY: root.tickShadowOffsetY
             }
 
             // Tick label
@@ -291,6 +348,17 @@ Item {
                 showInnerCircle: root.showInnerCircles
                 innerCircleDiameter: root.innerCircleDiameter * 0.7 // Smaller for minor ticks
                 innerCircleColor: minorTickDelegate.tickColor
+                // 3D Effects
+                hasGradient: root.tickGradient
+                gradientStart: minorTickDelegate.tickColor
+                gradientEnd: Qt.darker(minorTickDelegate.tickColor, 1.3)
+                hasGlow: root.tickGlow
+                glowColor: minorTickDelegate.tickColor
+                glowBlur: root.tickGlowBlur
+                hasShadow: root.tickShadow
+                shadowBlur: root.tickShadowBlur
+                shadowOffsetX: root.tickShadowOffsetX
+                shadowOffsetY: root.tickShadowOffsetY
             }
         }
     }

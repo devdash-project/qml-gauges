@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Shapes
 
 /**
  * @brief Atomic bezel/frame primitive for gauge exterior.
@@ -63,7 +64,8 @@ Item {
      *
      * Supported styles:
      * - "flat": Solid color
-     * - "chrome": Metallic gradient
+     * - "chrome": Metallic vertical gradient
+     * - "chrome3d": Cylindrical chrome with ConicalGradient (realistic 3D)
      * - "carbon": Carbon fiber texture (if textureSource set)
      * - "brushed": Brushed metal effect
      *
@@ -95,6 +97,33 @@ Item {
      */
     property string textureSource: ""
 
+    // === Chrome3D Properties ===
+
+    /**
+     * @brief Light source angle for chrome3d style (degrees).
+     *
+     * Rotates the conical gradient to simulate light direction.
+     * 0 = light from right, 90 = light from top, 180 = light from left.
+     *
+     * @default 45
+     */
+    property real chrome3dLightAngle: 45
+
+    /**
+     * @brief Number of highlight bands for chrome3d style.
+     *
+     * More bands create a more complex reflection pattern.
+     *
+     * @default 2
+     */
+    property int chrome3dBands: 2
+
+    /**
+     * @brief Chrome3d midtone color.
+     * @default color (uses main bezel color)
+     */
+    property color chrome3dMidtone: color
+
     // === Advanced ===
 
     /**
@@ -121,7 +150,7 @@ Item {
 
         // Thick border creates the ring/donut shape
         border.width: root.outerRadius - root.innerRadius
-        border.color: root.style === "chrome" ? "transparent" : root.color
+        border.color: (root.style === "chrome" || root.style === "chrome3d") ? "transparent" : root.color
 
         opacity: root.bezelOpacity
         antialiasing: root.antialiasing
@@ -144,6 +173,55 @@ Item {
                 GradientStop { position: 0.5; color: root.color }
                 GradientStop { position: 0.7; color: Qt.darker(root.color, 1.2) }
                 GradientStop { position: 1.0; color: root.chromeShadow }
+            }
+        }
+
+        // Chrome3D: Cylindrical chrome with ConicalGradient for realistic 3D appearance
+        Shape {
+            id: chrome3dShape
+            visible: root.style === "chrome3d"
+            anchors.fill: parent
+
+            // Use CurveRenderer for smooth curves on Qt 6.10+
+            preferredRendererType: typeof Shape.CurveRenderer !== 'undefined'
+                ? Shape.CurveRenderer
+                : Shape.GeometryRenderer
+
+            // Outer ring with conical gradient (simulates cylindrical chrome)
+            ShapePath {
+                fillColor: "transparent"
+                strokeWidth: root.outerRadius - root.innerRadius
+                strokeColor: "transparent"
+
+                fillGradient: ConicalGradient {
+                    centerX: root.outerRadius
+                    centerY: root.outerRadius
+                    angle: root.chrome3dLightAngle
+
+                    // Create realistic chrome ring with highlight bands
+                    // The pattern repeats to simulate cylindrical reflections
+                    GradientStop { position: 0.0; color: root.chromeShadow }
+                    GradientStop { position: 0.1; color: root.chrome3dMidtone }
+                    GradientStop { position: 0.25; color: root.chromeHighlight }
+                    GradientStop { position: 0.35; color: Qt.lighter(root.chromeHighlight, 1.3) }
+                    GradientStop { position: 0.45; color: root.chromeHighlight }
+                    GradientStop { position: 0.55; color: root.chrome3dMidtone }
+                    GradientStop { position: 0.65; color: root.chromeShadow }
+                    GradientStop { position: 0.75; color: root.chrome3dMidtone }
+                    GradientStop { position: 0.85; color: root.chromeHighlight }
+                    GradientStop { position: 0.95; color: root.chrome3dMidtone }
+                    GradientStop { position: 1.0; color: root.chromeShadow }
+                }
+
+                // Draw ring as circular arc
+                PathAngleArc {
+                    centerX: root.outerRadius
+                    centerY: root.outerRadius
+                    radiusX: (root.outerRadius + root.innerRadius) / 2
+                    radiusY: (root.outerRadius + root.innerRadius) / 2
+                    startAngle: 0
+                    sweepAngle: 360
+                }
             }
         }
 
