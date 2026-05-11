@@ -46,8 +46,12 @@ import QtQuick
  * same-module types is not reliably loadable at runtime from a compiled
  * qt_add_qml_module resource (the auto-generated qmldir's `prefer :/...` line
  * breaks the relative resolution of the referenced types). See PLAN.md
- * decisions log. Adding another preset means adding another nested QtObject
- * here plus a case in setTheme().
+ * decisions log. Adding another preset means updating THREE places in this
+ * file (kept deliberately co-located): (1) the nested QtObject token set,
+ * (2) a `case` in setTheme(), (3) an entry in `presetNames` + `presetMetadata`.
+ *
+ * `presetNames` / `presetMetadata` expose the preset registry as plain data so
+ * a selector UI can be built declaratively rather than hardcoding preset names.
  *
  * @example
  * @code
@@ -195,6 +199,43 @@ QtObject {
     }
 
     // ===================================================================
+    // Preset registry — enumerable metadata for selector UIs
+    //
+    // Keep these in sync with the nested QtObject definitions above and the
+    // setTheme() cases below: adding a preset touches all three. Order here is
+    // the order a selector should present them in. No `swatch` field yet — a
+    // preset's representative colour is its own design question (backlogged).
+    // ===================================================================
+
+    /**
+     * @brief Internal names of every registered preset, in display order.
+     *
+     * Matches the argument values setTheme() accepts.
+     */
+    readonly property var presetNames: ["industrial", "modernOEM", "classicWhite"]
+
+    /**
+     * @brief Human-readable metadata for each preset, keyed by internal name.
+     *
+     * Each entry has `displayName` (a proper-cased label, not the camelCase
+     * internal name) and `description` (a one-line summary for tooltips).
+     */
+    readonly property var presetMetadata: ({
+        "industrial": {
+            "displayName": "Industrial",
+            "description": "Military/utility aesthetic with painted face and chevron ticks"
+        },
+        "modernOEM": {
+            "displayName": "Modern OEM",
+            "description": "Contemporary digital cluster with chrome bezel and glow effects"
+        },
+        "classicWhite": {
+            "displayName": "Classic White",
+            "description": "Vintage white-face with orange-red painted numerals"
+        }
+    })
+
+    // ===================================================================
     // Active state
     // ===================================================================
 
@@ -246,7 +287,12 @@ QtObject {
     // Imperative API for C++ or QML to switch themes
     // ===================================================================
 
-    /** @brief Activate a registered preset by name ("industrial" | "modernOEM" | "classicWhite"). */
+    /**
+     * @brief Activate a registered preset by name ("industrial" | "modernOEM" | "classicWhite").
+     *
+     * When adding a preset, also update the nested QtObject above and
+     * `presetNames` / `presetMetadata` — see the registry note.
+     */
     function setTheme(themeName) {
         switch (themeName) {
         case "industrial": activeTheme = industrial; break
