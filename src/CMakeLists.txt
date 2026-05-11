@@ -5,7 +5,6 @@ qt_add_qml_module(devdash_gauges
     QML_FILES
         templates/RadialGauge.qml
         templates/RadialGauge3D.qml
-        templates/IndustrialGauge.qml
     RESOURCE_PREFIX /
     OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/qml/DevDash/Gauges
 )
@@ -37,7 +36,6 @@ if(QMLLINT_EXECUTABLE)
     set(QML_FILES_TO_LINT
         ${CMAKE_CURRENT_SOURCE_DIR}/templates/RadialGauge.qml
         ${CMAKE_CURRENT_SOURCE_DIR}/templates/RadialGauge3D.qml
-        ${CMAKE_CURRENT_SOURCE_DIR}/templates/IndustrialGauge.qml
     )
 
     add_custom_target(qmllint-gauges

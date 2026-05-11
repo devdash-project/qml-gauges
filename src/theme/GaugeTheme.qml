@@ -76,7 +76,8 @@ QtObject {
      * Matte-black painted surfaces, aged-cream marks, oxidized-red redline,
      * painted needle with a drop shadow — no glow / neon. Dark mode is the
      * night-vision look (warmer, dimmer — amber marks to preserve dark
-     * adaptation). Mirrors the property defaults baked into IndustrialGauge.
+     * adaptation). This is the default preset; a bare RadialGauge picks up
+     * these tokens unless an instance overrides them.
      */
     readonly property QtObject industrial: QtObject {
         readonly property QtObject light: QtObject {
