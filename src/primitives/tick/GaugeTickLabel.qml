@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Effects
 
 /**
  * @brief Atomic tick label primitive for gauge scales.
@@ -125,6 +126,57 @@ Item {
      */
     property color outlineColor: "#000000"
 
+    // === Form-shading Properties ===
+    //
+    // Form shading simulates a directional light hitting a slightly raised
+    // painted glyph. The base text is rendered as usual; a MultiEffect
+    // shadow is added behind it, offset away from the (notional) light
+    // source. With a small offset and a soft blur the result reads as
+    // "painted with depth" rather than "duplicated text" — the opposite
+    // visual goal of a regular drop shadow, which intentionally separates
+    // the glyph from the background.
+
+    /**
+     * @brief Apply a directional shadow that reads as paint depth.
+     *
+     * When true, the label gains a soft offset shadow whose direction is
+     * controlled by `lightAngle` and whose strength by `formShadingIntensity`.
+     * @default false
+     */
+    property bool hasFormShading: false
+
+    /**
+     * @brief How pronounced the form shading is, in [0, 1].
+     *
+     * Drives shadow alpha *and* shadow offset magnitude: low values produce
+     * a faint dimensionality cue, high values an overtly raised look. Above
+     * about 0.7 the shadow stops reading as depth and starts reading as a
+     * duplicate glyph.
+     * @default 0.4
+     */
+    property real formShadingIntensity: 0.4
+
+    /**
+     * @brief Direction of the simulated light, in degrees.
+     *
+     * 0° = light from the right, -90° = light from above. Default of -45°
+     * = light from upper-left, which is the conventional drawing convention.
+     * The shadow is cast in the opposite direction.
+     * @default -45
+     */
+    property real lightAngle: -45
+
+    /**
+     * @brief Shadow color used by form shading.
+     *
+     * Defaults to a darkened version of the text colour, which keeps the
+     * shading hue-consistent with the glyph (the painted-paint look). Set
+     * explicitly to override (e.g., a fixed deep tone independent of text
+     * colour).
+     * @default Qt.darker(color, 1.8) with reduced alpha
+     */
+    property color formShadingColor: Qt.darker(root.color, 1.8)
+
     // === Behavior Properties ===
 
     /**
@@ -151,6 +203,12 @@ Item {
         return prefix + formatted + suffix
     }
 
+    // Shadow offset vector derived from lightAngle + intensity. Magnitude
+    // scales with font size so the depth cue looks proportional at any size.
+    readonly property real _shadowMagnitude: root.fontSize * 0.08 * root.formShadingIntensity
+    readonly property real _shadowDx: -Math.cos(root.lightAngle * Math.PI / 180) * _shadowMagnitude
+    readonly property real _shadowDy: -Math.sin(root.lightAngle * Math.PI / 180) * _shadowMagnitude
+
     Text {
         id: label
         text: root.displayText
@@ -174,5 +232,21 @@ Item {
         // When keepUpright is true, text stays horizontal (no rotation)
         // When false, text rotates tangent to the gauge arc
         rotation: root.keepUpright ? 0 : root.angle
+
+        // Form-shading: a soft directional drop-shadow applied via MultiEffect
+        // when hasFormShading is set. layer.enabled must be true for the
+        // effect to attach — Qt's MultiEffect operates on the rasterised
+        // texture of the source item, so the Text glyphs need a layer.
+        // smooth: true keeps the rasterisation crisp on high-DPI displays.
+        layer.enabled: root.hasFormShading
+        layer.smooth: true
+        layer.effect: MultiEffect {
+            shadowEnabled: true
+            shadowColor: root.formShadingColor
+            shadowHorizontalOffset: root._shadowDx
+            shadowVerticalOffset: root._shadowDy
+            shadowBlur: 0.6
+            shadowOpacity: Math.min(1.0, root.formShadingIntensity * 1.5)
+        }
     }
 }
