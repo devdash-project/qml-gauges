@@ -159,6 +159,24 @@ ScrollView {
         root.editorMap = {}
     }
 
+    // Publish every editor's current value to the state server the moment it's
+    // wired in. Main.qml sets the page's `stateServer` from
+    // StackView.onCurrentItemChanged — i.e. *after* the page (and therefore
+    // this panel and its Repeater editors) finish constructing — so each
+    // editor's onLoaded ran while `stateServer` was still null and its
+    // per-property init call was skipped. Without this handler the state
+    // server's runtime-values map stays empty until a user nudges an editor,
+    // which is exactly what qml_explorer_get_state surfaces as `properties: {}`.
+    onStateServerChanged: {
+        if (!root.stateServer || !root.target)
+            return
+        for (const name in root.editorMap) {
+            const editor = root.editorMap[name]
+            if (editor)
+                root.stateServer.updateProperty(name, editor.value)
+        }
+    }
+
     // Editor component definitions
     Component {
         id: realEditor
