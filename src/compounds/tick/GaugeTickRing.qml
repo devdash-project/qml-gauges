@@ -189,6 +189,22 @@ Item {
      */
     property color labelOutlineColor: "#000000"
 
+    /**
+     * @brief Apply form-shading (a directional drop-shadow read as painted
+     * depth) on numeral labels.
+     *
+     * Passes through to each GaugeTickLabel's hasFormShading; see that
+     * primitive for the implementation.
+     * @default false
+     */
+    property bool labelFormShading: false
+
+    /**
+     * @brief Strength of label form-shading in [0, 1].
+     * @default 0.4
+     */
+    property real labelFormShadingIntensity: 0.4
+
     // === Tick 3D Effect Properties ===
 
     /**
@@ -329,6 +345,8 @@ Item {
                 color: majorTickDelegate.tickColor
                 showOutline: root.showLabelOutline
                 outlineColor: root.labelOutlineColor
+                hasFormShading: root.labelFormShading
+                formShadingIntensity: root.labelFormShadingIntensity
                 keepUpright: true
             }
         }

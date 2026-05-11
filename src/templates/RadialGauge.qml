@@ -584,6 +584,26 @@ Item {
      */
     property real tickShadowBlur: 0.25
 
+    /**
+     * @brief Apply form-shading (painted-depth shadow) to tick numerals.
+     *
+     * Distinct from `tickShadow` (which applies a drop shadow to the tick
+     * *marks*); this controls the labels' painted-depth appearance. Driven
+     * by its own theme token `effectsTextShading` rather than the broader
+     * `effectsShadow` so a preset can have a needle shadow without dragging
+     * every numeral into a painted-relief look (the Industrial / ModernOEM
+     * vocabulary is flat stencil/sans, not painted).
+     *
+     * @default GaugeTheme.effectsTextShading
+     */
+    property bool tickLabelFormShading: GaugeTheme.effectsTextShading
+
+    /**
+     * @brief Strength of tick-label form-shading in [0, 1].
+     * @default 0.4
+     */
+    property real tickLabelFormShadingIntensity: 0.4
+
     // === Implementation ===
 
     implicitWidth: 400
@@ -670,6 +690,8 @@ Item {
         tickGlowBlur: root.tickGlowBlur
         tickShadow: root.tickShadow
         tickShadowBlur: root.tickShadowBlur
+        labelFormShading: root.tickLabelFormShading
+        labelFormShadingIntensity: root.tickLabelFormShadingIntensity
     }
 
     // Layer 5: Value arc

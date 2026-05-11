@@ -36,6 +36,13 @@ import QtQuick
  *   - effectsGlow                 — render glow effects (modern OLED look)
  *   - effectsShadow               — render drop shadows (physical-object look)
  *   - effectsTexture              — render textured surfaces (paint grain, etc.)
+ *   - effectsTextShading          — apply form shading (painted depth) to face
+ *                                   text such as tick numerals — distinct from
+ *                                   `effectsShadow` (which is for solid objects
+ *                                   like the needle): a preset can render
+ *                                   painted depth on its numerals without
+ *                                   implying every glyph has a drop shadow,
+ *                                   and vice versa
  *   - tickStyle                   — preferred tick shape: "rectangle" | "chevron"
  *                                   | "triangle" | "rounded-dot" | "block"
  *   - bezelStyle                  — preferred bezel: "flat" | "chrome" | "chrome3d"
@@ -142,6 +149,7 @@ QtObject {
         readonly property bool effectsGlow: false
         readonly property bool effectsShadow: true
         readonly property bool effectsTexture: false
+        readonly property bool effectsTextShading: false
         readonly property string tickStyle: "chevron"
         readonly property string bezelStyle: "flat"
     }
@@ -183,6 +191,7 @@ QtObject {
         readonly property bool effectsGlow: true
         readonly property bool effectsShadow: true
         readonly property bool effectsTexture: false
+        readonly property bool effectsTextShading: false
         readonly property string tickStyle: "rectangle"
         readonly property string bezelStyle: "chrome3d"
     }
@@ -231,6 +240,7 @@ QtObject {
         readonly property bool effectsGlow: false
         readonly property bool effectsShadow: true
         readonly property bool effectsTexture: false
+        readonly property bool effectsTextShading: true  // painted-depth numerals
         readonly property string tickStyle: "rectangle"
         readonly property string bezelStyle: "flat"
     }
@@ -317,6 +327,7 @@ QtObject {
     readonly property bool effectsGlow: activeTheme.effectsGlow
     readonly property bool effectsShadow: activeTheme.effectsShadow
     readonly property bool effectsTexture: activeTheme.effectsTexture
+    readonly property bool effectsTextShading: activeTheme.effectsTextShading
     readonly property string tickStyle: activeTheme.tickStyle
     readonly property string bezelStyle: activeTheme.bezelStyle
 
