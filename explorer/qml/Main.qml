@@ -36,7 +36,8 @@ ApplicationWindow {
         // Templates (header at 18)
         "RadialGauge": 19,
         "RadialGauge3D": 20,
-        "IndustrialGauge": 21
+        "IndustrialGauge": 21,
+        "ClassicWhite": 22
     }
 
     // Connect to state server for MCP integration

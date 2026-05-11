@@ -181,6 +181,13 @@ ListView {
             pagePath: "pages/IndustrialGaugePage.qml"
             isHeader: false
         }
+        ListElement {
+            category: "Templates"
+            title: "ClassicWhite"
+            description: "Vintage white-face preset"
+            pagePath: "pages/ClassicWhitePage.qml"
+            isHeader: false
+        }
     }
 
     delegate: Item {

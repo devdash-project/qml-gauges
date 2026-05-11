@@ -40,13 +40,14 @@ import QtQuick
  *                                   | "triangle" | "rounded-dot" | "block"
  *   - bezelStyle                  — preferred bezel: "flat" | "chrome" | "chrome3d"
  *
- * Concrete token values come from *presets* — `industrial` and `modernOEM`
- * below. They are defined inline as nested QtObjects rather than as separate
- * preset .qml files: a QML singleton that references same-module types is not
- * reliably loadable at runtime from a compiled qt_add_qml_module resource (the
- * auto-generated qmldir's `prefer :/...` line breaks the relative resolution
- * of the referenced types). See PLAN.md decisions log. Adding a new preset
- * (e.g. ClassicWhite) means adding another nested QtObject here.
+ * Concrete token values come from *presets* — `industrial`, `modernOEM` and
+ * `classicWhite` below. They are defined inline as nested QtObjects rather
+ * than as separate preset .qml files: a QML singleton that references
+ * same-module types is not reliably loadable at runtime from a compiled
+ * qt_add_qml_module resource (the auto-generated qmldir's `prefer :/...` line
+ * breaks the relative resolution of the referenced types). See PLAN.md
+ * decisions log. Adding another preset means adding another nested QtObject
+ * here plus a case in setTheme().
  *
  * @example
  * @code
@@ -151,6 +152,48 @@ QtObject {
         readonly property string bezelStyle: "chrome3d"
     }
 
+    /**
+     * @brief Vintage white-face aesthetic, inspired by classic aftermarket gauges.
+     *
+     * A cool pearl-white dial in a thick matte-black bezel, bold geometric
+     * orange-red numerals and ticks, an orange-red painted needle with form
+     * shading, and a small orange centre hub — no chrome, no glass, no glow.
+     * Light mode is the canonical daylight look; dark mode dims everything and
+     * shifts the accent warmer (amber) to spare night vision, with the white
+     * face dropped to a warm dark grey. Pair with RadialGauge's `scriptLabel` /
+     * `brandLabel` slots for the lower-dial wordmark and branding line.
+     */
+    readonly property QtObject classicWhite: QtObject {
+        readonly property QtObject light: QtObject {
+            readonly property color background: "#1c1c1c"       // dark surround behind the gauge
+            readonly property color surface: "#f4f3f0"          // pearl-white dial (cool, not cream)
+            readonly property color surfaceElevated: "#171717"  // thick matte-black bezel
+            readonly property color primary: "#d44820"          // orange-red painted needle
+            readonly property color foreground: "#c2401c"        // orange-red numerals & ticks
+            readonly property color warning: "#c9851f"          // warning zone (muted amber)
+            readonly property color critical: "#8f2c14"         // redline (deep red)
+            readonly property color overlay: "transparent"      // no glass / lens overlay
+        }
+        readonly property QtObject dark: QtObject {
+            readonly property color background: "#0a0a0a"
+            readonly property color surface: "#2b2620"          // dim warm grey (was white)
+            readonly property color surfaceElevated: "#0d0d0d"  // deeper black bezel
+            readonly property color primary: "#a85518"          // dimmed amber-shifted accent
+            readonly property color foreground: "#974d16"        // dim amber numerals & ticks
+            readonly property color warning: "#8a5810"
+            readonly property color critical: "#6e2410"
+            readonly property color overlay: "transparent"
+        }
+        readonly property string typographyFontFamily: "Helvetica Neue, Roboto Condensed, Arial, sans-serif"
+        readonly property string typographyNumeralFontFamily: typographyFontFamily
+        readonly property real typographyScale: 1.0
+        readonly property bool effectsGlow: false
+        readonly property bool effectsShadow: true
+        readonly property bool effectsTexture: false
+        readonly property string tickStyle: "rectangle"
+        readonly property string bezelStyle: "flat"
+    }
+
     // ===================================================================
     // Active state
     // ===================================================================
@@ -203,11 +246,12 @@ QtObject {
     // Imperative API for C++ or QML to switch themes
     // ===================================================================
 
-    /** @brief Activate a registered preset by name ("industrial" | "modernOEM"). */
+    /** @brief Activate a registered preset by name ("industrial" | "modernOEM" | "classicWhite"). */
     function setTheme(themeName) {
         switch (themeName) {
         case "industrial": activeTheme = industrial; break
         case "modernOEM": activeTheme = modernOEM; break
+        case "classicWhite": activeTheme = classicWhite; break
         default: console.warn("GaugeTheme: unknown theme:", themeName); break
         }
     }

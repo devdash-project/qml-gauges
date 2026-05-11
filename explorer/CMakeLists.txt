@@ -43,6 +43,7 @@ qt_add_qml_module(qml-gauges-explorer
         qml/pages/RadialGaugePage.qml
         qml/pages/RadialGauge3DPage.qml
         qml/pages/IndustrialGaugePage.qml
+        qml/pages/ClassicWhitePage.qml
         qml/pages/Bezel3DPage.qml
         qml/pages/CenterCap3DPage.qml
     RESOURCE_PREFIX /
