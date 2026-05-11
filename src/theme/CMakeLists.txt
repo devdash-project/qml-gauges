@@ -13,11 +13,30 @@
 # GaugeTheme must be registered as a QML singleton (before qt_add_qml_module).
 set_source_files_properties(GaugeTheme.qml PROPERTIES QT_QML_SINGLETON_TYPE TRUE)
 
+# Bundled fonts. Loaded at runtime by FontLoader in GaugeTheme.qml. We place
+# them in src/assets/fonts/ on disk and bundle them into the theme module's
+# resource bundle via RESOURCES (with explicit aliases so the qrc path is
+# stable regardless of the file's relative location on disk). The qrc URL
+# pattern with qt_add_qml_module's RESOURCE_PREFIX `/` + URI `DevDash.Gauges.Theme`
+# is: qrc:/DevDash/Gauges/Theme/<alias>.
+set(THEME_FONT_FILES
+    ${CMAKE_SOURCE_DIR}/src/assets/fonts/BarlowCondensed-Regular.ttf
+    ${CMAKE_SOURCE_DIR}/src/assets/fonts/BarlowCondensed-SemiBold.ttf
+    ${CMAKE_SOURCE_DIR}/src/assets/fonts/BarlowCondensed-Bold.ttf
+)
+foreach(font_file IN LISTS THEME_FONT_FILES)
+    get_filename_component(font_name "${font_file}" NAME)
+    set_source_files_properties("${font_file}"
+        PROPERTIES QT_RESOURCE_ALIAS "fonts/${font_name}")
+endforeach()
+
 qt_add_qml_module(devdash_gauges_theme
     URI DevDash.Gauges.Theme
     VERSION 1.0
     QML_FILES
         GaugeTheme.qml
+    RESOURCES
+        ${THEME_FONT_FILES}
     RESOURCE_PREFIX /
     OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/qml/DevDash/Gauges/Theme
 )

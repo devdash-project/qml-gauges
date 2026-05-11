@@ -71,6 +71,37 @@ QtObject {
     id: theme
 
     // ===================================================================
+    // Bundled fonts
+    //
+    // FontLoaders are kept on the singleton so the font is loaded exactly
+    // once per QML engine and is available globally. The `family` of each
+    // loader resolves to the OS-reported family name once the font is
+    // registered — referencing `barlowCondensedLoader.font.family` is the
+    // safe way to use it from a `font.family` binding.
+    //
+    // Currently bundled: Barlow Condensed (SIL OFL, see src/assets/fonts/OFL.txt).
+    // Used by the classicWhite preset for its geometric condensed numerals.
+    // ===================================================================
+    property FontLoader _barlowRegularLoader: FontLoader {
+        source: "qrc:/DevDash/Gauges/Theme/fonts/BarlowCondensed-Regular.ttf"
+    }
+    property FontLoader _barlowSemiBoldLoader: FontLoader {
+        source: "qrc:/DevDash/Gauges/Theme/fonts/BarlowCondensed-SemiBold.ttf"
+    }
+    property FontLoader _barlowBoldLoader: FontLoader {
+        source: "qrc:/DevDash/Gauges/Theme/fonts/BarlowCondensed-Bold.ttf"
+    }
+
+    /**
+     * @brief Family name of the bundled Barlow Condensed font.
+     *
+     * Resolves once the FontLoaders register the font with Qt. Refer to this
+     * (rather than the literal string "Barlow Condensed") in `font.family`
+     * bindings so the lookup is driven by the actual loaded font.
+     */
+    readonly property string barlowCondensedFamily: _barlowRegularLoader.name
+
+    // ===================================================================
     // Presets — each carries a `light` + `dark` color set plus the
     // mode-independent (typography / effects / shape) tokens.
     // ===================================================================
@@ -188,8 +219,14 @@ QtObject {
             readonly property color critical: "#6e2410"
             readonly property color overlay: "transparent"
         }
+        // Body text falls back to a generic stack; numerals use the bundled
+        // Barlow Condensed for the geometric, condensed character of the
+        // reference (Classic Instruments Velocity White) — a tall, slightly
+        // condensed sans with closed apertures, much more "painted on" than
+        // Helvetica/Roboto. Resolved from the FontLoader so the literal family
+        // name is never hard-coded.
         readonly property string typographyFontFamily: "Helvetica Neue, Roboto Condensed, Arial, sans-serif"
-        readonly property string typographyNumeralFontFamily: typographyFontFamily
+        readonly property string typographyNumeralFontFamily: theme.barlowCondensedFamily
         readonly property real typographyScale: 1.0
         readonly property bool effectsGlow: false
         readonly property bool effectsShadow: true
