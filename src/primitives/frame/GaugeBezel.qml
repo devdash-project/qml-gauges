@@ -176,7 +176,10 @@ Item {
             }
         }
 
-        // Chrome3D: Cylindrical chrome with ConicalGradient for realistic 3D appearance
+        // Chrome3D: Cylindrical chrome with ConicalGradient for realistic 3D appearance.
+        // Rendered as a ring annulus (outer circle minus inner circle) so the chrome
+        // gradient fills only the bezel ring — a 360° arc with a fillGradient would
+        // close through the centre and paint a solid disc over the dial face.
         Shape {
             id: chrome3dShape
             visible: root.style === "chrome3d"
@@ -187,10 +190,12 @@ Item {
                 ? Shape.CurveRenderer
                 : Shape.GeometryRenderer
 
-            // Outer ring with conical gradient (simulates cylindrical chrome)
+            // Annulus: an outer circle and an inner circle in one path. Odd-even fill
+            // leaves the centre disc (enclosed by both circles) empty and fills only
+            // the ring (enclosed by the outer circle alone).
             ShapePath {
+                fillRule: ShapePath.OddEvenFill
                 fillColor: "transparent"
-                strokeWidth: root.outerRadius - root.innerRadius
                 strokeColor: "transparent"
 
                 fillGradient: ConicalGradient {
@@ -213,14 +218,27 @@ Item {
                     GradientStop { position: 1.0; color: root.chromeShadow }
                 }
 
-                // Draw ring as circular arc
+                // Outer circle of the ring (start at angle 0 = 3 o'clock)
+                startX: root.outerRadius + root.outerRadius
+                startY: root.outerRadius
                 PathAngleArc {
                     centerX: root.outerRadius
                     centerY: root.outerRadius
-                    radiusX: (root.outerRadius + root.innerRadius) / 2
-                    radiusY: (root.outerRadius + root.innerRadius) / 2
+                    radiusX: root.outerRadius
+                    radiusY: root.outerRadius
                     startAngle: 0
                     sweepAngle: 360
+                }
+
+                // Inner circle — its own subpath, cuts the hole so only the ring fills
+                PathAngleArc {
+                    centerX: root.outerRadius
+                    centerY: root.outerRadius
+                    radiusX: root.innerRadius
+                    radiusY: root.innerRadius
+                    startAngle: 0
+                    sweepAngle: 360
+                    moveToStart: true
                 }
             }
         }
