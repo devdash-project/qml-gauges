@@ -4,7 +4,7 @@ This document tracks the active development plan for the qml-gauges library.
 For the durable architectural reference, see CLAUDE.md. For audit outputs and
 historical investigations, see docs/audits/.
 
-Last updated: 2026-05-10 (file reorganization completed)
+Last updated: 2026-05-10 (IndustrialGauge preset completed)
 
 ## Project framing
 
@@ -58,8 +58,39 @@ primitives. Reference images for each live in docs/references/.
 - No colored value arc — the needle alone indicates value (with optional
   static redline zone arc).
 
-Reference images: gauge-needle.png (hero design target), Auto Meter Antique
-Beige, Speedhut JDM Datsun Z (black variant), Auto Meter Pro Comp.
+Reference images: gauge-needle.png (hero design target, copied to
+docs/references/), Auto Meter Antique Beige, Speedhut JDM Datsun Z
+(black variant), Auto Meter Pro Comp.
+
+**Status:** completed 2026-05-10. `src/templates/IndustrialGauge.qml`.
+Implementation choices:
+- Face color `#0a0905` (very dark warm black); bezel color `#1a1815`
+  (warm matte black, flat style); tick/numeral/label color `#e8e4d8`
+  (warm cream); needle color `#d4cfc0` (painted aluminum tone);
+  redline color `#7a1f15` at 0.4 opacity.
+- GaugeTickRing with `tickShape: "chevron"`. The chevron passthrough
+  was added to GaugeTickRing as part of this work (it was already on
+  the underlying GaugeTick primitive).
+- Needle: tapered shape, `frontGradient: true` + `gradientStyle:
+  "cylinder"` + `hasShadow: true`; all other effects off.
+- Center cap: filled disc at bezel color, no border, no gradient.
+- Label rendered inside the dial face (verticalCenterOffset 22% of
+  gauge size) rather than at the bottom margin.
+- Font is **deferred**: `fontFamily: "DIN, DIN 1451, sans-serif"`
+  fallback chain only. A FontLoader-installed industrial typeface
+  will pick up automatically. See Open Questions.
+- Paint-grain texture is **deferred**: `faceTextureSource` exposed
+  for downstream use, default empty (flat paint). See Backlog.
+
+Verification (against the same gauge config rendered by RadialGauge):
+- coverage_ratio: 0.72 (well above the 0.3 threshold for "real gauge
+  fills meaningful screen area").
+- Top three colors of the cropped gauge render are all warm-black
+  with neutral cream highlights; zero saturated blue/orange pixels
+  (RadialGauge for the same config has #10b0f0 blue as its 2nd-most
+  dominant color).
+- SSIM vs. RadialGauge: 0.765 — meaningfully below 1.0; the preset
+  is visibly distinct from the modern template baseline.
 
 ### ChromeClassicGauge
 
@@ -95,7 +126,8 @@ As of 2026-05-10. Based on audit outputs in docs/audits/.
 
 ### Inventory
 
-- 10 primitives, 10 compounds, 2 templates, 0 presets.
+- 10 primitives, 10 compounds, 3 templates (RadialGauge, RadialGauge3D,
+  IndustrialGauge — the last is the first preset).
 - Module URIs: `DevDash.Gauges`, `DevDash.Gauges.Primitives`, `DevDash.Gauges.Compounds`.
 - The four Needle* sub-primitives now live in Compounds (alongside GaugeNeedle)
   rather than Primitives — they have no plausible standalone use outside
@@ -176,9 +208,10 @@ See devdash-mcp/docs/TOOL_GUIDANCE.md for the "which tool when" reference.
 
 ## Active work
 
-1. **IndustrialGauge preset.** First Moon Patrol-relevant preset deliverable.
-   File reorganization (Alternative B + subfolder grouping) completed
-   2026-05-10; see decisions log.
+No active work item. IndustrialGauge preset shipped 2026-05-10
+(see Aesthetic targets above for the implementation summary). Next
+likely deliverable is either the second preset (PerformanceBlackGauge
+or ChromeClassicGauge) or the BezelScrews primitive — see Backlog.
 
 ## Backlog
 
@@ -201,7 +234,23 @@ Work units that are well-scoped but not active.
   not found." Minor developer-experience improvement.
 - **BezelScrews sub-primitive.** New primitive; needed for both IndustrialGauge
   and ChromeClassicGauge presets. Renders N fasteners at calculated angles
-  around the bezel. Not yet specified in detail.
+  around the bezel. Not yet specified in detail. (Surfaced again during
+  IndustrialGauge construction — the matte ring reads as a painted band
+  but lacks the "real instrument" cue that visible fasteners provide.)
+- **Paint-grain texture asset for IndustrialGauge.** `faceTextureSource`
+  is plumbed through, but no asset exists. Need a tileable warm-black
+  paint-grain image at ~512×512 or larger; aim for very subtle grain so
+  it doesn't dominate the dial. Watch for the rectangular-clip caveat
+  (textureSource doesn't circle-clip to the face).
+- **Industrial typeface loaded via FontLoader.** IndustrialGauge currently
+  uses a generic `"DIN, DIN 1451, sans-serif"` fallback chain. Pick one
+  from the candidates in Open Questions, license-check, and wire a
+  FontLoader in either the template or a Theme singleton.
+- **Label-inside-face rendering helper.** IndustrialGauge places the
+  label inside the dial via `verticalCenterOffset`. Other presets will
+  want the same. A small `GaugeFaceLabel` compound (positioned along a
+  configurable radial offset, with the same color/font wiring as the
+  tick ring) would deduplicate this.
 - **ChromeClassicGauge preset.** Blocked on Bezel3D viability assessment and
   BezelScrews primitive.
 - **PerformanceBlackGauge preset.** Depends on verified-working needle
@@ -218,6 +267,15 @@ Work units that are well-scoped but not active.
   significant scope, limited visual payoff.
 
 ## Decisions log
+
+- **2026-05-10: GaugeTickRing gains `tickShape` passthrough.** The
+  underlying GaugeTick primitive already exposed `tickShape` (verified
+  in capability-verification.md), but the compound that consumed it
+  hardcoded the rectangle default. Adding a passthrough is a one-line
+  compound enhancement, not a new primitive — kept within the "no new
+  primitives in this prompt" scope for IndustrialGauge.
+
+
 
 Short entries documenting non-obvious decisions and their rationale.
 
