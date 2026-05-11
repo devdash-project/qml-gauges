@@ -9,17 +9,19 @@ import DevDash.Gauges.Theme 1.0
 /**
  * @brief Header-bar controls that drive the global GaugeTheme singleton.
  *
- * These change how the *gauges* render — the active preset and (added in a
- * later commit) the light/dark mode — and are deliberately distinct from the
- * explorer's own UI theme toggle (the `Theme` singleton, which restyles the
- * explorer chrome). The two are orthogonal: a user can pair a light explorer
- * UI with dark-mode gauges (night-driving simulation) or vice versa.
+ * These change how the *gauges* render — the active preset and the light/dark
+ * mode — and are deliberately distinct from the explorer's own UI theme toggle
+ * (the `Theme` singleton, which restyles the explorer chrome). The two are
+ * orthogonal: a user can pair a light explorer UI with dark-mode gauges
+ * (night-driving simulation) or vice versa.
  *
  * The preset selector is populated declaratively from `GaugeTheme.presetNames`
  * / `GaugeTheme.presetMetadata`, so adding a preset to GaugeTheme makes it
  * appear here with no change to this file. It also reflects the *active*
  * preset: navigating to a page whose `Component.onCompleted` imperatively sets
- * a preset updates the selection.
+ * a preset updates the selection. The mode toggle likewise reflects (and sets)
+ * `GaugeTheme.mode` — independently of the active preset, since mode only
+ * swaps the colour set, not the structural tokens.
  */
 RowLayout {
     id: root
@@ -193,6 +195,49 @@ RowLayout {
             ToolTip.text: presetDelegate.metadata && presetDelegate.metadata.description
                 ? presetDelegate.metadata.description
                 : ""
+        }
+    }
+
+    // --- Gauge light/dark mode toggle -------------------------------------
+    // Separate from the explorer-UI light/dark toggle: this is the gauges'
+    // day/night colour set. Mode is orthogonal to the active preset and only
+    // swaps colours — structural tokens (tick shape, bezel style, effects)
+    // are mode-independent.
+    ToolButton {
+        id: modeToggle
+
+        Layout.preferredHeight: 30
+        Layout.maximumHeight: 30
+        Layout.alignment: Qt.AlignVCenter
+
+        readonly property bool gaugeDark: GaugeTheme.mode === "dark"
+
+        text: (gaugeDark ? "☾" : "☀") + "  " + (gaugeDark ? "Dark" : "Light")
+        font.pixelSize: 13
+        onClicked: GaugeTheme.setMode(gaugeDark ? "light" : "dark")
+
+        ToolTip.visible: hovered
+        ToolTip.delay: 400
+        ToolTip.text: gaugeDark
+            ? "Gauge rendering mode: dark (night colour set). Click for light."
+            : "Gauge rendering mode: light (day colour set). Click for dark."
+
+        contentItem: Text {
+            leftPadding: 8
+            rightPadding: 8
+            text: modeToggle.text
+            font: modeToggle.font
+            color: Theme.textPrimary
+            horizontalAlignment: Text.AlignHCenter
+            verticalAlignment: Text.AlignVCenter
+        }
+
+        background: Rectangle {
+            implicitHeight: 30
+            color: modeToggle.hovered ? Theme.hoverBackground : "transparent"
+            border.color: Theme.inputBorder
+            border.width: 1
+            radius: 4
         }
     }
 }
