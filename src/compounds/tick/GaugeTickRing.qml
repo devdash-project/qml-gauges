@@ -121,6 +121,13 @@ Item {
      */
     property real minorTickWidth: 1
 
+    /**
+     * @brief Tick shape for both major and minor ticks.
+     * One of: "rectangle", "rounded-dot", "triangle", "chevron", "block".
+     * @default "rectangle"
+     */
+    property string tickShape: "rectangle"
+
     // === Color Properties ===
 
     /**
@@ -283,6 +290,7 @@ Item {
                 distanceFromCenter: root.innerRadius
                 length: root.majorTickLength
                 tickWidth: root.majorTickWidth
+                tickShape: root.tickShape
                 color: majorTickDelegate.tickColor
                 showInnerCircle: root.showInnerCircles
                 innerCircleDiameter: root.innerCircleDiameter
@@ -344,6 +352,7 @@ Item {
                 distanceFromCenter: root.innerRadius
                 length: root.minorTickLength
                 tickWidth: root.minorTickWidth
+                tickShape: root.tickShape
                 color: minorTickDelegate.tickColor
                 showInnerCircle: root.showInnerCircles
                 innerCircleDiameter: root.innerCircleDiameter * 0.7 // Smaller for minor ticks

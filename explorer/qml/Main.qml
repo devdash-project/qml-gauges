@@ -34,7 +34,8 @@ ApplicationWindow {
         "RollingDigitReadout": 16,
         // Templates (header at 17)
         "RadialGauge": 18,
-        "RadialGauge3D": 19
+        "RadialGauge3D": 19,
+        "IndustrialGauge": 20
     }
 
     // Connect to state server for MCP integration

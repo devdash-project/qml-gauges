@@ -167,6 +167,13 @@ ListView {
             pagePath: "pages/RadialGauge3DPage.qml"
             isHeader: false
         }
+        ListElement {
+            category: "Templates"
+            title: "IndustrialGauge"
+            description: "Military / utilitarian preset"
+            pagePath: "pages/IndustrialGaugePage.qml"
+            isHeader: false
+        }
     }
 
     delegate: Item {
