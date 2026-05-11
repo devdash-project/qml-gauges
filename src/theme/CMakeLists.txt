@@ -3,9 +3,12 @@
 # Holds GaugeTheme — the singleton that carries the currently-active aesthetic
 # state for every gauge in the dashboard (active preset + light/dark mode).
 #
-# Preset files live under presets/ and are an implementation detail of
-# GaugeTheme: they are not exported as public QML types (no qmldir entry), so
-# downstream code only ever imports GaugeTheme.
+# The presets (`industrial`, `modernOEM`) are defined inline as nested QtObjects
+# inside GaugeTheme.qml rather than as separate preset .qml files: a QML
+# singleton that references same-module types is not reliably loadable at
+# runtime from a compiled qt_add_qml_module resource (the auto-generated
+# qmldir's `prefer :/...` line breaks relative resolution of the referenced
+# types). See PLAN.md decisions log.
 
 # GaugeTheme must be registered as a QML singleton (before qt_add_qml_module).
 set_source_files_properties(GaugeTheme.qml PROPERTIES QT_QML_SINGLETON_TYPE TRUE)
