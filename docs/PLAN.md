@@ -4,7 +4,7 @@ This document tracks the active development plan for the qml-gauges library.
 For the durable architectural reference, see CLAUDE.md. For audit outputs and
 historical investigations, see docs/audits/.
 
-Last updated: 2026-05-10
+Last updated: 2026-05-10 (file reorganization completed)
 
 ## Project framing
 
@@ -95,8 +95,11 @@ As of 2026-05-10. Based on audit outputs in docs/audits/.
 
 ### Inventory
 
-- 14 primitives, 6 compounds, 2 templates, 0 presets.
+- 10 primitives, 10 compounds, 2 templates, 0 presets.
 - Module URIs: `DevDash.Gauges`, `DevDash.Gauges.Primitives`, `DevDash.Gauges.Compounds`.
+- The four Needle* sub-primitives now live in Compounds (alongside GaugeNeedle)
+  rather than Primitives — they have no plausible standalone use outside
+  GaugeNeedle today.
 - Quick3D primitives (Bezel3D, CenterCap3D) are conditionally built; buildability
   and PBR responsiveness verified 2026-05-10 (see Verified capabilities below).
 
@@ -125,12 +128,6 @@ Approximately 40% of declared properties on primitives remain unused by any
 consumer. See docs/audits/property-usage.md for the full list. Pruning is
 deferred until after the first two presets are built, when we have empirical
 data on which properties get reached for; see decisions log (2026-05-10).
-
-### Documentation drift
-
-- CLAUDE.md references `GaugeNeedleTapered` and `GaugeNeedleClassic` which
-  do not exist. Actual structure is `GaugeNeedle` compound composing four
-  Needle* sub-primitives. **Fix required.**
 
 ## Tooling status
 
@@ -179,14 +176,9 @@ See devdash-mcp/docs/TOOL_GUIDANCE.md for the "which tool when" reference.
 
 ## Active work
 
-1. **File reorganization** (Alternative B from docs/audits/file-organization.md).
-   Move needle sub-primitives into the Compounds module alongside GaugeNeedle;
-   add subfolder grouping under primitives/ and compounds/; rename radial/ to
-   templates/. Update CMake and qmldir files accordingly. See decisions log
-   (2026-05-10) for rationale on choosing Alternative B.
-
-2. **IndustrialGauge preset.** First Moon Patrol-relevant preset deliverable.
-   Blocked on file reorganization completing.
+1. **IndustrialGauge preset.** First Moon Patrol-relevant preset deliverable.
+   File reorganization (Alternative B + subfolder grouping) completed
+   2026-05-10; see decisions log.
 
 ## Backlog
 
@@ -196,8 +188,6 @@ Work units that are well-scoped but not active.
   vignette migration in GlassOverlay, layer.smooth normalization across
   MultiEffect users, GaugeTick MultiEffect split (separate glow from shadow).
   Approved, low risk. Independent of file reorganization; ship standalone.
-- **CLAUDE.md documentation drift fix.** Trivial, ship immediately or batch
-  with reorg PR.
 - **Explorer protocol enhancement — `resolveProperty` action.** The MCP cannot
   evaluate QML bindings directly; only the QML runtime can. Currently
   `get_property` on a pure-binding value returns "not found" with an
@@ -242,12 +232,6 @@ Short entries documenting non-obvious decisions and their rationale.
   rendering tech. Reserved as a future option if specific primitives prove
   inadequate.
 
-- **2026-05-10: Needle sub-primitives stay in Primitives module.** Although
-  they're consumed only by GaugeNeedle today, keeping them in Primitives
-  preserves the option for non-radial gauges (e.g., linear gauge with needle
-  indicator) to use them. Alternative B (move to Compounds) documented for
-  future revisit.
-
 - **2026-05-10: Dead-knob properties retained.** Properties never used by our
   own templates stay in the library's primitive API. Same rationale as
   presets-not-pruning: library serves downstream users beyond our own templates.
@@ -271,10 +255,15 @@ Short entries documenting non-obvious decisions and their rationale.
   two presets are built, when there is empirical data on which properties
   get reached for. Revisit then.
 
-- **2026-05-10: File reorganization uses Alternative B.** Needle sub-primitives
-  move from the Primitives module into Compounds, alongside GaugeNeedle. The
-  only argument against was preserving module URIs for downstream users; with
-  no external users, cleaner architecture wins.
+- **2026-05-10: File reorganization completed (Alternative B + subfolder
+  grouping).** Needle sub-primitives moved from Primitives to Compounds
+  alongside GaugeNeedle; primitives grouped into arc/, frame/ (face +
+  bezel), center/, tick/, overlays/, 3d/; compounds grouped into arc/,
+  tick/, needle/, readout/; radial/ renamed to templates/. URI of the four
+  Needle* types changed from DevDash.Gauges.Primitives to
+  DevDash.Gauges.Compounds; no external consumers exist. The only argument
+  against was preserving module URIs for downstream users; with no external
+  users, cleaner architecture wins.
 
 ## Open questions
 

@@ -20,12 +20,19 @@ All projects are part of the [devdash-project](https://github.com/devdash-projec
 ### Component Hierarchy (Three-Tier)
 
 ```
-Templates (RadialGauge, future BarGauge, DrumOdometer)
+Templates (RadialGauge, RadialGauge3D, future BarGauge, DrumOdometer)
     ↓ composed from
-Compounds (GaugeTickRing, DigitalReadout, GaugeValueArc, GaugeZoneArc, RollingDigitReadout)
+Compounds (GaugeNeedle + Needle* sub-parts, GaugeTickRing, GaugeValueArc,
+           GaugeZoneArc, DigitalReadout, RollingDigitReadout)
     ↓ composed from
-Primitives (GaugeArc, GaugeFace, GaugeBezel, GaugeCenterCap, GaugeTick, GaugeTickLabel, GaugeNeedleTapered, GaugeNeedleClassic)
+Primitives (GaugeArc, GaugeFace, GaugeBezel, GaugeCenterCap, GaugeTick,
+            GaugeTickLabel, GlassOverlay, PerformanceOverlay,
+            Bezel3D, CenterCap3D)
 ```
+
+`GaugeNeedle` is a compound that composes four needle sub-primitives
+(`NeedleFrontBody`, `NeedleHeadTip`, `NeedleRearBody`, `NeedleTailTip`).
+All five types live in `DevDash.Gauges.Compounds`.
 
 ### QML Module Structure
 
@@ -39,9 +46,38 @@ import DevDash.Gauges.Compounds 1.0  // Functional sub-assemblies
 
 ```
 src/
-├── radial/RadialGauge.qml      # Template
-├── primitives/                  # 8 atomic components
-└── compounds/                   # 5 compound components
+├── templates/                  # DevDash.Gauges
+│   ├── RadialGauge.qml
+│   └── RadialGauge3D.qml
+├── primitives/                 # DevDash.Gauges.Primitives
+│   ├── arc/GaugeArc.qml
+│   ├── frame/                  # face + bezel together
+│   │   ├── GaugeFace.qml
+│   │   └── GaugeBezel.qml
+│   ├── center/GaugeCenterCap.qml
+│   ├── tick/
+│   │   ├── GaugeTick.qml
+│   │   └── GaugeTickLabel.qml
+│   ├── overlays/
+│   │   ├── GlassOverlay.qml
+│   │   └── PerformanceOverlay.qml
+│   └── 3d/                     # Quick3D, conditionally built
+│       ├── Bezel3D.qml
+│       └── CenterCap3D.qml
+└── compounds/                  # DevDash.Gauges.Compounds
+    ├── arc/
+    │   ├── GaugeValueArc.qml
+    │   └── GaugeZoneArc.qml
+    ├── tick/GaugeTickRing.qml
+    ├── needle/                 # GaugeNeedle + its sub-primitives
+    │   ├── GaugeNeedle.qml
+    │   ├── NeedleFrontBody.qml
+    │   ├── NeedleHeadTip.qml
+    │   ├── NeedleRearBody.qml
+    │   └── NeedleTailTip.qml
+    └── readout/
+        ├── DigitalReadout.qml
+        └── RollingDigitReadout.qml
 
 explorer/
 ├── qml/
