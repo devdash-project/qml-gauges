@@ -20,7 +20,7 @@ All projects are part of the [devdash-project](https://github.com/devdash-projec
 ### Component Hierarchy (Three-Tier)
 
 ```
-Templates (RadialGauge, RadialGauge3D, IndustrialGauge, future BarGauge, DrumOdometer)
+Templates (RadialGauge, future BarGauge, DrumOdometer)
     ↓ composed from
 Compounds (GaugeNeedle + Needle* sub-parts, GaugeTickRing, GaugeValueArc,
            GaugeZoneArc, DigitalReadout, RollingDigitReadout)
@@ -34,16 +34,18 @@ Primitives (GaugeArc, GaugeFace, GaugeBezel, BezelScrews, GaugeCenterCap,
 (`NeedleFrontBody`, `NeedleHeadTip`, `NeedleRearBody`, `NeedleTailTip`).
 All five types live in `DevDash.Gauges.Compounds`.
 
-Templates also pull their *default* styling from the **theme** — the
-`GaugeTheme` singleton in `DevDash.Gauges.Theme` (see "Theme system" below).
-Templates remain the place where per-aesthetic preset *composites* live;
-the theme is the orthogonal layer that supplies the colour/typography/effect
-defaults those composites (and bare templates) start from.
+Templates pull their *default* styling from the **theme** — the `GaugeTheme`
+singleton in `DevDash.Gauges.Theme` (see "Theme system" below). There are no
+longer per-aesthetic preset *template* composites: the aesthetic families
+(`industrial`, `modernOEM`, `classicWhite`) are `GaugeTheme` presets that any
+template reads, with per-instance property assignments still overriding. (The
+old `IndustrialGauge` / `RadialGauge3D` templates were retired once their
+property-default sets moved into the theme.)
 
 ### QML Module Structure
 
 ```qml
-import DevDash.Gauges 1.0            // Templates (RadialGauge, RadialGauge3D, IndustrialGauge)
+import DevDash.Gauges 1.0            // Templates (RadialGauge)
 import DevDash.Gauges.Primitives 1.0 // Atomic building blocks
 import DevDash.Gauges.Compounds 1.0  // Functional sub-assemblies
 import DevDash.Gauges.Theme 1.0      // GaugeTheme singleton (active aesthetic state)
@@ -54,9 +56,7 @@ import DevDash.Gauges.Theme 1.0      // GaugeTheme singleton (active aesthetic s
 ```
 src/
 ├── templates/                  # DevDash.Gauges
-│   ├── RadialGauge.qml
-│   ├── RadialGauge3D.qml
-│   └── IndustrialGauge.qml      # first preset composite
+│   └── RadialGauge.qml          # the one template; aesthetics come from the theme
 ├── theme/                      # DevDash.Gauges.Theme
 │   ├── GaugeTheme.qml           # singleton: active preset + light/dark mode
 │   └── qmldir                   # advertises only GaugeTheme (presets are internal)
@@ -110,7 +110,12 @@ property assignments still override the theme.
 Two orthogonal axes:
 
 - **Preset** (`GaugeTheme.activeTheme`, default `industrial`; switch with
-  `GaugeTheme.setTheme("industrial" | "modernOEM")`) — the aesthetic family.
+  `GaugeTheme.setTheme("industrial" | "modernOEM" | "classicWhite")`) — the
+  aesthetic family. `industrial` = warm-black painted / aged-cream / oxidized
+  red; `modernOEM` = near-black gradient / bright-orange accent / chrome bezel;
+  `classicWhite` = pearl-white dial / matte-black bezel / orange-red numerals &
+  needle (a vintage white-face look, inspired by classic aftermarket gauges —
+  no specific product is reproduced).
 - **Mode** (`GaugeTheme.mode`, `"light"` | `"dark"`; switch with
   `GaugeTheme.setMode(...)`) — day vs. night colour set. Independent of preset.
 
@@ -145,6 +150,13 @@ resource (the auto-generated qmldir's `prefer :/...` line breaks the relative
 resolution of those types, and the failure is silent — no diagnostic). Adding
 a preset = adding another nested `QtObject` to `GaugeTheme.qml` and a
 `case` to `setTheme()`.
+
+RadialGauge also exposes two empty-by-default decorative face-text slots —
+`scriptLabel` (a word just below the dial centre, rendered under the needle —
+the place a vintage-gauge wordmark sits) and `brandLabel` (a small line low on
+the face near 6 o'clock). The library ships no wordmark of its own; these are
+for user-supplied text (e.g. Moon Patrol's own word behind the needle on a
+`classicWhite`-themed gauge).
 
 When consuming the theme from a template, default a styling property to a
 theme token rather than a literal:

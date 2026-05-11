@@ -4,7 +4,7 @@ This document tracks the active development plan for the qml-gauges library.
 For the durable architectural reference, see CLAUDE.md. For audit outputs and
 historical investigations, see docs/audits/.
 
-Last updated: 2026-05-11 (theme system — DevDash.Gauges.Theme singleton — landed; RadialGauge now consumes it)
+Last updated: 2026-05-11 (theme Phases 3–4 landed: legacy IndustrialGauge / RadialGauge3D templates retired in favour of GaugeTheme presets; ClassicWhite preset added; RadialGauge gains scriptLabel / brandLabel)
 
 ## Project framing
 
@@ -43,7 +43,7 @@ serves external users; preset composites serve discoverability.
 
 ## Theme architecture
 
-(Landed 2026-05-11, Phases 1–2. Phases 3–5 below.)
+(Landed 2026-05-11, Phases 1–4. Phase 5 below.)
 
 A **theme** is the orthogonal styling layer that sits beside the preset
 composites. It is the `GaugeTheme` singleton in the `DevDash.Gauges.Theme`
@@ -69,22 +69,34 @@ qmldir + CMake registration).
   GaugeTheme.colors.surface`); an explicit assignment on an instance still
   wins. The theme supplies defaults, not mandates.
 - **Public surface is just `GaugeTheme`.** The presets (`industrial`,
-  `modernOEM`) are nested `QtObject`s defined inside `GaugeTheme.qml` — not
-  separate importable types. Adding a preset = adding another nested
-  `QtObject` + a `setTheme()` case.
+  `modernOEM`, `classicWhite`) are nested `QtObject`s defined inside
+  `GaugeTheme.qml` — not separate importable types. Adding a preset = adding
+  another nested `QtObject` + a `setTheme()` case.
 
-Phase status: Phase 1 (theme infrastructure) + Phase 2 (RadialGauge consumes
-the theme) complete. Remaining: Phase 3 — migrate IndustrialGauge /
-RadialGauge3D to *be* the `industrial` / `modernOEM` presets (drop their
-hardcoded defaults; add preset-driven feature toggles); Phase 4 — add a
-ClassicWhite preset; Phase 5 — explorer preset/mode selection UX.
+Phase status: Phases 1–4 complete.
+- Phase 1 (theme infrastructure) + Phase 2 (RadialGauge consumes the theme).
+- Phase 3 — retired the legacy preset-composite templates. Because RadialGauge
+  already read the theme tokens, this was done as "migrate the explorer
+  consumers to `RadialGauge` + `GaugeTheme.setTheme(...)`, then delete
+  `IndustrialGauge.qml` / `RadialGauge3D.qml`" rather than the originally-
+  envisioned "make those templates *be* the presets". Side-effect: the
+  effects `RadialGauge3D` hard-wired (chrome3d bezel, glass overlay, domed
+  centre cap, tick/needle glow) are not yet driven by the theme — see Backlog.
+- Phase 4 — added the `classicWhite` preset (vintage white-face aesthetic) and
+  the `scriptLabel` / `brandLabel` decorative face-text slots on RadialGauge.
+
+Remaining: Phase 5 — explorer preset/mode selection UX.
 
 ## Aesthetic targets (presets)
 
-Each preset is a thin composite that sets property defaults on the underlying
-primitives. Reference images for each live in docs/references/.
+A preset is a nested token set inside `GaugeTheme.qml` (a `light`/`dark`
+colour pair plus mode-independent typography/effect/shape tokens). Any
+template reads the active preset's tokens for its defaults; per-instance
+properties still override. (Earlier in the project, presets were planned as
+template *composites*; the theme layer replaced that — see the decisions log.)
+Reference images for each live in docs/references/.
 
-### IndustrialGauge (Moon Patrol's home)
+### Industrial (Moon Patrol's home — the default preset)
 
 - Military / utilitarian aesthetic. Drawn from WWII aircraft instruments,
   industrial process gauges, mil-spec automotive gauges.
@@ -100,8 +112,14 @@ Reference images: gauge-needle.png (hero design target, copied to
 docs/references/), Auto Meter Antique Beige, Speedhut JDM Datsun Z
 (black variant), Auto Meter Pro Comp.
 
-**Status:** completed 2026-05-10. `src/templates/IndustrialGauge.qml`.
-Implementation choices:
+**Status:** completed 2026-05-10 as the `IndustrialGauge` template; retired
+2026-05-11 (Phase 3). The aesthetic now lives in the `industrial` `GaugeTheme`
+preset (`src/theme/GaugeTheme.qml`) — the default preset — and a bare
+`RadialGauge` picks it up. The old template's per-feature toggles (chevron
+ticks, no value arc, etc.) are reproduced on the explorer demo page's
+`RadialGauge` instance for now; folding the chevron/no-arc style choices into
+theme tokens RadialGauge reads is the Phase-3 follow-up (see Backlog). The
+original composite's implementation choices, kept for the token rationale:
 - Face color `#0a0905` (very dark warm black); bezel color `#1a1815`
   (warm matte black, flat style); tick/numeral/label color `#e8e4d8`
   (warm cream); needle color `#d4cfc0` (painted aluminum tone);
@@ -154,14 +172,42 @@ Classic Instruments speedo.
 
 Reference images: Auto Meter Pro Comp Lite, Speedhut Classic Black Tach.
 
-### ModernOEMGauge
+### ModernOEM (modern OEM digital cluster)
 
 - The OEM digital cluster aesthetic. Glow effects, gradient backgrounds,
   digital readouts, value arcs filling behind/instead of the needle.
-- Approximately equivalent to current `RadialGauge3D` template with full
-  effects enabled.
+- **Status:** the `modernOEM` `GaugeTheme` preset (added Phase 2; the only
+  consumer, the `RadialGauge3D` template, was retired Phase 3). Colour tokens
+  (near-black gradient face, bright-orange accent, chrome-grey bezel,
+  light-grey marks) are live. The effects `RadialGauge3D` hard-wired —
+  `chrome3d` bezel, glass overlay, domed centre cap, tick/needle glow — are
+  *not* yet wired into RadialGauge from the `bezelStyle` / `effectsGlow`
+  tokens; that's the Phase-3 follow-up in the Backlog. Until then the explorer
+  demo page renders the colour-token version.
 
-Reference images: Hyundai Palisade cluster.
+Reference images: Hyundai Palisade cluster (`docs/references/hyundai-palisade.jpg`).
+
+### ClassicWhite (vintage white-face)
+
+- Vintage white-face aesthetic, inspired by classic aftermarket gauges (the
+  Classic Instruments "Velocity White" speedo in `docs/references/` is the
+  visual touchstone). No specific product's dial art or wordmarks are
+  reproduced — the aesthetic is captured via theme tokens only.
+- Cool pearl-white dial (`#f4f3f0`), thick matte-black bezel, bold geometric
+  orange-red numerals & ticks, orange-red painted needle with form shading,
+  small orange centre hub. Needle-only (no value arc). Dark mode dims
+  everything, shifts the accent warmer (amber) for night vision, and drops
+  the white face to a warm dark grey.
+- The product's distinctive script wordmark behind the needle and its
+  manufacturer branding at the bottom are deliberately *not* reproduced;
+  RadialGauge's `scriptLabel` / `brandLabel` slots (added Phase 4, empty by
+  default) are where a user puts their own.
+- **Status:** completed 2026-05-11 (Phase 4). The `classicWhite` `GaugeTheme`
+  preset + `src/templates/RadialGauge.qml` `scriptLabel` / `brandLabel` +
+  `explorer/qml/pages/ClassicWhitePage.qml`.
+
+Reference image: `docs/references/Screenshot_20251129-203149.png` (Classic
+Instruments Velocity White).
 
 ## Known capabilities and gaps
 
@@ -169,12 +215,13 @@ As of 2026-05-10. Based on audit outputs in docs/audits/.
 
 ### Inventory
 
-- 11 primitives, 10 compounds, 3 templates (RadialGauge, RadialGauge3D,
-  IndustrialGauge — the last is the first preset composite). BezelScrews
-  joined the primitives roster 2026-05-10.
+- 11 primitives, 10 compounds, 1 template (RadialGauge). BezelScrews joined
+  the primitives roster 2026-05-10. The `RadialGauge3D` and `IndustrialGauge`
+  templates were retired 2026-05-11 (Phase 3) once their aesthetics moved into
+  GaugeTheme presets.
 - 1 theme singleton: `GaugeTheme` (in `DevDash.Gauges.Theme`), landed
-  2026-05-11. Carries 2 presets (`industrial`, `modernOEM`) as inline
-  nested objects.
+  2026-05-11. Carries 3 presets (`industrial`, `modernOEM`, `classicWhite`) as
+  inline nested objects.
 - Module URIs: `DevDash.Gauges`, `DevDash.Gauges.Theme`,
   `DevDash.Gauges.Primitives`, `DevDash.Gauges.Compounds`.
 - The four Needle* sub-primitives now live in Compounds (alongside GaugeNeedle)
@@ -256,19 +303,34 @@ See devdash-mcp/docs/TOOL_GUIDANCE.md for the "which tool when" reference.
 
 ## Active work
 
-No active work item. Theme system Phases 1–2 shipped 2026-05-11
-(`DevDash.Gauges.Theme` singleton with `industrial` + `modernOEM` presets;
-RadialGauge consumes it for default styling). Next on the theme track:
-Phase 3 — migrate IndustrialGauge and RadialGauge3D to be the `industrial`
-and `modernOEM` presets (remove their hardcoded defaults, introduce
-preset-driven feature toggles). Then Phase 4 (ClassicWhite preset), Phase 5
-(explorer preset/mode selection UX). Independent of that, the next aesthetic
-target preset is still PerformanceBlackGauge or ChromeClassicGauge.
+No active work item. Theme system Phases 1–4 shipped 2026-05-11
+(`DevDash.Gauges.Theme` singleton with `industrial`, `modernOEM` and
+`classicWhite` presets; RadialGauge consumes the colour/font tokens and now
+exposes `scriptLabel` / `brandLabel`; the `IndustrialGauge` and `RadialGauge3D`
+templates are gone). Next on the theme track: Phase 5 — explorer preset/mode
+selection UX (a real UI, not just the MCP test hook on RadialGaugePage). Two
+follow-ups surfaced by Phase 3 are in the Backlog: wiring the remaining theme
+tokens (`tickStyle`, `bezelStyle`, `effectsGlow`/`effectsShadow`/`effectsTexture`,
+`typographyScale`) into RadialGauge so presets differ in *structure*, not just
+colour; and a `GaugeFaceLabel` compound. Independent of all that, the next
+aesthetic target preset is still PerformanceBlack or ChromeClassic.
 
 ## Backlog
 
 Work units that are well-scoped but not active.
 
+- **Wire the remaining theme tokens into RadialGauge (Phase-3 follow-up).**
+  RadialGauge currently reads only the colour tokens and the typography
+  *family* tokens. The structural/effect tokens — `tickStyle` (so `industrial`
+  gets its chevron ticks back), `bezelStyle` (so `modernOEM` gets a `chrome3d`
+  bezel and `classicWhite` a thick flat one), `effectsGlow` / `effectsShadow`
+  / `effectsTexture` (modern-OEM glow, painted-needle shadow), `typographyScale`
+  — aren't consumed. Until they are, `industrial` and `modernOEM` differ only
+  in colour through a plain RadialGauge (SSIM ≈ 0.97 between the two demo
+  renders), and the explorer demo pages reproduce the missing structure via
+  per-instance properties. Also re-home the `RadialGauge3D` glass overlay /
+  domed centre cap, which have no token at all yet (new tokens, or accept they
+  stay instance-only options).
 - **Effect consistency cleanup.** Three specific fixes: Canvas→RadialGradient
   vignette migration in GlassOverlay, layer.smooth normalization across
   MultiEffect users, GaugeTick MultiEffect split (separate glow from shadow).
@@ -293,11 +355,12 @@ Work units that are well-scoped but not active.
   uses a generic `"DIN, DIN 1451, sans-serif"` fallback chain. Pick one
   from the candidates in Open Questions, license-check, and wire a
   FontLoader in either the template or a Theme singleton.
-- **Label-inside-face rendering helper.** IndustrialGauge places the
-  label inside the dial via `verticalCenterOffset`. Other presets will
-  want the same. A small `GaugeFaceLabel` compound (positioned along a
-  configurable radial offset, with the same color/font wiring as the
-  tick ring) would deduplicate this.
+- **Label-inside-face rendering helper.** RadialGauge now has three ad-hoc
+  on-face `Text` items (`scriptLabel`, `brandLabel`, and the industrial-style
+  label-inside-the-dial idea). A small `GaugeFaceLabel` compound (positioned
+  along a configurable radial offset, with the same colour/font wiring as the
+  tick ring) would deduplicate this and give every preset a consistent
+  face-text mechanism.
 - **ChromeClassicGauge preset.** Blocked on Bezel3D viability assessment.
   BezelScrews primitive landed 2026-05-10 and is reusable here.
 - **PerformanceBlackGauge preset.** Depends on verified-working needle
@@ -306,14 +369,37 @@ Work units that are well-scoped but not active.
 - **Tier 7 MCP perf instrumentation.** Defer until Jetson budget questions
   become concrete (e.g., when running multiple gauges simultaneously in the
   deployed dashboard).
-- **Reference image baseline for visual regression.** Once IndustrialGauge
-  exists and renders correctly, baseline its output via tier 3 perceptual
-  hash; any future change that affects the rendered output is caught.
+- **Reference image baseline for visual regression.** Baseline each preset's
+  demo-page render (via tier 3 perceptual hash) so any future change that
+  affects rendered output is caught.
 - **Deeper effect-unification refactor** (bevel technique consistency across
   primitives, gradient declaration patterns). Deferred — not blocking,
   significant scope, limited visual payoff.
 
 ## Decisions log
+
+- **2026-05-11: ClassicWhite preset implemented from a reference image.**
+  The aesthetic of a classic aftermarket white-face gauge (the Classic
+  Instruments "Velocity White" speedo in docs/references/) is captured via
+  GaugeTheme tokens only — pearl-white surface, matte-black bezel, orange-red
+  primary/foreground, flat bezel style, shadow-only effects. No part of the
+  specific product's dial art or wordmarks is reproduced. The product's script
+  wordmark behind the needle and its bottom branding line are deliberately
+  left out; RadialGauge's new `scriptLabel` / `brandLabel` properties (empty by
+  default) let a user place their own text in those spots without forking the
+  template.
+
+- **2026-05-11: Phase 3 done as "retire the legacy templates", not "templates
+  become presets".** The original Phase-3 plan was to make `IndustrialGauge` /
+  `RadialGauge3D` *be* the `industrial` / `modernOEM` presets. But once Phase 2
+  had RadialGauge consuming the theme, those templates were pure
+  property-default sets with no remaining reason to exist — so Phase 3 just
+  migrated the explorer consumers to `RadialGauge` + `GaugeTheme.setTheme(...)`
+  and deleted the files. Trade-off: RadialGauge consumes only the colour/font
+  tokens, so the structural/effect distinctions the old templates hard-wired
+  (chevron ticks, chrome3d bezel, glass overlay, glow) are lost until the
+  remaining tokens are wired in — tracked in the Backlog. Per-page demo
+  instances reproduce the missing structure for now.
 
 - **2026-05-11: Theme = concept-level tokens, not gauge-specific properties.**
   The theme defines abstract tokens (`surface`, `primary`, `foreground`, …)
