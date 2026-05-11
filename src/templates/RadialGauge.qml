@@ -213,6 +213,18 @@ Item {
     property string bezelStyle: GaugeTheme.bezelStyle
 
     /**
+     * @brief Width of the decorative bezel ring (pixels).
+     *
+     * The bezel is an annulus running from the gauge's outer edge inward by
+     * this amount (it sets `GaugeBezel.innerRadius = outerRadius - bezelWidth`).
+     * Defaults to a fraction of the gauge size so it scales with the gauge;
+     * assign explicitly to override.
+     *
+     * @default 8% of min(width, height)
+     */
+    property real bezelWidth: Math.min(root.width, root.height) * 0.08
+
+    /**
      * @brief Whether the gauge face renders a texture overlay.
      *
      * Mirrors the theme's `effectsTexture` token. When false the face is a
@@ -801,12 +813,14 @@ Item {
         visible: root.label !== ""
     }
 
-    // Layer 10: Bezel (outermost)
+    // Layer 10: Bezel (outermost) — an annulus of width `bezelWidth` hugging
+    // the gauge's outer edge. No inner flat-border ring: the bezel ring (flat
+    // or chrome) is the whole visual element.
     GaugeBezel {
         anchors.fill: parent
         visible: root.showBezel
         outerRadius: Math.min(root.width, root.height) / 2
-        borderWidth: 20
+        innerRadius: outerRadius - root.bezelWidth
         borderColor: root.bezelColor
         color: root.bezelColor
         style: root.bezelStyle
