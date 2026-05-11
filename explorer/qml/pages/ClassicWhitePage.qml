@@ -15,8 +15,8 @@ import "../components"
  * the library reproduces none of those products' wordmarks — the `scriptLabel`
  * and `brandLabel` slots are left empty for the user to fill.
  *
- * Renders a bare RadialGauge and activates the preset on page load (restoring
- * the default `industrial` preset on the way out).
+ * Renders a bare RadialGauge and activates the preset on page load. (The
+ * active preset is a global; it simply persists until another page changes it.)
  */
 Item {
     id: root
@@ -28,8 +28,10 @@ Item {
 
     property alias propertyPanel: propertyPanel
 
+    // Activate the classic-white preset. No destruction-time restore: StackView
+    // completes the next page before destroying this one, so resetting here
+    // would clobber the incoming page's choice. Each preset-demo page sets its own.
     Component.onCompleted: GaugeTheme.setTheme("classicWhite")
-    Component.onDestruction: GaugeTheme.setTheme("industrial")
 
     property var properties: [
         // Value

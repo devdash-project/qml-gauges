@@ -30,10 +30,11 @@ Item {
 
     property alias propertyPanel: propertyPanel
 
-    // Activate the modern-OEM preset for this page; restore the default
-    // (industrial) preset on the way out so other pages start from a known state.
+    // Activate the modern-OEM preset for this page. We deliberately do not
+    // restore a preset on destruction: StackView creates+completes the next
+    // page before destroying this one, so a destruction-time setTheme() would
+    // clobber the incoming page's choice. Each preset-demo page sets its own.
     Component.onCompleted: GaugeTheme.setTheme("modernOEM")
-    Component.onDestruction: GaugeTheme.setTheme("industrial")
 
     property var properties: [
         // Value
