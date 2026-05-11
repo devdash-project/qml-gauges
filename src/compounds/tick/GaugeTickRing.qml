@@ -59,6 +59,15 @@ Item {
      */
     property real labelDivisor: 1
 
+    // Decimal places for major-tick labels: none when the label step
+    // (majorTickInterval / labelDivisor) is a whole number — covers both the
+    // RPM-style "8" (8000 / 1000) and the speedo-style "120" (120 / 1) cases —
+    // otherwise one decimal so fractional scales (e.g. 0.5-bar steps) read.
+    readonly property int _labelPrecision: {
+        const step = root.majorTickInterval / root.labelDivisor
+        return (isFinite(step) && Number.isInteger(step)) ? 0 : 1
+    }
+
     /**
      * @brief Value where ticks change to warning color.
      * @default maxValue (never warns)
@@ -313,7 +322,7 @@ Item {
                 anchors.centerIn: parent
                 angle: majorTickDelegate.tickAngle
                 distanceFromCenter: root.labelRadius
-                text: (majorTickDelegate.tickValue / root.labelDivisor).toFixed(root.labelDivisor >= 1000 ? 0 : 1)
+                text: (majorTickDelegate.tickValue / root.labelDivisor).toFixed(root._labelPrecision)
                 fontSize: root.fontSize
                 fontFamily: root.fontFamily
                 fontWeight: root.fontWeight
