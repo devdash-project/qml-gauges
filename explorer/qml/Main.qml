@@ -206,14 +206,15 @@ ApplicationWindow {
                     }
                 }
 
-                // Theme toggle button
+                // Explorer-UI light/dark toggle (restyles the explorer chrome
+                // only) -- distinct from the gauge-theme controls to its right.
                 ToolButton {
                     id: themeToggle
                     text: Theme.dark ? "\u2600" : "\u263E"  // Sun (to switch to light) or Moon (to switch to dark)
                     font.pixelSize: 18
                     onClicked: Theme.toggle()
                     ToolTip.visible: hovered
-                    ToolTip.text: Theme.dark ? "Switch to Light Mode" : "Switch to Dark Mode"
+                    ToolTip.text: Theme.dark ? "Switch explorer UI to Light Mode" : "Switch explorer UI to Dark Mode"
 
                     contentItem: Text {
                         text: parent.text
@@ -227,6 +228,12 @@ ApplicationWindow {
                         color: parent.hovered ? Theme.hoverBackground : "transparent"
                         radius: 4
                     }
+                }
+
+                // Gauge-theme controls: preset selector (+ mode toggle) driving
+                // the GaugeTheme singleton globally.
+                GaugeThemeControls {
+                    Layout.alignment: Qt.AlignVCenter
                 }
 
                 Label {

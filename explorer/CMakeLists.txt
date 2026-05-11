@@ -17,6 +17,7 @@ qt_add_qml_module(qml-gauges-explorer
         qml/Theme.qml
         qml/Main.qml
         qml/components/ComponentSidebar.qml
+        qml/components/GaugeThemeControls.qml
         qml/components/PropertyPanel.qml
         qml/components/PreviewArea.qml
         qml/components/DocumentationPanel.qml
