@@ -127,10 +127,15 @@ Item {
     // === Advanced ===
 
     /**
-     * @brief Enable antialiasing.
+     * @brief Enable antialiasing on the bezel's shapes.
+     *
+     * Named `customAntialiasing` rather than `antialiasing` to avoid shadowing
+     * the inherited `QQuickItem.antialiasing` property (which would trigger a
+     * qmllint [property-override] warning).
+     *
      * @default true
      */
-    property bool antialiasing: true
+    property bool customAntialiasing: true
 
     // === Internal Implementation ===
 
@@ -153,7 +158,7 @@ Item {
         border.color: (root.style === "chrome" || root.style === "chrome3d") ? "transparent" : root.color
 
         opacity: root.bezelOpacity
-        antialiasing: root.antialiasing
+        antialiasing: root.customAntialiasing
 
         // Chrome gradient (applied to border via nested Rectangle)
         Rectangle {
@@ -281,7 +286,7 @@ Item {
             color: "transparent"
             border.width: root.borderWidth
             border.color: root.borderColor
-            antialiasing: root.antialiasing
+            antialiasing: root.customAntialiasing
         }
     }
 }

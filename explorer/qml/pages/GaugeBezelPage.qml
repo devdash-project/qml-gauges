@@ -42,7 +42,7 @@ Item {
          description: "Darker color for chrome gradient shadow (bottom-right shadow effect)."},
 
         // Advanced
-        {name: "antialiasing", type: "bool", default: true, category: "Advanced",
+        {name: "customAntialiasing", type: "bool", default: true, category: "Advanced",
          description: "Enable smooth edge rendering. Disable for pixel-perfect but jagged edges."}
     ]
 
