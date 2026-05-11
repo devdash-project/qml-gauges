@@ -34,6 +34,14 @@ Item {
         {name: "headDetailWidth", type: "real", min: 0.5, max: 4, default: 1.5, category: "Appearance",
          description: "Stroke width of the slot, cross, or hex detail (pixels)."},
 
+        // Form shading
+        {name: "hasFormShading", type: "bool", default: true, category: "Form Shading",
+         description: "Render the head with a radial gradient simulating directional light, so it reads as a 3D protrusion rather than a flat disc."},
+        {name: "lightAngle", type: "real", min: -180, max: 180, default: -45, category: "Form Shading",
+         description: "Direction of the simulated light source (degrees). 0 = highlight at top; -45 = upper-left (the instrument-lighting convention)."},
+        {name: "formShadingIntensity", type: "real", min: 0, max: 1, default: 0.4, category: "Form Shading",
+         description: "Strength of the form shading. 0 = flat color; 1 = maximum highlight/shadow contrast; 0.4 = noticeable but restrained."},
+
         // Shadow
         {name: "hasShadow", type: "bool", default: true, category: "Shadow",
          description: "Whether each screw casts a drop shadow. Sells the look of a fastener sitting in a recess."},

@@ -17,25 +17,26 @@ ApplicationWindow {
     readonly property var pageIndexMap: {
         "Welcome": 0,
         // Primitives (header at 1)
-        "GaugeArc": 2,
-        "GaugeBezel": 3,
-        "GaugeCenterCap": 4,
-        "GaugeFace": 5,
-        "GaugeTick": 6,
-        "GaugeTickLabel": 7,
-        "Bezel3D": 8,
-        "CenterCap3D": 9,
-        // Compounds (header at 10)
-        "DigitalReadout": 11,
-        "GaugeNeedle": 12,
-        "GaugeTickRing": 13,
-        "GaugeValueArc": 14,
-        "GaugeZoneArc": 15,
-        "RollingDigitReadout": 16,
-        // Templates (header at 17)
-        "RadialGauge": 18,
-        "RadialGauge3D": 19,
-        "IndustrialGauge": 20
+        "BezelScrews": 2,
+        "GaugeArc": 3,
+        "GaugeBezel": 4,
+        "GaugeCenterCap": 5,
+        "GaugeFace": 6,
+        "GaugeTick": 7,
+        "GaugeTickLabel": 8,
+        "Bezel3D": 9,
+        "CenterCap3D": 10,
+        // Compounds (header at 11)
+        "DigitalReadout": 12,
+        "GaugeNeedle": 13,
+        "GaugeTickRing": 14,
+        "GaugeValueArc": 15,
+        "GaugeZoneArc": 16,
+        "RollingDigitReadout": 17,
+        // Templates (header at 18)
+        "RadialGauge": 19,
+        "RadialGauge3D": 20,
+        "IndustrialGauge": 21
     }
 
     // Connect to state server for MCP integration

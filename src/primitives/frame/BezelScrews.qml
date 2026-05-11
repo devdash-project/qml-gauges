@@ -101,6 +101,55 @@ Item {
      */
     property color headDetailColor: Qt.darker(root.screwColor, 1.8)
 
+    // === Form shading ===
+
+    /**
+     * @brief Whether the head renders with directional form shading.
+     *
+     * When true, the screw head is filled with a radial gradient that
+     * simulates a light source catching one side, so the head reads as a
+     * three-dimensional protrusion rather than a flat disc. When false,
+     * the head is a flat-colored circle (the original behavior).
+     *
+     * @default true
+     */
+    property bool hasFormShading: true
+
+    /**
+     * @brief Direction of the simulated light source (degrees).
+     *
+     * 0 places the highlight at the top of the head; negative values
+     * rotate it counterclockwise (toward the left). -45 yields an
+     * upper-left highlight, the conventional instrument-lighting angle.
+     *
+     * @default -45
+     */
+    property real lightAngle: -45
+
+    /**
+     * @brief Strength of the form shading (0.0-1.0).
+     *
+     * 0 produces no visible shading (flat color, equivalent to
+     * hasFormShading=false). 1.0 is maximum contrast between the
+     * highlight and shadow sides of the head. 0.4 is noticeable but
+     * restrained.
+     *
+     * @default 0.4
+     */
+    property real formShadingIntensity: 0.4
+
+    /** @brief Highlight color used on the lit side of the head. */
+    readonly property color _formHighlightColor:
+        Qt.lighter(root.screwColor, 1.0 + root.formShadingIntensity * 0.6)
+
+    /** @brief Shadow color used on the unlit side of the head. */
+    readonly property color _formShadowColor:
+        Qt.darker(root.screwColor, 1.0 + root.formShadingIntensity * 0.5)
+
+    /** @brief Light direction unit vector (screen space, +x right, +y down). */
+    readonly property real _lightDirX: Math.cos((root.lightAngle - 90) * Math.PI / 180)
+    readonly property real _lightDirY: Math.sin((root.lightAngle - 90) * Math.PI / 180)
+
     /**
      * @brief Stroke width of the slot or cross detail (pixels).
      *
@@ -178,13 +227,53 @@ Item {
                 shadowBlur: 0.5
             }
 
-            // Screw head (filled circle)
+            // Screw head — flat fill when form shading is disabled
             Rectangle {
                 id: head
                 anchors.fill: parent
+                visible: !root.hasFormShading
                 radius: width / 2
                 color: root.screwColor
                 antialiasing: true
+            }
+
+            // Screw head — radial-gradient fill simulating directional light
+            Shape {
+                anchors.fill: parent
+                visible: root.hasFormShading
+                preferredRendererType: typeof Shape.CurveRenderer !== 'undefined'
+                    ? Shape.CurveRenderer
+                    : Shape.GeometryRenderer
+
+                ShapePath {
+                    id: shadedHeadPath
+                    strokeColor: "transparent"
+                    fillColor: "transparent"
+
+                    readonly property real _r: root.screwDiameter / 2
+
+                    fillGradient: RadialGradient {
+                        centerX: shadedHeadPath._r
+                        centerY: shadedHeadPath._r
+                        centerRadius: shadedHeadPath._r
+                        focalX: shadedHeadPath._r + root.screwDiameter * 0.15 * root._lightDirX
+                        focalY: shadedHeadPath._r + root.screwDiameter * 0.15 * root._lightDirY
+                        focalRadius: 0
+
+                        GradientStop { position: 0.0; color: root._formHighlightColor }
+                        GradientStop { position: 0.5; color: root.screwColor }
+                        GradientStop { position: 1.0; color: root._formShadowColor }
+                    }
+
+                    PathAngleArc {
+                        centerX: shadedHeadPath._r
+                        centerY: shadedHeadPath._r
+                        radiusX: shadedHeadPath._r
+                        radiusY: shadedHeadPath._r
+                        startAngle: 0
+                        sweepAngle: 360
+                    }
+                }
             }
 
             // Slot: single horizontal line
