@@ -27,6 +27,7 @@ qt_add_qml_module(qml-gauges-explorer
         qml/editors/StringEditor.qml
         qml/editors/EnumEditor.qml
         qml/pages/WelcomePage.qml
+        qml/pages/BezelScrewsPage.qml
         qml/pages/GaugeArcPage.qml
         qml/pages/GaugeBezelPage.qml
         qml/pages/GaugeCenterCapPage.qml

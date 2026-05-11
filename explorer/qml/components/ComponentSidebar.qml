@@ -33,6 +33,13 @@ ListView {
         // Primitives
         ListElement {
             category: "Primitives"
+            title: "BezelScrews"
+            description: "Fastener ring (screws / rivets / bolts)"
+            pagePath: "pages/BezelScrewsPage.qml"
+            isHeader: false
+        }
+        ListElement {
+            category: "Primitives"
             title: "GaugeArc"
             description: "Arc primitive for drawing gauge value arcs"
             pagePath: "pages/GaugeArcPage.qml"

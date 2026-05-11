@@ -4,6 +4,7 @@ qt_add_qml_module(devdash_gauges_primitives
     VERSION 1.0
     QML_FILES
         arc/GaugeArc.qml
+        frame/BezelScrews.qml
         frame/GaugeBezel.qml
         center/GaugeCenterCap.qml
         frame/GaugeFace.qml
@@ -49,6 +50,7 @@ install(TARGETS devdash_gauges_primitives
 if(QMLLINT_EXECUTABLE)
     set(PRIMITIVES_QML_FILES
         ${CMAKE_CURRENT_SOURCE_DIR}/arc/GaugeArc.qml
+        ${CMAKE_CURRENT_SOURCE_DIR}/frame/BezelScrews.qml
         ${CMAKE_CURRENT_SOURCE_DIR}/frame/GaugeBezel.qml
         ${CMAKE_CURRENT_SOURCE_DIR}/center/GaugeCenterCap.qml
         ${CMAKE_CURRENT_SOURCE_DIR}/frame/GaugeFace.qml
