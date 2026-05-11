@@ -45,12 +45,24 @@ if(BUILD_TESTS)
 endif()
 
 # QML Linting target
-# Find qmllint - check Qt bin directory first
+# Find Qt's qmllint specifically. A bare `find_program(NAMES qmllint)` can pick
+# up an unrelated tool that's on PATH — on Arch, /usr/bin/qmllint is a different
+# "QML syntax verifier" (self-reports "qmllint 1.0"), not Qt's qmllint at
+# /usr/lib/qt6/bin/qmllint (6.x), and it errors on files Qt's qmllint passes.
+# So search the Qt bin dirs only (NO_DEFAULT_PATH skips PATH / system dirs),
+# with the common distro location first and the bin dir of a custom Qt prefix
+# (${Qt6_DIR}/../../../bin — useful for ~/Qt/<ver>/<kit> installs, though on a
+# distro-packaged Qt it resolves to a generic /usr/bin) after it. A plain
+# search is the last resort so the target still degrades gracefully where the
+# Qt binary isn't where we expect.
 find_program(QMLLINT_EXECUTABLE
-    NAMES qmllint
-    HINTS "${Qt6_DIR}/../../../bin" "${Qt6_DIR}/../../bin"
-    PATHS /usr/lib/qt6/bin
+    NAMES qmllint-qt6 qmllint
+    PATHS /usr/lib/qt6/bin "${Qt6_DIR}/../../../bin" "${Qt6_DIR}/../../bin"
+    NO_DEFAULT_PATH
 )
+if(NOT QMLLINT_EXECUTABLE)
+    find_program(QMLLINT_EXECUTABLE NAMES qmllint-qt6 qmllint)
+endif()
 
 if(QMLLINT_EXECUTABLE)
     message(STATUS "Found qmllint: ${QMLLINT_EXECUTABLE}")
