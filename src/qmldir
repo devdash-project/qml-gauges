@@ -1,3 +1,2 @@
 module DevDash.Gauges
 RadialGauge 1.0 templates/RadialGauge.qml
-RadialGauge3D 1.0 templates/RadialGauge3D.qml

@@ -116,8 +116,9 @@ QtObject {
      * Gradient near-black face inside a cylindrical chrome bezel, glass
      * overlay highlight, glowing ticks, gradient needle with glow + shadow,
      * bright accent. Dark mode is the night look (dimmer accent, less glare).
-     * Derived from the property defaults baked into RadialGauge3D
-     * (reference: Hyundai Palisade cluster).
+     * Reference: the Hyundai Palisade digital cluster. (The bezelStyle /
+     * effectsGlow tokens here anticipate effect plumbing that RadialGauge does
+     * not yet read; the colour tokens are wired up today.)
      */
     readonly property QtObject modernOEM: QtObject {
         readonly property QtObject light: QtObject {
