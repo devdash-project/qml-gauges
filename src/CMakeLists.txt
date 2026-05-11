@@ -22,6 +22,7 @@ install(DIRECTORY ${CMAKE_BINARY_DIR}/qml/DevDash
 )
 
 # Add sub-modules
+add_subdirectory(theme)
 add_subdirectory(primitives)
 add_subdirectory(compounds)
 

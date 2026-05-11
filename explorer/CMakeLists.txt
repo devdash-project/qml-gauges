@@ -65,6 +65,7 @@ set_target_properties(qml-gauges-explorer PROPERTIES
 # Ensure the gauge modules are built before the explorer
 add_dependencies(qml-gauges-explorer
     devdash_gauges
+    devdash_gauges_theme
     devdash_gauges_primitives
     devdash_gauges_compounds
 )
