@@ -3,18 +3,18 @@ qt_add_qml_module(devdash_gauges_primitives
     URI DevDash.Gauges.Primitives
     VERSION 1.0
     QML_FILES
-        GaugeArc.qml
-        GaugeBezel.qml
-        GaugeCenterCap.qml
-        GaugeFace.qml
-        GaugeTick.qml
-        GaugeTickLabel.qml
-        GlassOverlay.qml
+        arc/GaugeArc.qml
+        frame/GaugeBezel.qml
+        center/GaugeCenterCap.qml
+        frame/GaugeFace.qml
+        tick/GaugeTick.qml
+        tick/GaugeTickLabel.qml
+        overlays/GlassOverlay.qml
         NeedleFrontBody.qml
         NeedleHeadTip.qml
         NeedleRearBody.qml
         NeedleTailTip.qml
-        PerformanceOverlay.qml
+        overlays/PerformanceOverlay.qml
     RESOURCE_PREFIX /
     OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/qml/DevDash/Gauges/Primitives
 )
@@ -24,8 +24,8 @@ if(HAVE_QUICK3D)
     # Add 3D QML components to the module
     qt_target_qml_sources(devdash_gauges_primitives
         QML_FILES
-            CenterCap3D.qml
-            Bezel3D.qml
+            3d/CenterCap3D.qml
+            3d/Bezel3D.qml
     )
 
     # Add 3D assets as resources
@@ -52,18 +52,18 @@ install(TARGETS devdash_gauges_primitives
 # QML linting
 if(QMLLINT_EXECUTABLE)
     set(PRIMITIVES_QML_FILES
-        ${CMAKE_CURRENT_SOURCE_DIR}/GaugeArc.qml
-        ${CMAKE_CURRENT_SOURCE_DIR}/GaugeBezel.qml
-        ${CMAKE_CURRENT_SOURCE_DIR}/GaugeCenterCap.qml
-        ${CMAKE_CURRENT_SOURCE_DIR}/GaugeFace.qml
-        ${CMAKE_CURRENT_SOURCE_DIR}/GaugeTick.qml
-        ${CMAKE_CURRENT_SOURCE_DIR}/GaugeTickLabel.qml
-        ${CMAKE_CURRENT_SOURCE_DIR}/GlassOverlay.qml
+        ${CMAKE_CURRENT_SOURCE_DIR}/arc/GaugeArc.qml
+        ${CMAKE_CURRENT_SOURCE_DIR}/frame/GaugeBezel.qml
+        ${CMAKE_CURRENT_SOURCE_DIR}/center/GaugeCenterCap.qml
+        ${CMAKE_CURRENT_SOURCE_DIR}/frame/GaugeFace.qml
+        ${CMAKE_CURRENT_SOURCE_DIR}/tick/GaugeTick.qml
+        ${CMAKE_CURRENT_SOURCE_DIR}/tick/GaugeTickLabel.qml
+        ${CMAKE_CURRENT_SOURCE_DIR}/overlays/GlassOverlay.qml
         ${CMAKE_CURRENT_SOURCE_DIR}/NeedleFrontBody.qml
         ${CMAKE_CURRENT_SOURCE_DIR}/NeedleHeadTip.qml
         ${CMAKE_CURRENT_SOURCE_DIR}/NeedleRearBody.qml
         ${CMAKE_CURRENT_SOURCE_DIR}/NeedleTailTip.qml
-        ${CMAKE_CURRENT_SOURCE_DIR}/PerformanceOverlay.qml
+        ${CMAKE_CURRENT_SOURCE_DIR}/overlays/PerformanceOverlay.qml
     )
 
     add_custom_target(qmllint-primitives

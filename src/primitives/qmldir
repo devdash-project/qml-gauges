@@ -1,10 +1,12 @@
 module DevDash.Gauges.Primitives
-GaugeArc 1.0 GaugeArc.qml
-GaugeBezel 1.0 GaugeBezel.qml
-GaugeCenterCap 1.0 GaugeCenterCap.qml
-GaugeFace 1.0 GaugeFace.qml
-GaugeTick 1.0 GaugeTick.qml
-GaugeTickLabel 1.0 GaugeTickLabel.qml
+GaugeArc 1.0 arc/GaugeArc.qml
+GaugeBezel 1.0 frame/GaugeBezel.qml
+GaugeCenterCap 1.0 center/GaugeCenterCap.qml
+GaugeFace 1.0 frame/GaugeFace.qml
+GaugeTick 1.0 tick/GaugeTick.qml
+GaugeTickLabel 1.0 tick/GaugeTickLabel.qml
+GlassOverlay 1.0 overlays/GlassOverlay.qml
+PerformanceOverlay 1.0 overlays/PerformanceOverlay.qml
 NeedleFrontBody 1.0 NeedleFrontBody.qml
 NeedleHeadTip 1.0 NeedleHeadTip.qml
 NeedleRearBody 1.0 NeedleRearBody.qml
