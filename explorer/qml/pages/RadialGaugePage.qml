@@ -101,23 +101,36 @@ Item {
          description: "Add outline stroke around tick labels for visibility."},
 
         // Colors
+        // `reset:` gives the property's canonical default *expression* (the
+        // GaugeTheme token RadialGauge.qml binds it to). qml_explorer_reset_property
+        // re-creates the binding from it via Qt.binding, so a reset property
+        // tracks the active theme again — see PropertyPanel.onResetPropertyRequested.
         {name: "faceColor", type: "color", default: "#1a1a1a", category: "Colors",
+         reset: () => GaugeTheme.colors.surface,
          description: "Background color of the gauge face/dial."},
         {name: "bezelColor", type: "color", default: "#2a2a2a", category: "Colors",
+         reset: () => GaugeTheme.colors.surfaceElevated,
          description: "Color of the decorative bezel ring."},
         {name: "backgroundArcColor", type: "color", default: "#333333", category: "Colors",
+         reset: () => Qt.lighter(GaugeTheme.colors.surface, 1.3),
          description: "Color of the track arc behind the value arc."},
         {name: "valueArcColor", type: "color", default: "#00aaff", category: "Colors",
+         reset: () => GaugeTheme.colors.primary,
          description: "Color of the value arc in normal range."},
         {name: "needleColor", type: "color", default: "#ffffff", category: "Colors",
+         reset: () => GaugeTheme.colors.primary,
          description: "Color of the needle indicator."},
         {name: "tickColor", type: "color", default: "#888888", category: "Colors",
+         reset: () => GaugeTheme.colors.foreground,
          description: "Color of tick marks and labels in normal range."},
         {name: "redlineColor", type: "color", default: "#aa2222", category: "Colors",
+         reset: () => GaugeTheme.colors.critical,
          description: "Color of the redline zone arc."},
         {name: "warningColor", type: "color", default: "#ffaa00", category: "Colors",
+         reset: () => GaugeTheme.colors.warning,
          description: "Color for warning zone ticks/arc. Typically amber."},
         {name: "criticalColor", type: "color", default: "#ff4444", category: "Colors",
+         reset: () => GaugeTheme.colors.critical,
          description: "Color for critical zone ticks/arc. Typically red."},
 
         // Needle
@@ -146,8 +159,10 @@ Item {
 
         // Typography
         {name: "tickLabelFontSize", type: "int", min: 10, max: 32, default: 18, category: "Typography",
+         reset: () => Math.round(18 * GaugeTheme.typographyScale),
          description: "Font size for tick labels around the gauge in pixels."},
         {name: "gaugeLabelFontSize", type: "int", min: 10, max: 32, default: 18, category: "Typography",
+         reset: () => Math.round(18 * GaugeTheme.typographyScale),
          description: "Font size for the gauge label on the face in pixels."},
 
         // === 3D EFFECTS ===
@@ -163,6 +178,7 @@ Item {
         {name: "needleBevelWidth", type: "real", min: 0.5, max: 3, default: 1.0, category: "Needle 3D",
          description: "Width of bevel highlight/shadow strokes in pixels."},
         {name: "needleShadow", type: "bool", default: false, category: "Needle 3D",
+         reset: () => GaugeTheme.effectsShadow,
          description: "Enable basic drop shadow behind needle."},
         {name: "needlePivotShadow", type: "bool", default: false, category: "Needle 3D",
          description: "Enable realistic pivot shadow that follows light angle as needle rotates."},
@@ -173,6 +189,7 @@ Item {
         {name: "needleInnerGlowColor", type: "color", default: "#ffffff", category: "Needle 3D",
          description: "Color of the inner glow effect."},
         {name: "needleOuterGlow", type: "bool", default: false, category: "Needle 3D",
+         reset: () => GaugeTheme.effectsGlow,
          description: "Enable outer glow (neon halo) effect around needle edges."},
         {name: "needleOuterGlowColor", type: "color", default: "#ffffff", category: "Needle 3D",
          description: "Color of the outer glow halo."},
@@ -181,6 +198,7 @@ Item {
         {name: "tickGradient", type: "bool", default: false, category: "Tick 3D",
          description: "Enable gradient fill on tick marks for depth."},
         {name: "tickGlow", type: "bool", default: false, category: "Tick 3D",
+         reset: () => GaugeTheme.effectsGlow,
          description: "Enable glow effect on ticks for luminous paint appearance."},
         {name: "tickGlowBlur", type: "real", min: 0.1, max: 1.0, default: 0.4, category: "Tick 3D",
          description: "Tick glow blur amount. Higher = softer glow."},

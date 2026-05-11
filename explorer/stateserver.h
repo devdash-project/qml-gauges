@@ -26,6 +26,7 @@
  *   {"action": "getState"}
  *   {"action": "getProperty", "name": "tickShape"}
  *   {"action": "setProperty", "name": "tickShape", "value": "triangle"}
+ *   {"action": "resetProperty", "name": "faceColor"}
  *   {"action": "listProperties"}
  *
  * Responses:
@@ -81,6 +82,7 @@ signals:
     // Signals for QML to respond to external commands
     void navigateRequested(const QString &page);
     void setPropertyRequested(const QString &name, const QVariant &value);
+    void resetPropertyRequested(const QString &name);
 
 private slots:
     void onNewConnection();

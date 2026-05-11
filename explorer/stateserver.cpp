@@ -213,6 +213,23 @@ QJsonObject StateServer::handleRequest(const QJsonObject &request)
             response["data"] = data;
         }
 
+    } else if (action == "resetProperty") {
+        QString name = request["name"].toString();
+        if (name.isEmpty()) {
+            response["success"] = false;
+            response["error"] = "Missing 'name' parameter";
+        } else {
+            // Ask QML to re-establish this property's binding (the editor →
+            // target override that setProperty installed is replaced by the
+            // property's metadata-declared `reset` expression, or its
+            // documented default).
+            emit resetPropertyRequested(name);
+            response["success"] = true;
+            QJsonObject data;
+            data["name"] = name;
+            response["data"] = data;
+        }
+
     } else if (action == "listProperties") {
         response["success"] = true;
         response["data"] = QJsonArray::fromVariantList(m_propertyMetadata);

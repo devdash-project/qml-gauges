@@ -43,6 +43,35 @@ ScrollView {
                 root.stateServer.updateProperty(name, value)
             }
         }
+
+        // Re-establish a property's binding after setProperty (or a user edit,
+        // or freeze) pinned it to a literal. The metadata entry may carry a
+        // `reset` function — the canonical default *expression* for that
+        // property (e.g. RadialGauge.faceColor's `() => GaugeTheme.colors.surface`)
+        // — in which case the binding is re-created via Qt.binding, so the
+        // property tracks the theme again. Otherwise we fall back to the
+        // documented `default` literal. The per-editor target→editor sync
+        // (see the Repeater delegate) then mirrors the new value into the
+        // editor UI and the state server; we also do it explicitly here for
+        // the case where the value didn't actually change.
+        function onResetPropertyRequested(name) {
+            if (!root.target || root.target[name] === undefined)
+                return
+            const propData = (root.properties || []).find(p => p && p.name === name)
+            if (propData && typeof propData.reset === "function") {
+                root.target[name] = Qt.binding(propData.reset)
+            } else if (propData && propData.default !== undefined) {
+                root.target[name] = propData.default
+            } else {
+                return
+            }
+            const newValue = root.target[name]
+            const editor = root.editorMap[name]
+            if (editor)
+                editor.value = newValue
+            if (root.stateServer)
+                root.stateServer.updateProperty(name, newValue)
+        }
     }
 
     ColumnLayout {
