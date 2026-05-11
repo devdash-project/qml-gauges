@@ -4,7 +4,7 @@ This document tracks the active development plan for the qml-gauges library.
 For the durable architectural reference, see CLAUDE.md. For audit outputs and
 historical investigations, see docs/audits/.
 
-Last updated: 2026-05-10 (IndustrialGauge preset completed)
+Last updated: 2026-05-10 (BezelScrews primitive landed and integrated into IndustrialGauge)
 
 ## Project framing
 
@@ -81,6 +81,11 @@ Implementation choices:
   will pick up automatically. See Open Questions.
 - Paint-grain texture is **deferred**: `faceTextureSource` exposed
   for downstream use, default empty (flat paint). See Backlog.
+- Bezel fasteners **integrated** 2026-05-10 via the new `BezelScrews`
+  primitive. Default count 4, slot-style heads, slightly lighter than
+  the bezel so the heads read as raised painted metal. Exposed as
+  `bezelScrewCount`, `bezelScrewAngleOffset`, `bezelScrewHeadStyle`.
+  Set count to 0 to disable.
 
 Verification (against the same gauge config rendered by RadialGauge):
 - coverage_ratio: 0.72 (well above the 0.3 threshold for "real gauge
@@ -126,8 +131,9 @@ As of 2026-05-10. Based on audit outputs in docs/audits/.
 
 ### Inventory
 
-- 10 primitives, 10 compounds, 3 templates (RadialGauge, RadialGauge3D,
-  IndustrialGauge — the last is the first preset).
+- 11 primitives, 10 compounds, 3 templates (RadialGauge, RadialGauge3D,
+  IndustrialGauge — the last is the first preset). BezelScrews joined
+  the primitives roster 2026-05-10.
 - Module URIs: `DevDash.Gauges`, `DevDash.Gauges.Primitives`, `DevDash.Gauges.Compounds`.
 - The four Needle* sub-primitives now live in Compounds (alongside GaugeNeedle)
   rather than Primitives — they have no plausible standalone use outside
@@ -208,10 +214,9 @@ See devdash-mcp/docs/TOOL_GUIDANCE.md for the "which tool when" reference.
 
 ## Active work
 
-No active work item. IndustrialGauge preset shipped 2026-05-10
-(see Aesthetic targets above for the implementation summary). Next
-likely deliverable is either the second preset (PerformanceBlackGauge
-or ChromeClassicGauge) or the BezelScrews primitive — see Backlog.
+No active work item. BezelScrews primitive shipped 2026-05-10 and is
+integrated into IndustrialGauge by default. Next likely deliverable is
+the second preset (PerformanceBlackGauge or ChromeClassicGauge).
 
 ## Backlog
 
@@ -232,11 +237,6 @@ Work units that are well-scoped but not active.
   workspace, or window destroyed without process exit), the MCP should
   detect this and return a diagnostic error rather than generic "window
   not found." Minor developer-experience improvement.
-- **BezelScrews sub-primitive.** New primitive; needed for both IndustrialGauge
-  and ChromeClassicGauge presets. Renders N fasteners at calculated angles
-  around the bezel. Not yet specified in detail. (Surfaced again during
-  IndustrialGauge construction — the matte ring reads as a painted band
-  but lacks the "real instrument" cue that visible fasteners provide.)
 - **Paint-grain texture asset for IndustrialGauge.** `faceTextureSource`
   is plumbed through, but no asset exists. Need a tileable warm-black
   paint-grain image at ~512×512 or larger; aim for very subtle grain so
@@ -251,8 +251,8 @@ Work units that are well-scoped but not active.
   want the same. A small `GaugeFaceLabel` compound (positioned along a
   configurable radial offset, with the same color/font wiring as the
   tick ring) would deduplicate this.
-- **ChromeClassicGauge preset.** Blocked on Bezel3D viability assessment and
-  BezelScrews primitive.
+- **ChromeClassicGauge preset.** Blocked on Bezel3D viability assessment.
+  BezelScrews primitive landed 2026-05-10 and is reusable here.
 - **PerformanceBlackGauge preset.** Depends on verified-working needle
   configurations. Lower priority than IndustrialGauge.
 - **Tier 2 MCP wrapper** (`render_matrix`). Useful once tier 1 wrapper exists.
@@ -274,6 +274,17 @@ Work units that are well-scoped but not active.
   hardcoded the rectangle default. Adding a passthrough is a one-line
   compound enhancement, not a new primitive — kept within the "no new
   primitives in this prompt" scope for IndustrialGauge.
+
+- **2026-05-10: BezelScrews is a primitive, not a GaugeBezel style.**
+  Two options were on the table: a separate `BezelScrews` primitive vs.
+  a `style: "screwed"` option on GaugeBezel. Decision: separate primitive.
+  Rationale: fasteners are conceptually independent of the bezel — they
+  may appear on mounting plates, instrument panels, sub-bezels, or
+  different bezel styles (matte/chrome/painted). A standalone primitive
+  composes across all of those without bloating GaugeBezel's property
+  surface or forcing every bezel style to participate in fastener
+  geometry. IndustrialGauge layers BezelScrews on top of GaugeBezel;
+  ChromeClassicGauge will do the same with different colors.
 
 
 
@@ -331,9 +342,6 @@ Decisions to make, not work to do.
   widely available), Allied Stencil (overtly military), Eurostile (1960s
   aerospace), Letter Gothic (typewriter/early-computing). Licensing implications
   vary. Loaded via Qt FontLoader.
-- **BezelScrews implementation: separate primitive vs. style on GaugeBezel.**
-  Composability favors separate primitive; simplicity favors built-in style
-  option. Decide when implementing.
 - **Animation damping work.** Currently deprioritized for Moon Patrol. May
   matter for the published library's quality bar — needle behavior is a
   significant "realness" cue. Revisit after presets land.

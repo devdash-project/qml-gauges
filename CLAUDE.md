@@ -20,13 +20,13 @@ All projects are part of the [devdash-project](https://github.com/devdash-projec
 ### Component Hierarchy (Three-Tier)
 
 ```
-Templates (RadialGauge, RadialGauge3D, future BarGauge, DrumOdometer)
+Templates (RadialGauge, RadialGauge3D, IndustrialGauge, future BarGauge, DrumOdometer)
     ↓ composed from
 Compounds (GaugeNeedle + Needle* sub-parts, GaugeTickRing, GaugeValueArc,
            GaugeZoneArc, DigitalReadout, RollingDigitReadout)
     ↓ composed from
-Primitives (GaugeArc, GaugeFace, GaugeBezel, GaugeCenterCap, GaugeTick,
-            GaugeTickLabel, GlassOverlay, PerformanceOverlay,
+Primitives (GaugeArc, GaugeFace, GaugeBezel, BezelScrews, GaugeCenterCap,
+            GaugeTick, GaugeTickLabel, GlassOverlay, PerformanceOverlay,
             Bezel3D, CenterCap3D)
 ```
 
@@ -51,9 +51,10 @@ src/
 │   └── RadialGauge3D.qml
 ├── primitives/                 # DevDash.Gauges.Primitives
 │   ├── arc/GaugeArc.qml
-│   ├── frame/                  # face + bezel together
+│   ├── frame/                  # face + bezel + fasteners together
 │   │   ├── GaugeFace.qml
-│   │   └── GaugeBezel.qml
+│   │   ├── GaugeBezel.qml
+│   │   └── BezelScrews.qml
 │   ├── center/GaugeCenterCap.qml
 │   ├── tick/
 │   │   ├── GaugeTick.qml
