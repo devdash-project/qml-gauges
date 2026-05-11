@@ -429,6 +429,35 @@ Item {
      */
     property color tickLabelOutlineColor: "#000000"
 
+    // === Face Text ===
+    //
+    // Two optional decorative text slots on the dial face. Both default to the
+    // empty string (hidden). The library ships no wordmark of its own — these
+    // exist so downstream users can place their own script word / branding
+    // line in the spots a vintage gauge traditionally uses them.
+
+    /**
+     * @brief Decorative script word rendered just below the dial centre.
+     *
+     * Positioned so a needle resting near the bottom of the scale partially
+     * overlays it — the place an aftermarket-gauge wordmark traditionally
+     * goes. Rendered under the needle. Empty by default (hidden).
+     *
+     * @default "" (hidden)
+     */
+    property string scriptLabel: ""
+
+    /**
+     * @brief Small branding line rendered low on the dial face.
+     *
+     * Occupies the spot a manufacturer name would sit near 6 o'clock, inside
+     * the dial (distinct from `label`, which is placed below the gauge).
+     * Rendered under the needle. Empty by default (hidden).
+     *
+     * @default "" (hidden)
+     */
+    property string brandLabel: ""
+
     // === Tick Mark Customization ===
 
     /**
@@ -581,6 +610,32 @@ Item {
         warningColor: root.warningColor
         criticalColor: root.criticalColor
         strokeWidth: 22
+    }
+
+    // Layer 5b: Decorative script word on the face (sits under the needle)
+    Text {
+        anchors.centerIn: parent
+        anchors.verticalCenterOffset: Math.min(root.width, root.height) * 0.14
+        text: root.scriptLabel
+        visible: root.scriptLabel !== ""
+        font.family: root.gaugeLabelFontFamily
+        font.pixelSize: Math.round(Math.min(root.width, root.height) * 0.075)
+        font.italic: true
+        font.weight: Font.DemiBold
+        font.letterSpacing: 1
+        color: root.tickColor
+    }
+
+    // Layer 5c: Small branding line low on the face (sits under the needle)
+    Text {
+        anchors.centerIn: parent
+        anchors.verticalCenterOffset: Math.min(root.width, root.height) * 0.32
+        text: root.brandLabel
+        visible: root.brandLabel !== ""
+        font.family: root.gaugeLabelFontFamily
+        font.pixelSize: Math.round(Math.min(root.width, root.height) * 0.032)
+        font.letterSpacing: 1
+        color: root.tickColor
     }
 
     // Layer 6: Needle
