@@ -4,7 +4,7 @@ This document tracks the active development plan for the qml-gauges library.
 For the durable architectural reference, see CLAUDE.md. For audit outputs and
 historical investigations, see docs/audits/.
 
-Last updated: 2026-05-11 (theme Phase 5 landed: the explorer's header bar gains a preset selector + gauge mode toggle — `GaugeThemeControls` — driving the `GaugeTheme` singleton globally, populated declaratively from `presetNames` / `presetMetadata` and reflecting `activeTheme` / `mode` reactively. Earlier the same day: Phases 3–4 — legacy IndustrialGauge / RadialGauge3D templates retired in favour of GaugeTheme presets; ClassicWhite preset added; RadialGauge gained scriptLabel / brandLabel; the Phase-3 follow-up wired the structural theme tokens — tickStyle, bezelStyle, effectsGlow/effectsShadow/effectsTexture, typographyScale — into RadialGauge so the three presets render structurally distinct, not just colour-shifted (Industrial-vs-ModernOEM SSIM 0.965 → 0.77). The whole theme track (Phases 1–5) is now complete.)
+Last updated: 2026-05-11 (MCP-follow-up explorer fixes: PropertyPanel now mirrors binding-derived target changes into the editor UI and the state server, so `qml_explorer_get_state` is no longer stale after `GaugeTheme.setTheme()`; and a new `resetProperty` WS action / `qml_explorer_reset_property` tool re-establishes a property's binding after `set_property` pinned it — see the Decisions log. Earlier the same day: theme Phase 5 — the explorer's header bar gained a preset selector + gauge mode toggle (`GaugeThemeControls`) driving the `GaugeTheme` singleton globally, populated declaratively from `presetNames` / `presetMetadata` and reflecting `activeTheme` / `mode` reactively. And Phases 3–4 — legacy IndustrialGauge / RadialGauge3D templates retired in favour of GaugeTheme presets; ClassicWhite preset added; RadialGauge gained scriptLabel / brandLabel; the Phase-3 follow-up wired the structural theme tokens — tickStyle, bezelStyle, effectsGlow/effectsShadow/effectsTexture, typographyScale — into RadialGauge so the three presets render structurally distinct, not just colour-shifted (Industrial-vs-ModernOEM SSIM 0.965 → 0.77). The whole theme track (Phases 1–5) is complete.)
 
 ## Project framing
 
@@ -326,7 +326,8 @@ See devdash-mcp/MCP_USAGE.md for full setup notes.
 | 6 | Animation capture | Absent (deferred) |
 | 7 | Performance instrumentation | Absent (relevant when Jetson perf budget questions become concrete) |
 
-Total tools exposed: 25 (was 17 at last documentation).
+Total tools exposed: 26 (was 17 at last documentation; +1 for
+`qml_explorer_reset_property`).
 
 ### Additional MCP capabilities
 
@@ -334,8 +335,17 @@ These don't fit the tier framework cleanly but matter for verification work:
 
 - **`qml_explorer_freeze_property` / `freeze_all_properties`** — break animation
   bindings during verification so a value can be inspected without the
-  binding immediately overwriting it. Used as the workaround for the
-  MCP-cannot-evaluate-bindings limitation.
+  binding immediately overwriting it.
+- **`qml_explorer_reset_property`** — the inverse: re-establish a property's
+  binding after `set_property` / `freeze` pinned it to a literal. Backed by the
+  explorer's `resetProperty` action (2026-05-11); restores from the property
+  metadata's `reset` expression (the GaugeTheme token it defaults to) or its
+  documented `default`. See the Decisions log.
+- **Binding-derived state is now live.** PropertyPanel publishes a property's
+  value to the state server not just at page load but whenever it changes via a
+  QML binding (e.g. a `GaugeTheme.setTheme()` flowing through
+  `RadialGauge.faceColor`), so `qml_explorer_get_state` / `get_property` return
+  the *current* resolved value, not the load-time one (2026-05-11).
 - **`qml_explorer_logs_get`** — captures explorer stdout/stderr when the
   explorer was launched by the MCP session.
 - **Token-efficient screenshot returns.** Screenshot tools default to
@@ -398,12 +408,14 @@ Work units that are well-scoped but not active.
   vignette migration in GlassOverlay, layer.smooth normalization across
   MultiEffect users, GaugeTick MultiEffect split (separate glow from shadow).
   Approved, low risk. Independent of file reorganization; ship standalone.
-- **Explorer protocol enhancement — `resolveProperty` action.** The MCP cannot
-  evaluate QML bindings directly; only the QML runtime can. Currently
-  `get_property` on a pure-binding value returns "not found" with an
-  instructive error message. A protocol enhancement on the explorer side
-  could return the resolved value. Low priority; the `freeze_property`
-  workaround is adequate.
+- **~~Explorer protocol enhancement — resolve bound property values for the
+  MCP~~ — effectively DONE (2026-05-11).** The MCP can't evaluate QML bindings
+  itself, but PropertyPanel now publishes a property's resolved value to the
+  state server both at page load *and* whenever a binding re-evaluates it, so
+  `get_state` carries it and `get_property`'s fallback finds it (no separate
+  `resolveProperty` action needed for the panel-backed pages). A bound value
+  that has no editor on its page still won't appear — that's the residual gap,
+  but it hasn't bitten anything; revisit only if it does.
 - **Hyprland workspace-aware error messaging in MCP.** When the explorer
   process exists but its window isn't enumerable (moved to a hidden
   workspace, or window destroyed without process exit), the MCP should
@@ -441,6 +453,29 @@ Work units that are well-scoped but not active.
 
 ## Decisions log
 
+- **2026-05-11: PropertyPanel now mirrors binding-derived target changes; new
+  `resetProperty` protocol action.** Two MCP-follow-up fixes. (1) Each property
+  editor connects to its target's `<name>Changed` signal and re-publishes the
+  value to the editor UI and the state server, with a re-entrancy guard so the
+  editor's resulting `valueChanged` doesn't push back onto the target (which
+  would clobber the binding it's mirroring — and would also break an animated
+  property's binding, e.g. `RadialGauge.value`). Closes the
+  `get_state`-is-stale-after-`GaugeTheme.setTheme()` issue. (2) `StateServer`
+  gains a `resetProperty` action → `resetPropertyRequested(name)` →
+  `PropertyPanel.onResetPropertyRequested`, which re-creates the binding via
+  `Qt.binding` from an optional `reset:` function on the property's metadata
+  entry — the GaugeTheme-token *expression* the template defaults to (e.g.
+  `faceColor`'s `() => GaugeTheme.colors.surface`) — or falls back to the
+  metadata `default` literal for non-theme-bound properties. The `reset:`
+  expression lives in the *page* metadata (`RadialGaugePage.qml`) so
+  PropertyPanel stays gauge-agnostic; it's only metadata, so it serialises to
+  `null` over the WS protocol (the MCP doesn't use it). Verified end-to-end via
+  `qml_explorer_reset_property`: `set faceColor=#ff0000` → `setTheme(classicWhite)`
+  (face stays red) → `reset_property("faceColor")` → face = classicWhite surface
+  `#2b2620` → `setTheme(modernOEM)` → face tracks to `#060606`. Reset also
+  exercised on bool / real / string / int editors. The old `resolveProperty`
+  backlog idea is obsoleted for panel-backed pages (the resolved values are now
+  in `get_state`).
 - **2026-05-11: Phase-5 selector took "Option B" — kept the per-page
   `setTheme()` calls, made the selector reactive.** The explorer's preset
   selector reflects `GaugeTheme.activeTheme` (mapping the active nested
