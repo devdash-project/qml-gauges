@@ -4,7 +4,7 @@ This document tracks the active development plan for the qml-gauges library.
 For the durable architectural reference, see CLAUDE.md. For audit outputs and
 historical investigations, see docs/audits/.
 
-Last updated: 2026-05-11 (doc-consistency pass: the `chrome3d` `GaugeBezel` fill bug — surfaced when `bezelStyle` was wired through RadialGauge — was actually fixed in commit `29d00cf` (chrome3d rebuilt as a true annulus); the Backlog item is now struck through as DONE and it's dropped from the Active-work next-pick list. Before that, MCP-follow-up explorer fixes: PropertyPanel now mirrors binding-derived target changes into the editor UI and the state server, so `qml_explorer_get_state` is no longer stale after `GaugeTheme.setTheme()`; and a new `resetProperty` WS action / `qml_explorer_reset_property` tool re-establishes a property's binding after `set_property` pinned it — see the Decisions log. Earlier the same day: theme Phase 5 — the explorer's header bar gained a preset selector + gauge mode toggle (`GaugeThemeControls`) driving the `GaugeTheme` singleton globally, populated declaratively from `presetNames` / `presetMetadata` and reflecting `activeTheme` / `mode` reactively. And Phases 3–4 — legacy IndustrialGauge / RadialGauge3D templates retired in favour of GaugeTheme presets; ClassicWhite preset added; RadialGauge gained scriptLabel / brandLabel; the Phase-3 follow-up wired the structural theme tokens — tickStyle, bezelStyle, effectsGlow/effectsShadow/effectsTexture, typographyScale — into RadialGauge so the three presets render structurally distinct, not just colour-shifted (Industrial-vs-ModernOEM SSIM 0.965 → 0.77). The whole theme track (Phases 1–5) is complete.)
+Last updated: 2026-05-11 (ClassicWhite typographic-character refinement landed: Barlow Condensed bundled into the theme module via a FontLoader on `GaugeTheme` and pointed at by ClassicWhite's `typographyNumeralFontFamily`; `GaugeTickLabel` gained a `hasFormShading` capability driven by a `MultiEffect` directional shadow; a new theme token `effectsTextShading` opts a preset into form-shaded numerals — true on classicWhite, false on industrial / modernOEM so their rendered output is unchanged. See "ClassicWhite refinement (2026-05-11)" below for the capability-test outcome. Before that — same date — the `chrome3d` `GaugeBezel` fill bug was fixed in commit `29d00cf` (chrome3d rebuilt as a true annulus). And MCP-follow-up explorer fixes: PropertyPanel now mirrors binding-derived target changes into the editor UI and the state server, so `qml_explorer_get_state` is no longer stale after `GaugeTheme.setTheme()`; and a new `resetProperty` WS action / `qml_explorer_reset_property` tool re-establishes a property's binding after `set_property` pinned it — see the Decisions log. Earlier the same day: theme Phase 5 — the explorer's header bar gained a preset selector + gauge mode toggle (`GaugeThemeControls`) driving the `GaugeTheme` singleton globally, populated declaratively from `presetNames` / `presetMetadata` and reflecting `activeTheme` / `mode` reactively. And Phases 3–4 — legacy IndustrialGauge / RadialGauge3D templates retired in favour of GaugeTheme presets; ClassicWhite preset added; RadialGauge gained scriptLabel / brandLabel; the Phase-3 follow-up wired the structural theme tokens — tickStyle, bezelStyle, effectsGlow/effectsShadow/effectsTexture, typographyScale — into RadialGauge so the three presets render structurally distinct, not just colour-shifted (Industrial-vs-ModernOEM SSIM 0.965 → 0.77). The whole theme track (Phases 1–5) is complete.)
 
 ## Project framing
 
@@ -250,10 +250,84 @@ Reference images: Hyundai Palisade cluster (`docs/references/hyundai-palisade.jp
   default) are where a user puts their own.
 - **Status:** completed 2026-05-11 (Phase 4). The `classicWhite` `GaugeTheme`
   preset + `src/templates/RadialGauge.qml` `scriptLabel` / `brandLabel` +
-  `explorer/qml/pages/ClassicWhitePage.qml`.
+  `explorer/qml/pages/ClassicWhitePage.qml`. **Refined 2026-05-11** with
+  bundled typography and form-shaded numerals — see *ClassicWhite refinement
+  (2026-05-11)* below.
 
 Reference image: `docs/references/Screenshot_20251129-203149.png` (Classic
 Instruments Velocity White).
+
+#### ClassicWhite refinement (2026-05-11)
+
+First capability-test prompt for the library — how close can we get to a
+specific real-world reference (the Velocity White speedo)? Two highest-impact
+gaps to close: the numerals' typographic character (the prior Helvetica/Roboto
+fallback chain read as flat web-app sans, not painted-on geometric condensed
+sans) and the absence of any dimensional cue on the numerals (the reference's
+numerals read as painted-with-depth, not flat-coloured text). Both landed:
+
+- **Typography.** Bundled **Barlow Condensed** (SIL OFL) under
+  `src/assets/fonts/` — geometric condensed sans in Regular / SemiBold / Bold
+  weights, the OFL license file shipped alongside. The theme module's qrc
+  bundle picks the .ttf files up via `qt_add_qml_module`'s `RESOURCES`
+  argument with explicit `QT_RESOURCE_ALIAS` aliases, so the qrc path is
+  stable (`qrc:/DevDash/Gauges/Theme/fonts/<file>.ttf`) regardless of source
+  layout. Three `FontLoader`s live on the `GaugeTheme` singleton at startup,
+  and the loaded family name is exposed as `GaugeTheme.barlowCondensedFamily`
+  — classicWhite's `typographyNumeralFontFamily` binds to it, so the literal
+  string "Barlow Condensed" is never hard-coded in QML.
+- **Form shading.** `GaugeTickLabel` gained `hasFormShading` /
+  `formShadingIntensity` / `lightAngle` / `formShadingColor` properties. With
+  shading on, the `Text` element is wrapped in a `layer.enabled` and gets a
+  `MultiEffect` shadow whose offset vector is derived from `lightAngle`
+  (default -45°: light from upper-left) and whose magnitude scales with both
+  `fontSize` and intensity. At the default 0.4 intensity the offset stays
+  well below the glyph stroke width, so the result reads as a slightly raised
+  painted numeral rather than a duplicated glyph. The shadow color defaults to
+  `Qt.darker(text-color, 1.8)` so the shading is hue-consistent with the
+  glyph (the paint-on-paint look). `GaugeTickRing` proxies through
+  `labelFormShading` / `labelFormShadingIntensity` to each major-tick label.
+- **Theme gating.** A new theme token `effectsTextShading` — separate from
+  `effectsShadow` (which is for *solid* objects: the needle) — lets a preset
+  declare painted-text shading independently. `classicWhite.effectsTextShading
+  = true`; `industrial` and `modernOEM` carry `false`, so the rendered output
+  of both is unchanged (their typography is flat stencil/sans, not painted).
+  `RadialGauge.tickLabelFormShading` defaults to `GaugeTheme.effectsTextShading`.
+
+Verification:
+- Screenshots: `docs/audits/classicwhite-typography-2026-05-11/`
+  (`classicwhite-light.png`, `classicwhite-dark.png`,
+  `industrial-light-unchanged.png`, `modernoem-light-unchanged.png`).
+- Reference perceptual-hash distance is dominated by the reference's phone-
+  chrome (status bar, browser bar) which the gauge crop does not contain, so
+  raw Hamming distance moved from ~25 → ~30 (slightly *worse* by that metric,
+  because the new render shares less *non-gauge* pixel structure with the
+  reference). The metric isn't load-bearing here.
+- The load-bearing test is human visual judgment side-by-side. Outcome: the
+  Barlow Condensed numerals make a far larger visible difference than the form
+  shading. The shading at default intensity is intentionally subtle — the
+  small font sizes at our preview scale don't carry much sub-pixel depth — but
+  it is present and the dimensional cue does register. Pushed to 0.7 the
+  effect is more pronounced without breaking the depth read; pushed to 1.0 it
+  starts to look like duplicate glyphs. Default of 0.4 ships.
+- Industrial and ModernOEM presets visually unchanged
+  (`industrial-light-unchanged.png`, `modernoem-light-unchanged.png`).
+
+Technical notes for future similar work:
+- `MultiEffect` on a `Text` requires `layer.enabled: true` (the effect
+  operates on a rasterised texture of the source). `layer.smooth: true` keeps
+  glyphs crisp on high-DPI displays. Each enabled `GaugeTickLabel` now carries
+  one layer + one `MultiEffect` — at typical gauge counts (8-10 major ticks)
+  this is fine on Jetson Orin NX, but a future bar gauge with many more text
+  elements may want a different approach (e.g. baking the shadow into a
+  pre-rendered atlas).
+- Bundling fonts via `qt_add_qml_module(... RESOURCES ...)` with
+  `QT_RESOURCE_ALIAS` worked cleanly first try. The alternative —
+  `qt_add_resources` to a separate prefix — would have been less localised to
+  the theme module.
+- Backlog item to consider: extract the "Text + form-shading shadow" pattern
+  to a reusable `FormShadedText` primitive if a second consumer appears (e.g.
+  the `gaugeLabel` slot or a future face wordmark wants the same treatment).
 
 ## Known capabilities and gaps
 
@@ -434,7 +508,16 @@ Work units that are well-scoped but not active.
 - **Industrial typeface loaded via FontLoader.** IndustrialGauge currently
   uses a generic `"DIN, DIN 1451, sans-serif"` fallback chain. Pick one
   from the candidates in Open Questions, license-check, and wire a
-  FontLoader in either the template or a Theme singleton.
+  FontLoader in either the template or a Theme singleton. (Infrastructure
+  now exists: `GaugeTheme` carries `FontLoader`s and `qt_add_qml_module`'s
+  `RESOURCES` + `QT_RESOURCE_ALIAS` pattern is established by the 2026-05-11
+  Barlow Condensed bundle.)
+- **`FormShadedText` reusable primitive.** The `Text` + `layer.enabled` +
+  `MultiEffect`-shadow pattern that `GaugeTickLabel.hasFormShading` ships
+  could be extracted to its own primitive if a second consumer wants it
+  (a face wordmark slot, the `gaugeLabel` text, the digital readout's
+  number, etc.). Doing it preemptively would be premature abstraction;
+  do it once the second use site exists.
 - **Label-inside-face rendering helper.** RadialGauge now has three ad-hoc
   on-face `Text` items (`scriptLabel`, `brandLabel`, and the industrial-style
   label-inside-the-dial idea). A small `GaugeFaceLabel` compound (positioned
@@ -457,6 +540,29 @@ Work units that are well-scoped but not active.
   significant scope, limited visual payoff.
 
 ## Decisions log
+
+- **2026-05-11: ClassicWhite refinement — new `effectsTextShading` token, not
+  a reuse of `effectsShadow`.** Form-shaded numerals could plausibly default
+  off `effectsShadow` (and the original prompt suggested that). But Industrial
+  and ModernOEM both carry `effectsShadow: true` (for the needle's drop
+  shadow), and giving their numerals painted-relief shading would change
+  their rendered output — which the prompt also forbade. So shading on solid
+  objects (needle) and shading on text are now expressed as two tokens, not
+  one. A side benefit: presets that want a needle shadow *without* painted
+  text (Industrial, ModernOEM) and presets that want painted text *with* a
+  matching needle (ClassicWhite) are both expressible; a hypothetical preset
+  that wanted painted text without a needle shadow would also work. The new
+  token's mode-independence matches the rest of the `effects*` family.
+
+- **2026-05-11: Font family looked up from FontLoader.name, not hard-coded.**
+  Theme preset `typographyNumeralFontFamily` strings point at
+  `GaugeTheme.barlowCondensedFamily` (which resolves from the loader's
+  `name` property) rather than the literal "Barlow Condensed". This avoids
+  the silent fallback when the font's reported family differs from what's
+  on disk (different builds report subtly different names — "Barlow
+  Condensed" vs "BarlowCondensed-Regular" vs the OS-canonicalised form), and
+  surfaces a load failure as a default-sans render rather than a wrong-font
+  string lookup that no one notices.
 
 - **2026-05-11: PropertyPanel now mirrors binding-derived target changes; new
   `resetProperty` protocol action.** Two MCP-follow-up fixes. (1) Each property
