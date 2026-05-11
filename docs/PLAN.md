@@ -4,7 +4,7 @@ This document tracks the active development plan for the qml-gauges library.
 For the durable architectural reference, see CLAUDE.md. For audit outputs and
 historical investigations, see docs/audits/.
 
-Last updated: 2026-05-11 (theme Phases 3–4 landed: legacy IndustrialGauge / RadialGauge3D templates retired in favour of GaugeTheme presets; ClassicWhite preset added; RadialGauge gains scriptLabel / brandLabel. Phase-3 follow-up done: RadialGauge now consumes the structural theme tokens — tickStyle, bezelStyle, effectsGlow/effectsShadow/effectsTexture, typographyScale — so the three presets render structurally distinct, not just colour-shifted (Industrial-vs-ModernOEM SSIM 0.965 → 0.77). GaugeTheme also exposes presetNames / presetMetadata as enumerable data for the Phase-5 selector.)
+Last updated: 2026-05-11 (theme Phase 5 landed: the explorer's header bar gains a preset selector + gauge mode toggle — `GaugeThemeControls` — driving the `GaugeTheme` singleton globally, populated declaratively from `presetNames` / `presetMetadata` and reflecting `activeTheme` / `mode` reactively. Earlier the same day: Phases 3–4 — legacy IndustrialGauge / RadialGauge3D templates retired in favour of GaugeTheme presets; ClassicWhite preset added; RadialGauge gained scriptLabel / brandLabel; the Phase-3 follow-up wired the structural theme tokens — tickStyle, bezelStyle, effectsGlow/effectsShadow/effectsTexture, typographyScale — into RadialGauge so the three presets render structurally distinct, not just colour-shifted (Industrial-vs-ModernOEM SSIM 0.965 → 0.77). The whole theme track (Phases 1–5) is now complete.)
 
 ## Project framing
 
@@ -43,7 +43,7 @@ serves external users; preset composites serve discoverability.
 
 ## Theme architecture
 
-(Landed 2026-05-11, Phases 1–4. Phase 5 below.)
+(Landed 2026-05-11, Phases 1–5 — the theme track is complete.)
 
 A **theme** is the orthogonal styling layer that sits beside the preset
 composites. It is the `GaugeTheme` singleton in the `DevDash.Gauges.Theme`
@@ -66,10 +66,11 @@ qmldir + CMake registration).
   `src/theme/GaugeTheme.qml` covers the token semantics.
 - **Preset registry as data.** `GaugeTheme.presetNames` (ordered internal
   names) and `GaugeTheme.presetMetadata` (`{displayName, description}` per
-  preset) expose the preset list as plain data so the Phase-5 selector UX can
-  be declarative. Adding a preset now touches three co-located spots in
-  `GaugeTheme.qml`: the nested `QtObject`, a `setTheme()` case, and a registry
-  entry. (No `swatch` field yet — see Backlog.)
+  preset) expose the preset list as plain data; the explorer's Phase-5 preset
+  selector is built declaratively off it. Adding a preset now touches three
+  co-located spots in `GaugeTheme.qml`: the nested `QtObject`, a `setTheme()`
+  case, and a registry entry — and it shows up in the selector with no explorer
+  change. (No `swatch` field yet — see Backlog.)
 - **Two orthogonal axes: preset and mode.** `activeTheme` (default
   `industrial`) selects the aesthetic family; `mode` (`"light"` / `"dark"`)
   selects the day / night colour set. They vary independently. The intended
@@ -84,7 +85,8 @@ qmldir + CMake registration).
   `GaugeTheme.qml` — not separate importable types. Adding a preset = adding
   another nested `QtObject` + a `setTheme()` case.
 
-Phase status: Phases 1–4 complete; the Phase-3 token follow-up is also done.
+Phase status: Phases 1–5 complete (the theme track is finished); the Phase-3
+token follow-up is also done.
 - Phase 1 (theme infrastructure) + Phase 2 (RadialGauge consumes the colour
   and font-family tokens).
 - Phase 3 — retired the legacy preset-composite templates. Because RadialGauge
@@ -108,10 +110,25 @@ Phase status: Phases 1–4 complete; the Phase-3 token follow-up is also done.
   `GaugeBezel` style has a pre-existing fill bug (the ConicalGradient fills the
   disc, not just the ring) that this wiring now exercises.
 - Also landed: `GaugeTheme.presetNames` / `presetMetadata` — the preset list
-  as enumerable data, prep for the Phase-5 selector.
+  as enumerable data, the foundation for the Phase-5 selector.
+- Phase 5 (landed 2026-05-11) — the explorer's header bar gains
+  `GaugeThemeControls` (`explorer/qml/components/GaugeThemeControls.qml`): a
+  preset selector ComboBox + a gauge light/dark mode toggle, both driving the
+  `GaugeTheme` singleton globally. The selector is built declaratively off
+  `presetNames` / `presetMetadata` (display name as label, description as a
+  per-option tooltip) and reflects `activeTheme` reactively — a preset-demo
+  page's `Component.onCompleted: setTheme(...)` shows up as the selected item,
+  and the user can deviate via the selector with nothing reverting it (pages
+  set the preset only on load). The mode toggle is independent of the
+  explorer's own UI light/dark toggle (so a light explorer UI can show
+  dark-mode gauges, or vice versa). The `themeName` / `themeMode` synthetic
+  properties on `RadialGaugePage` remain as an MCP verification harness — they
+  manipulate the same global state the selector now reflects.
 
-Remaining: Phase 5 — explorer preset/mode selection UX (a real UI; the
-`themeName` / `themeMode` MCP test hook on `RadialGaugePage` is just a harness).
+No Phase 6: the theme track is complete. (Remaining theme-adjacent work is
+backlog: the `RadialGauge3D`-era glass overlay / domed centre cap have no token
+yet, the `chrome3d` `GaugeBezel` fill bug, the `swatch`-per-preset idea, and a
+`GaugeFaceLabel` compound.)
 
 ## Aesthetic targets (presets)
 
@@ -332,20 +349,19 @@ See devdash-mcp/docs/TOOL_GUIDANCE.md for the "which tool when" reference.
 
 ## Active work
 
-No active work item. Theme system Phases 1–4 shipped 2026-05-11
-(`DevDash.Gauges.Theme` singleton with `industrial`, `modernOEM` and
-`classicWhite` presets; RadialGauge consumes the colour/font tokens and now
-exposes `scriptLabel` / `brandLabel`; the `IndustrialGauge` and `RadialGauge3D`
-templates are gone). The Phase-3 structural-token follow-up shipped the same
-day (RadialGauge now consumes `tickStyle` / `bezelStyle` / the `effects*`
-flags / `typographyScale`), and `GaugeTheme` gained `presetNames` /
-`presetMetadata`. Next on the theme track: Phase 5 — explorer preset/mode
-selection UX (a real UI, not just the MCP test hook on RadialGaugePage; the
-presetMetadata is the data it should drive off). Still in the Backlog from
-Phase 3: re-homing the `RadialGauge3D` glass overlay / domed centre cap (no
-token yet), the `chrome3d` `GaugeBezel` fill bug, and a `GaugeFaceLabel`
-compound. Independent of all that, the next aesthetic target preset is still
-PerformanceBlack or ChromeClassic.
+No active work item. The theme track is complete: Phases 1–5 shipped
+2026-05-11 — the `DevDash.Gauges.Theme` singleton with `industrial`,
+`modernOEM` and `classicWhite` presets; RadialGauge consumes every token
+(colour, font, `tickStyle` / `bezelStyle` / the `effects*` flags /
+`typographyScale`) as defaults and exposes `scriptLabel` / `brandLabel`; the
+`IndustrialGauge` and `RadialGauge3D` templates are gone; `GaugeTheme` exposes
+`presetNames` / `presetMetadata`; and the explorer's header bar drives all of
+it via `GaugeThemeControls` (preset selector + gauge mode toggle). Next, pick
+from the Backlog: the next aesthetic target preset (PerformanceBlack or
+ChromeClassic), re-homing the `RadialGauge3D`-era glass overlay / domed centre
+cap (no theme token yet), the `chrome3d` `GaugeBezel` fill bug, the
+`swatch`-per-preset idea, a `GaugeFaceLabel` compound, or the effect-consistency
+cleanup.
 
 ## Backlog
 
@@ -424,6 +440,28 @@ Work units that are well-scoped but not active.
   significant scope, limited visual payoff.
 
 ## Decisions log
+
+- **2026-05-11: Phase-5 selector took "Option B" — kept the per-page
+  `setTheme()` calls, made the selector reactive.** The explorer's preset
+  selector reflects `GaugeTheme.activeTheme` (mapping the active nested
+  `QtObject` back to its `presetNames` entry), so a preset-demo page's
+  `Component.onCompleted: GaugeTheme.setTheme(...)` shows up as the selected
+  item — the per-page "this page demonstrates the Industrial preset" semantic
+  is preserved *and* the user can deviate via the selector, with nothing
+  reverting it because pages set the preset only on load, never continuously.
+  No new GaugeTheme API: the selector consumes the existing `presetNames` /
+  `presetMetadata` / `activeTheme` / `mode` / `setTheme` / `setMode`. The
+  gauge mode toggle is deliberately a *separate* control from the explorer's
+  own UI light/dark toggle (the `Theme` singleton): they're orthogonal, so a
+  light explorer UI can render dark-mode gauges (night-driving simulation) or
+  vice versa. `currentIndex` on the ComboBox is pushed imperatively (not a
+  plain binding) because the control writes to it on user activation, which
+  would break a binding — a small `syncToActive()` guarded by an
+  index-already-equal check keeps it consistent both ways. The `themeName` /
+  `themeMode` synthetic-property hook on `RadialGaugePage` was kept (not
+  removed) as an MCP verification harness — it drives the same global state the
+  selector reflects, which is exactly what makes it a useful test of the
+  selector's reactivity.
 
 - **2026-05-11: Structural-token wiring kept RadialGauge's existing property
   names; didn't rename to a `*Has*` convention.** The Phase-3 follow-up changed

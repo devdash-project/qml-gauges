@@ -172,7 +172,10 @@ that this wiring now exercises — also backlogged.)
 `GaugeTheme.presetNames` (ordered list of the internal preset names, matching
 what `setTheme()` accepts) and `GaugeTheme.presetMetadata` (a `{displayName,
 description}` object per preset) expose the preset registry as plain data, so a
-selector UI can be built declaratively rather than hardcoding preset names.
+selector UI can be built declaratively rather than hardcoding preset names. The
+explorer's header-bar preset selector (see "Component Explorer" below) is built
+this way: adding a preset to `GaugeTheme.qml` makes it appear in that dropdown
+with no explorer change.
 
 Presets are defined as nested `QtObject`s **inside `GaugeTheme.qml`**, not as
 separate preset `.qml` files: a QML singleton that references same-module
@@ -294,6 +297,34 @@ When adding new QML files, update the corresponding CMakeLists.txt:
 ## Component Explorer
 
 The explorer (`explorer/`) is both a development tool and demo application.
+
+### Header-bar controls
+
+The header bar carries two *independent* light/dark stories plus the gauge
+preset selector, left-to-right after the page title:
+
+- **Explorer-UI light/dark toggle** (☀/☾ ToolButton, `Theme.toggle()`) —
+  restyles the explorer chrome only. `Theme` is the explorer's own UI-theme
+  singleton (`explorer/qml/Theme.qml`); it has nothing to do with the gauges.
+- **`GaugeThemeControls`** (`explorer/qml/components/GaugeThemeControls.qml`) —
+  drives the `GaugeTheme` *gauge* singleton globally:
+  - a **preset selector** (ComboBox) populated from `GaugeTheme.presetNames` /
+    `presetMetadata` (display name as the label, description as a per-option
+    tooltip), calling `GaugeTheme.setTheme(name)` on selection. It also
+    *reflects* `GaugeTheme.activeTheme` reactively — so a preset-demo page's
+    `Component.onCompleted: GaugeTheme.setTheme(...)` shows up as the selected
+    item, and the user can then deviate via the selector (nothing reverts it,
+    since pages only set the preset on load, never continuously).
+  - a **gauge mode toggle** (☀ Light / ☾ Dark ToolButton) bound to
+    `GaugeTheme.mode`, calling `GaugeTheme.setMode(...)`. Distinct from the
+    explorer-UI toggle: a user can run a light explorer UI with dark-mode
+    gauges (night-driving simulation) or vice versa. Mode only swaps the colour
+    set; structural tokens are mode-independent.
+
+The old per-page `themeName` / `themeMode` synthetic-property hook on
+`RadialGaugePage` (forwarding to `GaugeTheme.setTheme` / `setMode`) is still
+present as an MCP verification harness — it manipulates the same global state
+the selector reflects.
 
 ### Adding a New Component Page
 
