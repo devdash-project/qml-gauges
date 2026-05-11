@@ -120,18 +120,53 @@ ScrollView {
                     // Register editor in map for bidirectional updates
                     root.editorMap[propData.name] = item
 
-                    // One-way binding: editor → target property
-                    // (Don't use Qt.binding for target→editor as it conflicts with user input)
-                    item.valueChanged.connect(() => {
-                        if (root.target) {
-                            root.target[propData.name] = item.value
+                    // Re-entrancy guard shared by the two sync directions below.
+                    // While one direction is propagating, the other must not
+                    // fire back — in particular a target→editor refresh must not
+                    // re-push the value onto the target, or it would clobber the
+                    // very binding we're mirroring (and break it permanently).
+                    let syncing = false
 
-                            // Report to state server for MCP integration
-                            if (root.stateServer) {
-                                root.stateServer.updateProperty(propData.name, item.value)
-                            }
-                        }
+                    // editor → target: a user edit (or an MCP setProperty routed
+                    // through the editor) pushes the value onto the target,
+                    // intentionally replacing any binding it had — that *is* the
+                    // per-instance override. Also reported to the state server.
+                    // (Don't use Qt.binding for target→editor — it conflicts with
+                    // user input — hence the explicit signal wiring just below.)
+                    item.valueChanged.connect(() => {
+                        if (syncing || !root.target)
+                            return
+                        syncing = true
+                        root.target[propData.name] = item.value
+                        syncing = false
+                        if (root.stateServer)
+                            root.stateServer.updateProperty(propData.name, item.value)
                     })
+
+                    // target → editor: when target[name] changes for any *other*
+                    // reason — most importantly a binding re-evaluating, e.g.
+                    // GaugeTheme.setTheme() flowing through
+                    // RadialGauge.faceColor: GaugeTheme.colors.surface — mirror it
+                    // into the editor UI and the state server. Without this,
+                    // qml_explorer_get_state (and the editor) would keep showing
+                    // the load-time value after a theme switch. The `syncing`
+                    // guard means the editor's resulting valueChanged does NOT
+                    // push back onto the target, so the binding survives.
+                    if (root.target) {
+                        const changedSignal = root.target[propData.name + "Changed"]
+                        if (changedSignal && changedSignal.connect) {
+                            changedSignal.connect(() => {
+                                if (syncing || !root.target)
+                                    return
+                                const nv = root.target[propData.name]
+                                syncing = true
+                                item.value = nv
+                                syncing = false
+                                if (root.stateServer)
+                                    root.stateServer.updateProperty(propData.name, nv)
+                            })
+                        }
+                    }
 
                     // Initialize state server with current value
                     if (root.stateServer && root.target) {
