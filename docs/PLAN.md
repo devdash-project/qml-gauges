@@ -4,7 +4,7 @@ This document tracks the active development plan for the qml-gauges library.
 For the durable architectural reference, see CLAUDE.md. For audit outputs and
 historical investigations, see docs/audits/.
 
-Last updated: 2026-05-10 (BezelScrews primitive landed and integrated into IndustrialGauge)
+Last updated: 2026-05-11 (theme system — DevDash.Gauges.Theme singleton — landed; RadialGauge now consumes it)
 
 ## Project framing
 
@@ -40,6 +40,44 @@ serves external users; preset composites serve discoverability.
 - **Real instrument ≠ modern OLED cluster.** These are different aesthetics
   with different vocabulary. Library serves both via separate presets; neither
   is the "default."
+
+## Theme architecture
+
+(Landed 2026-05-11, Phases 1–2. Phases 3–5 below.)
+
+A **theme** is the orthogonal styling layer that sits beside the preset
+composites. It is the `GaugeTheme` singleton in the `DevDash.Gauges.Theme`
+submodule (structured like Primitives / Compounds / Templates: its own
+qmldir + CMake registration).
+
+- **Tokens, not gauge-specific properties.** The theme defines concept-level
+  tokens — `background`, `surface`, `surfaceElevated`, `primary`,
+  `foreground`, `warning`, `critical`, `overlay` (colours), plus
+  `typographyFontFamily` / `typographyNumeralFontFamily` / `typographyScale`,
+  `effectsGlow` / `effectsShadow` / `effectsTexture`, `tickStyle`,
+  `bezelStyle` (mode-independent). Each gauge family maps the tokens onto its
+  own elements (radial: `surface` → face; future bar: `surface` → background).
+  The theme never names a specific gauge type. Full token reference: CLAUDE.md
+  "Theme system", and the doc comment in `src/theme/GaugeTheme.qml`.
+- **Two orthogonal axes: preset and mode.** `activeTheme` (default
+  `industrial`) selects the aesthetic family; `mode` (`"light"` / `"dark"`)
+  selects the day / night colour set. They vary independently. The intended
+  driver on Moon Patrol is the C++ host calling `GaugeTheme.setMode(...)` off
+  ambient-light readings; QML reacts via the `colors` binding.
+- **Per-instance overrides preserved.** Gauge templates default each styling
+  property to a theme token (`property color faceColor:
+  GaugeTheme.colors.surface`); an explicit assignment on an instance still
+  wins. The theme supplies defaults, not mandates.
+- **Public surface is just `GaugeTheme`.** The presets (`industrial`,
+  `modernOEM`) are nested `QtObject`s defined inside `GaugeTheme.qml` — not
+  separate importable types. Adding a preset = adding another nested
+  `QtObject` + a `setTheme()` case.
+
+Phase status: Phase 1 (theme infrastructure) + Phase 2 (RadialGauge consumes
+the theme) complete. Remaining: Phase 3 — migrate IndustrialGauge /
+RadialGauge3D to *be* the `industrial` / `modernOEM` presets (drop their
+hardcoded defaults; add preset-driven feature toggles); Phase 4 — add a
+ClassicWhite preset; Phase 5 — explorer preset/mode selection UX.
 
 ## Aesthetic targets (presets)
 
@@ -132,9 +170,13 @@ As of 2026-05-10. Based on audit outputs in docs/audits/.
 ### Inventory
 
 - 11 primitives, 10 compounds, 3 templates (RadialGauge, RadialGauge3D,
-  IndustrialGauge — the last is the first preset). BezelScrews joined
-  the primitives roster 2026-05-10.
-- Module URIs: `DevDash.Gauges`, `DevDash.Gauges.Primitives`, `DevDash.Gauges.Compounds`.
+  IndustrialGauge — the last is the first preset composite). BezelScrews
+  joined the primitives roster 2026-05-10.
+- 1 theme singleton: `GaugeTheme` (in `DevDash.Gauges.Theme`), landed
+  2026-05-11. Carries 2 presets (`industrial`, `modernOEM`) as inline
+  nested objects.
+- Module URIs: `DevDash.Gauges`, `DevDash.Gauges.Theme`,
+  `DevDash.Gauges.Primitives`, `DevDash.Gauges.Compounds`.
 - The four Needle* sub-primitives now live in Compounds (alongside GaugeNeedle)
   rather than Primitives — they have no plausible standalone use outside
   GaugeNeedle today.
@@ -214,9 +256,14 @@ See devdash-mcp/docs/TOOL_GUIDANCE.md for the "which tool when" reference.
 
 ## Active work
 
-No active work item. BezelScrews primitive shipped 2026-05-10 and is
-integrated into IndustrialGauge by default. Next likely deliverable is
-the second preset (PerformanceBlackGauge or ChromeClassicGauge).
+No active work item. Theme system Phases 1–2 shipped 2026-05-11
+(`DevDash.Gauges.Theme` singleton with `industrial` + `modernOEM` presets;
+RadialGauge consumes it for default styling). Next on the theme track:
+Phase 3 — migrate IndustrialGauge and RadialGauge3D to be the `industrial`
+and `modernOEM` presets (remove their hardcoded defaults, introduce
+preset-driven feature toggles). Then Phase 4 (ClassicWhite preset), Phase 5
+(explorer preset/mode selection UX). Independent of that, the next aesthetic
+target preset is still PerformanceBlackGauge or ChromeClassicGauge.
 
 ## Backlog
 
@@ -267,6 +314,36 @@ Work units that are well-scoped but not active.
   significant scope, limited visual payoff.
 
 ## Decisions log
+
+- **2026-05-11: Theme = concept-level tokens, not gauge-specific properties.**
+  The theme defines abstract tokens (`surface`, `primary`, `foreground`, …)
+  rather than properties like `faceColor` or `needleColor`. Rationale: the
+  theme must work across multiple gauge families (radial, future bar, future
+  digital); concept-level tokens let each family interpret them appropriately
+  (a radial gauge maps `surface` → its face; a bar gauge would map `surface` →
+  its background) without the theme ever needing to know about specific gauge
+  types.
+
+- **2026-05-11: Theme submodule at `DevDash.Gauges.Theme`; public API is just
+  `GaugeTheme`.** The theme lives in its own submodule, structured like
+  Primitives / Compounds / Templates. The presets (`industrial`, `modernOEM`)
+  are *not* separate importable types — they are nested `QtObject`s inside
+  `GaugeTheme.qml`. Downstream code only ever touches `GaugeTheme`.
+
+- **2026-05-11: Presets inlined into `GaugeTheme.qml`, not separate `.qml`
+  files; `onSurface` token renamed `foreground`.** The original design had
+  `IndustrialPreset.qml` / `ModernOEMPreset.qml` referenced by the singleton.
+  Empirically, a QML *singleton* that references same-module types is not
+  reliably loadable at runtime from a compiled `qt_add_qml_module` resource —
+  the auto-generated qmldir's `prefer :/...` line breaks the relative
+  resolution of the referenced types, and the failure mode is *silent* (the
+  module just fails to import, no diagnostic on stderr, qmllint stays green).
+  Inlining the presets as nested `QtObject`s sidesteps it. Separately, the
+  Material-design token name `onSurface` had to become `foreground`: a
+  property whose name starts with `on` + uppercase is mis-parsed by
+  qmlcachegen as a signal-handler binding (works in the QML interpreter, fails
+  in AOT). Both are tooling constraints, not design choices — revisit if a
+  future Qt fixes either.
 
 - **2026-05-10: GaugeTickRing gains `tickShape` passthrough.** The
   underlying GaugeTick primitive already exposed `tickShape` (verified

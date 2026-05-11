@@ -34,12 +34,19 @@ Primitives (GaugeArc, GaugeFace, GaugeBezel, BezelScrews, GaugeCenterCap,
 (`NeedleFrontBody`, `NeedleHeadTip`, `NeedleRearBody`, `NeedleTailTip`).
 All five types live in `DevDash.Gauges.Compounds`.
 
+Templates also pull their *default* styling from the **theme** — the
+`GaugeTheme` singleton in `DevDash.Gauges.Theme` (see "Theme system" below).
+Templates remain the place where per-aesthetic preset *composites* live;
+the theme is the orthogonal layer that supplies the colour/typography/effect
+defaults those composites (and bare templates) start from.
+
 ### QML Module Structure
 
 ```qml
-import DevDash.Gauges 1.0            // Templates only (RadialGauge)
+import DevDash.Gauges 1.0            // Templates (RadialGauge, RadialGauge3D, IndustrialGauge)
 import DevDash.Gauges.Primitives 1.0 // Atomic building blocks
 import DevDash.Gauges.Compounds 1.0  // Functional sub-assemblies
+import DevDash.Gauges.Theme 1.0      // GaugeTheme singleton (active aesthetic state)
 ```
 
 ### Directory Layout
@@ -48,7 +55,11 @@ import DevDash.Gauges.Compounds 1.0  // Functional sub-assemblies
 src/
 ├── templates/                  # DevDash.Gauges
 │   ├── RadialGauge.qml
-│   └── RadialGauge3D.qml
+│   ├── RadialGauge3D.qml
+│   └── IndustrialGauge.qml      # first preset composite
+├── theme/                      # DevDash.Gauges.Theme
+│   ├── GaugeTheme.qml           # singleton: active preset + light/dark mode
+│   └── qmldir                   # advertises only GaugeTheme (presets are internal)
 ├── primitives/                 # DevDash.Gauges.Primitives
 │   ├── arc/GaugeArc.qml
 │   ├── frame/                  # face + bezel + fasteners together
@@ -86,6 +97,62 @@ explorer/
 │   ├── components/             # Sidebar, PropertyPanel, PreviewArea
 │   ├── editors/                # RealEditor, ColorEditor, BoolEditor, etc.
 │   └── pages/                  # One page per component
+```
+
+### Theme system (`DevDash.Gauges.Theme`)
+
+`GaugeTheme` is a **singleton** holding the dashboard's currently-active
+aesthetic state. The C++ host (or any QML) can switch it at runtime — the
+intended use on Moon Patrol's cluster is ambient-light-driven day/night
+switching. Gauge templates read their default styling from it; per-instance
+property assignments still override the theme.
+
+Two orthogonal axes:
+
+- **Preset** (`GaugeTheme.activeTheme`, default `industrial`; switch with
+  `GaugeTheme.setTheme("industrial" | "modernOEM")`) — the aesthetic family.
+- **Mode** (`GaugeTheme.mode`, `"light"` | `"dark"`; switch with
+  `GaugeTheme.setMode(...)`) — day vs. night colour set. Independent of preset.
+
+The theme exposes **concept-level tokens, not gauge-specific properties** — so
+any gauge family (radial, future bar, future digital) can map the same tokens
+onto its own elements. A radial gauge maps `surface` → face colour; a bar
+gauge would map `surface` → background.
+
+Colour tokens (vary by mode; read from `GaugeTheme.colors`):
+
+| Token            | Meaning                                                        |
+| ---------------- | -------------------------------------------------------------- |
+| `background`     | colour behind everything (dashboard backdrop)                  |
+| `surface`        | primary gauge body surface (radial face, bar background)       |
+| `surfaceElevated`| raised elements such as bezel rims                             |
+| `primary`        | main accent: needles, dominant numerals, active arc            |
+| `foreground`     | marks on the surface: ticks, labels, secondary text (the Material `onSurface` role — named `foreground` because an `on…`-prefixed QML property name is mis-parsed as a signal handler by qmlcachegen) |
+| `warning`        | warning-zone colour (amber range, typically)                   |
+| `critical`       | critical / redline zone colour (red range, typically)          |
+| `overlay`        | glass / lens overlay tint (often `transparent`, or white at low opacity) |
+
+Non-colour tokens (mode-independent; read directly off `GaugeTheme`):
+`typographyFontFamily`, `typographyNumeralFontFamily`, `typographyScale`,
+`effectsGlow`, `effectsShadow`, `effectsTexture`,
+`tickStyle` (`"rectangle"|"chevron"|"triangle"|"rounded-dot"|"block"`),
+`bezelStyle` (`"flat"|"chrome"|"chrome3d"`).
+
+Presets are defined as nested `QtObject`s **inside `GaugeTheme.qml`**, not as
+separate preset `.qml` files: a QML singleton that references same-module
+types is not reliably loadable at runtime from a compiled `qt_add_qml_module`
+resource (the auto-generated qmldir's `prefer :/...` line breaks the relative
+resolution of those types, and the failure is silent — no diagnostic). Adding
+a preset = adding another nested `QtObject` to `GaugeTheme.qml` and a
+`case` to `setTheme()`.
+
+When consuming the theme from a template, default a styling property to a
+theme token rather than a literal:
+
+```qml
+import DevDash.Gauges.Theme 1.0
+// ...
+property color faceColor: GaugeTheme.colors.surface   // theme default; instance can override
 ```
 
 ## Build Commands
@@ -175,6 +242,7 @@ mcp__ide__getDiagnostics with uri: "file:///path/to/file.qml"
 
 When adding new QML files, update the corresponding CMakeLists.txt:
 - `src/CMakeLists.txt` - For templates
+- `src/theme/CMakeLists.txt` - For the theme module
 - `src/primitives/CMakeLists.txt` - For primitives
 - `src/compounds/CMakeLists.txt` - For compounds
 - `explorer/CMakeLists.txt` - For explorer pages/components/editors
