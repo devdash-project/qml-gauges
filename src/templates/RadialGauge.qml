@@ -152,6 +152,16 @@ Item {
      */
     property real labelDivisor: 1
 
+    /**
+     * @brief Tick mark shape for major and minor ticks.
+     *
+     * Supported: "rectangle", "chevron", "triangle", "rounded-dot", "block".
+     * Mirrors the theme's `tickStyle` token; per-instance assignment overrides.
+     *
+     * @default GaugeTheme.tickStyle
+     */
+    property string tickShape: GaugeTheme.tickStyle
+
     // === Color Scheme ===
     //
     // Defaults are derived from the active theme (see GaugeTheme). Assigning
@@ -184,6 +194,44 @@ Item {
 
     /** @brief Critical-range tick / arc color. @default GaugeTheme.colors.critical */
     property color criticalColor: GaugeTheme.colors.critical
+
+    // === Bezel & Face Styling ===
+    //
+    // These mirror the theme's structural tokens (`bezelStyle`, `effectsTexture`)
+    // so a preset can change a gauge's *structure*, not just its colours.
+    // Per-instance assignment overrides the theme as usual.
+
+    /**
+     * @brief Decorative bezel rendering style.
+     *
+     * Supported: "flat" (solid colour), "chrome" (vertical metallic gradient),
+     * "chrome3d" (cylindrical chrome via ConicalGradient).
+     * Mirrors the theme's `bezelStyle` token.
+     *
+     * @default GaugeTheme.bezelStyle
+     */
+    property string bezelStyle: GaugeTheme.bezelStyle
+
+    /**
+     * @brief Whether the gauge face renders a texture overlay.
+     *
+     * Mirrors the theme's `effectsTexture` token. When false the face is a
+     * flat fill regardless of `faceTextureSource` — this is how a preset opts
+     * out of texturing entirely.
+     *
+     * @default GaugeTheme.effectsTexture
+     */
+    property bool faceTexture: GaugeTheme.effectsTexture
+
+    /**
+     * @brief Texture image source for the gauge face (paint grain, carbon, …).
+     *
+     * Only applied when `faceTexture` is true. The library ships no texture
+     * asset; this is a slot for downstream use.
+     *
+     * @default "" (no texture)
+     */
+    property string faceTextureSource: ""
 
     // === Needle Customization ===
 
@@ -253,9 +301,12 @@ Item {
 
     /**
      * @brief Enable shadow effect on needle.
-     * @default false
+     *
+     * Mirrors the theme's `effectsShadow` token (the painted-object look).
+     *
+     * @default GaugeTheme.effectsShadow
      */
-    property bool needleShadow: false
+    property bool needleShadow: GaugeTheme.effectsShadow
 
     /**
      * @brief Gradient style for 3D needle effect.
@@ -308,9 +359,12 @@ Item {
     /**
      * @brief Enable outer glow effect (neon halo).
      * Creates a glowing halo extending outward from needle edges.
-     * @default false
+     *
+     * Mirrors the theme's `effectsGlow` token (the modern OLED-cluster look).
+     *
+     * @default GaugeTheme.effectsGlow
      */
-    property bool needleOuterGlow: false
+    property bool needleOuterGlow: GaugeTheme.effectsGlow
 
     /**
      * @brief Outer glow color.
@@ -386,9 +440,12 @@ Item {
 
     /**
      * @brief Font size for tick labels (pixels).
-     * @default 18
+     *
+     * Base size 18, scaled by the theme's `typographyScale` token.
+     *
+     * @default 18 × GaugeTheme.typographyScale
      */
-    property int tickLabelFontSize: 18
+    property int tickLabelFontSize: Math.round(18 * GaugeTheme.typographyScale)
 
     /**
      * @brief Font weight for tick labels.
@@ -404,9 +461,12 @@ Item {
 
     /**
      * @brief Font size for gauge label (pixels).
-     * @default 18
+     *
+     * Base size 18, scaled by the theme's `typographyScale` token.
+     *
+     * @default 18 × GaugeTheme.typographyScale
      */
-    property int gaugeLabelFontSize: 18
+    property int gaugeLabelFontSize: Math.round(18 * GaugeTheme.typographyScale)
 
     /**
      * @brief Font weight for gauge label.
@@ -486,9 +546,12 @@ Item {
     /**
      * @brief Enable glow effect on tick marks.
      * Creates luminous paint appearance.
-     * @default false
+     *
+     * Mirrors the theme's `effectsGlow` token (the modern OLED-cluster look).
+     *
+     * @default GaugeTheme.effectsGlow
      */
-    property bool tickGlow: false
+    property bool tickGlow: GaugeTheme.effectsGlow
 
     /**
      * @brief Tick glow blur amount (0.0-1.0).
@@ -527,6 +590,7 @@ Item {
         visible: root.showFace
         diameter: Math.min(root.width, root.height)
         color: root.faceColor
+        textureSource: root.faceTexture ? root.faceTextureSource : ""
     }
 
     // Layer 2: Background arc track
@@ -568,6 +632,7 @@ Item {
         labelDivisor: root.labelDivisor
         startAngle: root.startAngle
         sweepAngle: root.sweepAngle
+        tickShape: root.tickShape
 
         // Colors
         warningStart: root.warningThreshold
@@ -718,7 +783,7 @@ Item {
         value: root.value
         unit: root.unit
         precision: 0
-        valueFontSize: 32
+        valueFontSize: Math.round(32 * GaugeTheme.typographyScale)
         warningThreshold: root.warningThreshold
         criticalThreshold: root.redlineStart
     }
@@ -743,5 +808,7 @@ Item {
         outerRadius: Math.min(root.width, root.height) / 2
         borderWidth: 20
         borderColor: root.bezelColor
+        color: root.bezelColor
+        style: root.bezelStyle
     }
 }
