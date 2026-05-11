@@ -265,13 +265,18 @@ Item {
         angleOffset: root.bezelScrewAngleOffset
         // Place screws inside the bezel ring (outerRadius - half bezel thickness)
         radius: root._gaugeSize / 2 - 7
-        screwDiameter: root._gaugeSize * 0.028
+        screwDiameter: root._gaugeSize * 0.045
         // Slightly lighter than the bezel so the heads read as raised
         // painted metal sitting on the matte ring.
         screwColor: Qt.lighter(root.bezelColor, 1.9)
         headStyle: root.bezelScrewHeadStyle
         // Slot/cross detail in a darker tone so the cut reads clearly.
         headDetailColor: Qt.darker(root.bezelColor, 2.0)
+        headDetailWidth: 2.5
+        // Form shading sells the heads as physical protrusions catching
+        // upper-left light, not painted-on discs.
+        hasFormShading: true
+        formShadingIntensity: 0.4
         hasShadow: true
         shadowOffsetY: 1
         shadowOpacity: 0.5
