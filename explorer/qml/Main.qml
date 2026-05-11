@@ -7,8 +7,23 @@ import "components"
 ApplicationWindow {
     id: window
 
+    // Pin to a stable, non-tiled size. On a tiling compositor (Hyprland is the
+    // dev environment) a plain top-level gets sized by the workspace layout —
+    // and that size shifts as other windows come and go — which makes
+    // screenshot ROI coordinates computed from one capture invalid for the
+    // next. A `Qt.Dialog` window plus min == max size constraints requests a
+    // fixed-size floating window; tiling WMs auto-float a window they can't
+    // resize, so the explorer floats at a predictable 1280×800. (For a hard
+    // guarantee on Hyprland, add to your config:
+    //   windowrulev2 = float, class:io.devdash.qml-gauges-explorer
+    // — that's user config, not a repo concern.)
+    flags: Qt.Window | Qt.Dialog
     width: 1280
     height: 800
+    minimumWidth: 1280
+    maximumWidth: 1280
+    minimumHeight: 800
+    maximumHeight: 800
     visible: true
     title: "DevDash Gauges Explorer"
 
