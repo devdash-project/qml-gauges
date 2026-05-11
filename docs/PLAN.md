@@ -4,7 +4,7 @@ This document tracks the active development plan for the qml-gauges library.
 For the durable architectural reference, see CLAUDE.md. For audit outputs and
 historical investigations, see docs/audits/.
 
-Last updated: 2026-05-11 (MCP-follow-up explorer fixes: PropertyPanel now mirrors binding-derived target changes into the editor UI and the state server, so `qml_explorer_get_state` is no longer stale after `GaugeTheme.setTheme()`; and a new `resetProperty` WS action / `qml_explorer_reset_property` tool re-establishes a property's binding after `set_property` pinned it — see the Decisions log. Earlier the same day: theme Phase 5 — the explorer's header bar gained a preset selector + gauge mode toggle (`GaugeThemeControls`) driving the `GaugeTheme` singleton globally, populated declaratively from `presetNames` / `presetMetadata` and reflecting `activeTheme` / `mode` reactively. And Phases 3–4 — legacy IndustrialGauge / RadialGauge3D templates retired in favour of GaugeTheme presets; ClassicWhite preset added; RadialGauge gained scriptLabel / brandLabel; the Phase-3 follow-up wired the structural theme tokens — tickStyle, bezelStyle, effectsGlow/effectsShadow/effectsTexture, typographyScale — into RadialGauge so the three presets render structurally distinct, not just colour-shifted (Industrial-vs-ModernOEM SSIM 0.965 → 0.77). The whole theme track (Phases 1–5) is complete.)
+Last updated: 2026-05-11 (doc-consistency pass: the `chrome3d` `GaugeBezel` fill bug — surfaced when `bezelStyle` was wired through RadialGauge — was actually fixed in commit `29d00cf` (chrome3d rebuilt as a true annulus); the Backlog item is now struck through as DONE and it's dropped from the Active-work next-pick list. Before that, MCP-follow-up explorer fixes: PropertyPanel now mirrors binding-derived target changes into the editor UI and the state server, so `qml_explorer_get_state` is no longer stale after `GaugeTheme.setTheme()`; and a new `resetProperty` WS action / `qml_explorer_reset_property` tool re-establishes a property's binding after `set_property` pinned it — see the Decisions log. Earlier the same day: theme Phase 5 — the explorer's header bar gained a preset selector + gauge mode toggle (`GaugeThemeControls`) driving the `GaugeTheme` singleton globally, populated declaratively from `presetNames` / `presetMetadata` and reflecting `activeTheme` / `mode` reactively. And Phases 3–4 — legacy IndustrialGauge / RadialGauge3D templates retired in favour of GaugeTheme presets; ClassicWhite preset added; RadialGauge gained scriptLabel / brandLabel; the Phase-3 follow-up wired the structural theme tokens — tickStyle, bezelStyle, effectsGlow/effectsShadow/effectsTexture, typographyScale — into RadialGauge so the three presets render structurally distinct, not just colour-shifted (Industrial-vs-ModernOEM SSIM 0.965 → 0.77). The whole theme track (Phases 1–5) is complete.)
 
 ## Project framing
 
@@ -105,10 +105,11 @@ token follow-up is also done.
   from SSIM ≈ 0.965 (colour-only difference) to ≈ 0.77 (chevron vs rectangle
   ticks, flat vs `chrome3d` bezel, no-glow vs glow). Per-instance overrides
   still win; structural tokens are mode-independent (don't change with
-  light/dark). Two leftovers, both backlogged: the `RadialGauge3D`-era glass
-  overlay and domed centre cap have no token at all; and the `chrome3d`
-  `GaugeBezel` style has a pre-existing fill bug (the ConicalGradient fills the
-  disc, not just the ring) that this wiring now exercises.
+  light/dark). One leftover, backlogged: the `RadialGauge3D`-era glass overlay
+  and domed centre cap have no token at all. (Wiring `bezelStyle` →
+  `GaugeBezel.style` also surfaced a pre-existing `chrome3d` fill bug — a filled
+  360° arc that painted over the dial — fixed the same day in `29d00cf` by
+  rebuilding the chrome3d shape as a true annulus; see the Decisions log.)
 - Also landed: `GaugeTheme.presetNames` / `presetMetadata` — the preset list
   as enumerable data, the foundation for the Phase-5 selector.
 - Phase 5 (landed 2026-05-11) — the explorer's header bar gains
@@ -127,8 +128,7 @@ token follow-up is also done.
 
 No Phase 6: the theme track is complete. (Remaining theme-adjacent work is
 backlog: the `RadialGauge3D`-era glass overlay / domed centre cap have no token
-yet, the `chrome3d` `GaugeBezel` fill bug, the `swatch`-per-preset idea, and a
-`GaugeFaceLabel` compound.)
+yet, the `swatch`-per-preset idea, and a `GaugeFaceLabel` compound.)
 
 ## Aesthetic targets (presets)
 
@@ -227,9 +227,9 @@ Reference images: Auto Meter Pro Comp Lite, Speedhut Classic Black Tach.
   structural ones: `bezelStyle: "chrome3d"`, `tickStyle: "rectangle"`,
   `effectsGlow: true` now reach RadialGauge. Two effects the old `RadialGauge3D`
   hard-wired still have no theme token — the glass overlay and the domed centre
-  cap — so they remain instance-only; and the `chrome3d` `GaugeBezel`
-  rendering has a known fill bug (ConicalGradient fills the disc, not the ring)
-  that the new wiring exposes. Both are in the Backlog.
+  cap — so they remain instance-only (in the Backlog). (Wiring `chrome3d`
+  through also exposed a `GaugeBezel` fill bug — the 360° arc painted over the
+  dial — fixed in `29d00cf`: the chrome3d shape is now a true annulus.)
 
 Reference images: Hyundai Palisade cluster (`docs/references/hyundai-palisade.jpg`).
 
@@ -326,8 +326,10 @@ See devdash-mcp/MCP_USAGE.md for full setup notes.
 | 6 | Animation capture | Absent (deferred) |
 | 7 | Performance instrumentation | Absent (relevant when Jetson perf budget questions become concrete) |
 
-Total tools exposed: 26 (was 17 at last documentation; +1 for
-`qml_explorer_reset_property`).
+Total tools exposed: 26 (up from the 17 documented earlier — the image-diff
+suite, the screenshot/telemetry/logs tools and the `qml_explorer_*` freeze /
+reset / status / logs introspection tools landed since; the most recent
+addition is `qml_explorer_reset_property`).
 
 ### Additional MCP capabilities
 
@@ -369,9 +371,8 @@ No active work item. The theme track is complete: Phases 1–5 shipped
 it via `GaugeThemeControls` (preset selector + gauge mode toggle). Next, pick
 from the Backlog: the next aesthetic target preset (PerformanceBlack or
 ChromeClassic), re-homing the `RadialGauge3D`-era glass overlay / domed centre
-cap (no theme token yet), the `chrome3d` `GaugeBezel` fill bug, the
-`swatch`-per-preset idea, a `GaugeFaceLabel` compound, or the effect-consistency
-cleanup.
+cap (no theme token yet), the `swatch`-per-preset idea, a `GaugeFaceLabel`
+compound, or the effect-consistency cleanup.
 
 ## Backlog
 
@@ -391,14 +392,18 @@ Work units that are well-scoped but not active.
   `overlayStyle` / a `centerCapStyle`, say) or accept these stay per-instance
   options on RadialGauge. Until then the explorer demo pages reproduce them
   per-instance.
-- **`chrome3d` `GaugeBezel` fill bug.** The `chrome3d` style draws a single
-  360° `PathAngleArc` with a `ConicalGradient` `fillGradient`, which fills the
-  enclosed *disc* rather than just the ring annulus — so the bezel paints over
-  the dial. Latent until the Phase-3 follow-up wired `bezelStyle` →
-  `GaugeBezel.style` through RadialGauge (`showBezel` defaults false, so it was
-  never exercised before). Fix: render the ring as an annulus path (outer arc
-  + reversed inner arc), or apply the gradient another way. The non-3d
-  `chrome` style is unaffected (nested Rectangle borders).
+- **~~`chrome3d` `GaugeBezel` fill bug~~ — FIXED (2026-05-11, commit `29d00cf`).**
+  The `chrome3d` style drew a single 360° `PathAngleArc` with a `ConicalGradient`
+  `fillGradient`; a filled 360° arc closes through the centre, so the Shape
+  painted a solid chrome disc over the dial, ticks, needle and centre cap. Latent
+  until the Phase-3 follow-up wired `bezelStyle` → `GaugeBezel.style` through
+  RadialGauge (`showBezel` defaults false, so it was never exercised before) —
+  `modernOEM` uses `chrome3d` and rendered unusably. Fixed by rebuilding the
+  chrome3d shape as a true annulus (an outer circle + an inner circle in one
+  `ShapePath` with `OddEvenFill`), so the gradient fills only the ring between
+  `outerRadius` and `innerRadius`; same outer/inner silhouette as the flat
+  style. The non-3d `chrome` style was always unaffected (nested Rectangle
+  borders).
 - **Per-preset representative swatch colour.** Add a `swatch` field to
   `GaugeTheme.presetMetadata` so a selector can show a colour chip per preset.
   Deferred because "what *is* a preset's representative colour" is itself a
@@ -509,8 +514,9 @@ Work units that are well-scoped but not active.
   gain. New properties use the sub-component's name where one exists
   (`tickShape` matches `GaugeTickRing.tickShape`; `bezelStyle` maps to
   `GaugeBezel.style`). The `chrome3d` `GaugeBezel` fill bug surfaced by this
-  wiring was *not* fixed in the same change — it's a primitive bug, backlogged
-  separately, so the wiring commit stays focused.
+  wiring was *not* fixed in the same change — it's a primitive bug, kept to its
+  own commit; it landed next as `29d00cf` (the chrome3d shape rebuilt as a true
+  annulus).
 
 - **2026-05-11: `presetMetadata` ships no `swatch` field yet.** `presetNames` +
   `presetMetadata` (displayName + description) are enough for the Phase-5
@@ -536,11 +542,14 @@ Work units that are well-scoped but not active.
   had RadialGauge consuming the theme, those templates were pure
   property-default sets with no remaining reason to exist — so Phase 3 just
   migrated the explorer consumers to `RadialGauge` + `GaugeTheme.setTheme(...)`
-  and deleted the files. Trade-off: RadialGauge consumes only the colour/font
-  tokens, so the structural/effect distinctions the old templates hard-wired
-  (chevron ticks, chrome3d bezel, glass overlay, glow) are lost until the
-  remaining tokens are wired in — tracked in the Backlog. Per-page demo
-  instances reproduce the missing structure for now.
+  and deleted the files. Trade-off accepted at the time: RadialGauge consumed
+  only the colour/font tokens, so the structural/effect distinctions the old
+  templates hard-wired (chevron ticks, chrome3d bezel, glass overlay, glow) were
+  lost until the remaining tokens were wired in. Mostly resolved the same day by
+  the Phase-3 follow-up (which added `tickStyle` / `bezelStyle` / the `effects*`
+  flags / `typographyScale` to RadialGauge — see above); the glass overlay and
+  domed centre cap still have no token (Backlog), and the per-page demo
+  instances reproduce those for now.
 
 - **2026-05-11: Theme = concept-level tokens, not gauge-specific properties.**
   The theme defines abstract tokens (`surface`, `primary`, `foreground`, …)

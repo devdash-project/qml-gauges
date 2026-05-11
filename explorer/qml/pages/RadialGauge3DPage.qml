@@ -13,18 +13,21 @@ import "../components"
  * (near-black gradient face, bright orange accent, light-grey marks). This page
  * renders a bare RadialGauge and activates that preset at page load.
  *
- * Note: the retired RadialGauge3D template also carried some effects that the
- * plain RadialGauge does not wire from the theme yet — a chrome3d bezel, a
- * glass overlay, a domed centre cap and tick/needle glow. Those are tracked as
- * follow-up theme-token plumbing (see PLAN.md); the colour tokens already give
- * the page its modern-OEM character. The page keeps its old sidebar name
- * ("RadialGauge3D") as a semantic grouping.
+ * RadialGauge now consumes the structural tokens too, so the preset alone
+ * gives this page its chrome3d bezel (`bezelStyle`), rectangle ticks and
+ * tick/needle glow (`effectsGlow`) — not just the modern-OEM colours. Two
+ * effects the retired RadialGauge3D template hard-wired have no theme token
+ * yet — a glass overlay and a domed 3D centre cap — and RadialGauge has no
+ * equivalent property, so they're simply absent here (see PLAN.md backlog);
+ * the page approximates the metallic look with the per-instance gradient /
+ * shadow flags below. The page keeps its old sidebar name ("RadialGauge3D")
+ * as a semantic grouping.
  */
 Item {
     id: root
 
     property string title: "RadialGauge3D"
-    property string description: "RadialGauge under the 'modernOEM' GaugeTheme preset — near-black face, bright orange value arc and needle, light-grey ticks, digital readout. (Chrome bezel / glass overlay from the old RadialGauge3D template are pending theme-token plumbing.)"
+    property string description: "RadialGauge under the 'modernOEM' GaugeTheme preset — near-black face, bright orange value arc and needle, light-grey ticks, chrome3d bezel, tick/needle glow, digital readout. (The old RadialGauge3D template's glass overlay and domed 3D centre cap have no theme token yet — see PLAN.md backlog.)"
 
     property var stateServer: null
 

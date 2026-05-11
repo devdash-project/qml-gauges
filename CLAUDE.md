@@ -166,8 +166,7 @@ defaults, so a preset can change a gauge's structure, not just its palette:
 Every one of these is still per-instance overridable — the token only supplies
 the default expression. (The `RadialGauge3D`-era glass overlay and domed centre
 cap have no token yet; they stay instance-only options — see docs/PLAN.md
-backlog. The `chrome3d` bezel style has a pre-existing fill bug in `GaugeBezel`
-that this wiring now exercises — also backlogged.)
+backlog.)
 
 `GaugeTheme.presetNames` (ordered list of the internal preset names, matching
 what `setTheme()` accepts) and `GaugeTheme.presetMetadata` (a `{displayName,
