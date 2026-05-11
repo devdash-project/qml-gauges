@@ -4,7 +4,7 @@ This document tracks the active development plan for the qml-gauges library.
 For the durable architectural reference, see CLAUDE.md. For audit outputs and
 historical investigations, see docs/audits/.
 
-Last updated: 2026-05-11 (theme Phases 3–4 landed: legacy IndustrialGauge / RadialGauge3D templates retired in favour of GaugeTheme presets; ClassicWhite preset added; RadialGauge gains scriptLabel / brandLabel)
+Last updated: 2026-05-11 (theme Phases 3–4 landed: legacy IndustrialGauge / RadialGauge3D templates retired in favour of GaugeTheme presets; ClassicWhite preset added; RadialGauge gains scriptLabel / brandLabel. Phase-3 follow-up done: RadialGauge now consumes the structural theme tokens — tickStyle, bezelStyle, effectsGlow/effectsShadow/effectsTexture, typographyScale — so the three presets render structurally distinct, not just colour-shifted (Industrial-vs-ModernOEM SSIM 0.965 → 0.77). GaugeTheme also exposes presetNames / presetMetadata as enumerable data for the Phase-5 selector.)
 
 ## Project framing
 
@@ -57,8 +57,19 @@ qmldir + CMake registration).
   `effectsGlow` / `effectsShadow` / `effectsTexture`, `tickStyle`,
   `bezelStyle` (mode-independent). Each gauge family maps the tokens onto its
   own elements (radial: `surface` → face; future bar: `surface` → background).
-  The theme never names a specific gauge type. Full token reference: CLAUDE.md
-  "Theme system", and the doc comment in `src/theme/GaugeTheme.qml`.
+  The theme never names a specific gauge type. RadialGauge maps every token
+  today (colours → face/bezel/needle/arc/tick colours; `tickStyle` → tick
+  shape; `bezelStyle` → bezel style; `effectsGlow` → tick + needle glow;
+  `effectsShadow` → needle shadow; `effectsTexture` → face-texture gate;
+  `typographyScale` → label/numeral/readout sizes). Full token-to-property
+  table: CLAUDE.md "Theme system"; the doc comment in
+  `src/theme/GaugeTheme.qml` covers the token semantics.
+- **Preset registry as data.** `GaugeTheme.presetNames` (ordered internal
+  names) and `GaugeTheme.presetMetadata` (`{displayName, description}` per
+  preset) expose the preset list as plain data so the Phase-5 selector UX can
+  be declarative. Adding a preset now touches three co-located spots in
+  `GaugeTheme.qml`: the nested `QtObject`, a `setTheme()` case, and a registry
+  entry. (No `swatch` field yet — see Backlog.)
 - **Two orthogonal axes: preset and mode.** `activeTheme` (default
   `industrial`) selects the aesthetic family; `mode` (`"light"` / `"dark"`)
   selects the day / night colour set. They vary independently. The intended
@@ -73,19 +84,34 @@ qmldir + CMake registration).
   `GaugeTheme.qml` — not separate importable types. Adding a preset = adding
   another nested `QtObject` + a `setTheme()` case.
 
-Phase status: Phases 1–4 complete.
-- Phase 1 (theme infrastructure) + Phase 2 (RadialGauge consumes the theme).
+Phase status: Phases 1–4 complete; the Phase-3 token follow-up is also done.
+- Phase 1 (theme infrastructure) + Phase 2 (RadialGauge consumes the colour
+  and font-family tokens).
 - Phase 3 — retired the legacy preset-composite templates. Because RadialGauge
   already read the theme tokens, this was done as "migrate the explorer
   consumers to `RadialGauge` + `GaugeTheme.setTheme(...)`, then delete
   `IndustrialGauge.qml` / `RadialGauge3D.qml`" rather than the originally-
-  envisioned "make those templates *be* the presets". Side-effect: the
-  effects `RadialGauge3D` hard-wired (chrome3d bezel, glass overlay, domed
-  centre cap, tick/needle glow) are not yet driven by the theme — see Backlog.
+  envisioned "make those templates *be* the presets".
 - Phase 4 — added the `classicWhite` preset (vintage white-face aesthetic) and
   the `scriptLabel` / `brandLabel` decorative face-text slots on RadialGauge.
+- Phase-3 follow-up (landed same day) — RadialGauge now consumes the
+  *structural* tokens too: `tickStyle` → `tickShape`, `bezelStyle` →
+  `GaugeBezel.style`, `effectsGlow` → `tickGlow` + `needleOuterGlow`,
+  `effectsShadow` → `needleShadow`, `effectsTexture` → a `faceTexture` gate on
+  `faceTextureSource`, `typographyScale` → the label / numeral / readout font
+  sizes. Verified: a plain RadialGauge themed `industrial` vs `modernOEM` went
+  from SSIM ≈ 0.965 (colour-only difference) to ≈ 0.77 (chevron vs rectangle
+  ticks, flat vs `chrome3d` bezel, no-glow vs glow). Per-instance overrides
+  still win; structural tokens are mode-independent (don't change with
+  light/dark). Two leftovers, both backlogged: the `RadialGauge3D`-era glass
+  overlay and domed centre cap have no token at all; and the `chrome3d`
+  `GaugeBezel` style has a pre-existing fill bug (the ConicalGradient fills the
+  disc, not just the ring) that this wiring now exercises.
+- Also landed: `GaugeTheme.presetNames` / `presetMetadata` — the preset list
+  as enumerable data, prep for the Phase-5 selector.
 
-Remaining: Phase 5 — explorer preset/mode selection UX.
+Remaining: Phase 5 — explorer preset/mode selection UX (a real UI; the
+`themeName` / `themeMode` MCP test hook on `RadialGaugePage` is just a harness).
 
 ## Aesthetic targets (presets)
 
@@ -115,11 +141,12 @@ docs/references/), Auto Meter Antique Beige, Speedhut JDM Datsun Z
 **Status:** completed 2026-05-10 as the `IndustrialGauge` template; retired
 2026-05-11 (Phase 3). The aesthetic now lives in the `industrial` `GaugeTheme`
 preset (`src/theme/GaugeTheme.qml`) — the default preset — and a bare
-`RadialGauge` picks it up. The old template's per-feature toggles (chevron
-ticks, no value arc, etc.) are reproduced on the explorer demo page's
-`RadialGauge` instance for now; folding the chevron/no-arc style choices into
-theme tokens RadialGauge reads is the Phase-3 follow-up (see Backlog). The
-original composite's implementation choices, kept for the token rationale:
+`RadialGauge` picks it up, including the chevron ticks (now from the
+`tickStyle` token) and the painted-needle drop shadow (`effectsShadow`). The
+"needle-only, no value arc" choice has no theme token — `showValueArc` is a
+RadialGauge feature toggle, not a token — so the explorer demo page still sets
+that per-instance. The original composite's implementation choices, kept for
+the token rationale:
 - Face color `#0a0905` (very dark warm black); bezel color `#1a1815`
   (warm matte black, flat style); tick/numeral/label color `#e8e4d8`
   (warm cream); needle color `#d4cfc0` (painted aluminum tone);
@@ -179,11 +206,13 @@ Reference images: Auto Meter Pro Comp Lite, Speedhut Classic Black Tach.
 - **Status:** the `modernOEM` `GaugeTheme` preset (added Phase 2; the only
   consumer, the `RadialGauge3D` template, was retired Phase 3). Colour tokens
   (near-black gradient face, bright-orange accent, chrome-grey bezel,
-  light-grey marks) are live. The effects `RadialGauge3D` hard-wired —
-  `chrome3d` bezel, glass overlay, domed centre cap, tick/needle glow — are
-  *not* yet wired into RadialGauge from the `bezelStyle` / `effectsGlow`
-  tokens; that's the Phase-3 follow-up in the Backlog. Until then the explorer
-  demo page renders the colour-token version.
+  light-grey marks) are live, and as of the Phase-3 token follow-up so are the
+  structural ones: `bezelStyle: "chrome3d"`, `tickStyle: "rectangle"`,
+  `effectsGlow: true` now reach RadialGauge. Two effects the old `RadialGauge3D`
+  hard-wired still have no theme token — the glass overlay and the domed centre
+  cap — so they remain instance-only; and the `chrome3d` `GaugeBezel`
+  rendering has a known fill bug (ConicalGradient fills the disc, not the ring)
+  that the new wiring exposes. Both are in the Backlog.
 
 Reference images: Hyundai Palisade cluster (`docs/references/hyundai-palisade.jpg`).
 
@@ -307,30 +336,48 @@ No active work item. Theme system Phases 1–4 shipped 2026-05-11
 (`DevDash.Gauges.Theme` singleton with `industrial`, `modernOEM` and
 `classicWhite` presets; RadialGauge consumes the colour/font tokens and now
 exposes `scriptLabel` / `brandLabel`; the `IndustrialGauge` and `RadialGauge3D`
-templates are gone). Next on the theme track: Phase 5 — explorer preset/mode
-selection UX (a real UI, not just the MCP test hook on RadialGaugePage). Two
-follow-ups surfaced by Phase 3 are in the Backlog: wiring the remaining theme
-tokens (`tickStyle`, `bezelStyle`, `effectsGlow`/`effectsShadow`/`effectsTexture`,
-`typographyScale`) into RadialGauge so presets differ in *structure*, not just
-colour; and a `GaugeFaceLabel` compound. Independent of all that, the next
-aesthetic target preset is still PerformanceBlack or ChromeClassic.
+templates are gone). The Phase-3 structural-token follow-up shipped the same
+day (RadialGauge now consumes `tickStyle` / `bezelStyle` / the `effects*`
+flags / `typographyScale`), and `GaugeTheme` gained `presetNames` /
+`presetMetadata`. Next on the theme track: Phase 5 — explorer preset/mode
+selection UX (a real UI, not just the MCP test hook on RadialGaugePage; the
+presetMetadata is the data it should drive off). Still in the Backlog from
+Phase 3: re-homing the `RadialGauge3D` glass overlay / domed centre cap (no
+token yet), the `chrome3d` `GaugeBezel` fill bug, and a `GaugeFaceLabel`
+compound. Independent of all that, the next aesthetic target preset is still
+PerformanceBlack or ChromeClassic.
 
 ## Backlog
 
 Work units that are well-scoped but not active.
 
-- **Wire the remaining theme tokens into RadialGauge (Phase-3 follow-up).**
-  RadialGauge currently reads only the colour tokens and the typography
-  *family* tokens. The structural/effect tokens — `tickStyle` (so `industrial`
-  gets its chevron ticks back), `bezelStyle` (so `modernOEM` gets a `chrome3d`
-  bezel and `classicWhite` a thick flat one), `effectsGlow` / `effectsShadow`
-  / `effectsTexture` (modern-OEM glow, painted-needle shadow), `typographyScale`
-  — aren't consumed. Until they are, `industrial` and `modernOEM` differ only
-  in colour through a plain RadialGauge (SSIM ≈ 0.97 between the two demo
-  renders), and the explorer demo pages reproduce the missing structure via
-  per-instance properties. Also re-home the `RadialGauge3D` glass overlay /
-  domed centre cap, which have no token at all yet (new tokens, or accept they
-  stay instance-only options).
+- **~~Wire the remaining theme tokens into RadialGauge~~ — DONE (Phase-3
+  follow-up, 2026-05-11).** RadialGauge now consumes `tickStyle` → `tickShape`,
+  `bezelStyle` → `GaugeBezel.style`, `effectsGlow` → `tickGlow` +
+  `needleOuterGlow`, `effectsShadow` → `needleShadow`, `effectsTexture` →
+  `faceTexture` (gating `faceTextureSource`), `typographyScale` → label /
+  numeral / readout font sizes. A plain RadialGauge themed `industrial` vs
+  `modernOEM` went from SSIM ≈ 0.965 (colour only) to ≈ 0.77. The two
+  sub-items below spun out of this work.
+- **Re-home the `RadialGauge3D` glass overlay / domed centre cap.** Neither
+  has a theme token — the original token set only covered colours, tick/bezel
+  style, and the three `effects*` flags. Decide whether to add tokens (an
+  `overlayStyle` / a `centerCapStyle`, say) or accept these stay per-instance
+  options on RadialGauge. Until then the explorer demo pages reproduce them
+  per-instance.
+- **`chrome3d` `GaugeBezel` fill bug.** The `chrome3d` style draws a single
+  360° `PathAngleArc` with a `ConicalGradient` `fillGradient`, which fills the
+  enclosed *disc* rather than just the ring annulus — so the bezel paints over
+  the dial. Latent until the Phase-3 follow-up wired `bezelStyle` →
+  `GaugeBezel.style` through RadialGauge (`showBezel` defaults false, so it was
+  never exercised before). Fix: render the ring as an annulus path (outer arc
+  + reversed inner arc), or apply the gradient another way. The non-3d
+  `chrome` style is unaffected (nested Rectangle borders).
+- **Per-preset representative swatch colour.** Add a `swatch` field to
+  `GaugeTheme.presetMetadata` so a selector can show a colour chip per preset.
+  Deferred because "what *is* a preset's representative colour" is itself a
+  design question (the `primary` accent? a face/accent pairing? light-mode or
+  dark-mode?) — decide that first.
 - **Effect consistency cleanup.** Three specific fixes: Canvas→RadialGradient
   vignette migration in GlassOverlay, layer.smooth normalization across
   MultiEffect users, GaugeTick MultiEffect split (separate glow from shadow).
@@ -377,6 +424,27 @@ Work units that are well-scoped but not active.
   significant scope, limited visual payoff.
 
 ## Decisions log
+
+- **2026-05-11: Structural-token wiring kept RadialGauge's existing property
+  names; didn't rename to a `*Has*` convention.** The Phase-3 follow-up changed
+  the *defaults* of `needleShadow` / `needleOuterGlow` / `tickGlow` to read
+  from `effectsShadow` / `effectsGlow`, and added `tickShape` / `bezelStyle` /
+  `faceTexture` / `faceTextureSource`, rather than renaming the booleans to
+  match a theme-token naming convention. Rationale: the existing names are
+  already what `RadialGaugePage`'s property metadata, the per-page demos, and
+  the tests reference; renaming would churn the explorer for no functional
+  gain. New properties use the sub-component's name where one exists
+  (`tickShape` matches `GaugeTickRing.tickShape`; `bezelStyle` maps to
+  `GaugeBezel.style`). The `chrome3d` `GaugeBezel` fill bug surfaced by this
+  wiring was *not* fixed in the same change — it's a primitive bug, backlogged
+  separately, so the wiring commit stays focused.
+
+- **2026-05-11: `presetMetadata` ships no `swatch` field yet.** `presetNames` +
+  `presetMetadata` (displayName + description) are enough for the Phase-5
+  selector to be declarative. A representative-colour chip per preset was
+  considered and deferred — picking *which* colour represents a preset (accent?
+  face? a pairing? which mode?) is a design call to make when the selector's
+  visual design is on the table, not a data-plumbing one. Backlogged.
 
 - **2026-05-11: ClassicWhite preset implemented from a reference image.**
   The aesthetic of a classic aftermarket white-face gauge (the Classic

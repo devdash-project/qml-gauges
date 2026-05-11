@@ -143,13 +143,45 @@ Non-colour tokens (mode-independent; read directly off `GaugeTheme`):
 `tickStyle` (`"rectangle"|"chevron"|"triangle"|"rounded-dot"|"block"`),
 `bezelStyle` (`"flat"|"chrome"|"chrome3d"`).
 
+`RadialGauge` consumes **all** of these tokens — colour and structural — as
+defaults, so a preset can change a gauge's structure, not just its palette:
+
+| Token | RadialGauge property it defaults | downstream effect |
+| ----- | -------------------------------- | ----------------- |
+| `colors.surface` | `faceColor` | `GaugeFace.color` |
+| `colors.surfaceElevated` | `bezelColor` | `GaugeBezel.color` / `.borderColor` |
+| `colors.primary` | `valueArcColor`, `needleColor` | value arc + needle |
+| `colors.foreground` | `tickColor` | ticks, numerals, on-face labels |
+| `colors.warning` | `warningColor` | warning-range ticks/arc |
+| `colors.critical` | `redlineColor`, `criticalColor` | redline zone / critical ticks |
+| `tickStyle` | `tickShape` | `GaugeTickRing.tickShape` |
+| `bezelStyle` | `bezelStyle` | `GaugeBezel.style` |
+| `effectsGlow` | `tickGlow`, `needleOuterGlow` | tick glow + needle neon halo |
+| `effectsShadow` | `needleShadow` | needle drop shadow |
+| `effectsTexture` | `faceTexture` | gates `faceTextureSource` → `GaugeFace.textureSource` |
+| `typographyScale` | `tickLabelFontSize`, `gaugeLabelFontSize` | ×-multiplies those + the digital readout's value size |
+| `typographyFontFamily` | `gaugeLabelFontFamily` | gauge label font |
+| `typographyNumeralFontFamily` | `tickLabelFontFamily` | tick numeral font |
+
+Every one of these is still per-instance overridable — the token only supplies
+the default expression. (The `RadialGauge3D`-era glass overlay and domed centre
+cap have no token yet; they stay instance-only options — see docs/PLAN.md
+backlog. The `chrome3d` bezel style has a pre-existing fill bug in `GaugeBezel`
+that this wiring now exercises — also backlogged.)
+
+`GaugeTheme.presetNames` (ordered list of the internal preset names, matching
+what `setTheme()` accepts) and `GaugeTheme.presetMetadata` (a `{displayName,
+description}` object per preset) expose the preset registry as plain data, so a
+selector UI can be built declaratively rather than hardcoding preset names.
+
 Presets are defined as nested `QtObject`s **inside `GaugeTheme.qml`**, not as
 separate preset `.qml` files: a QML singleton that references same-module
 types is not reliably loadable at runtime from a compiled `qt_add_qml_module`
 resource (the auto-generated qmldir's `prefer :/...` line breaks the relative
 resolution of those types, and the failure is silent — no diagnostic). Adding
-a preset = adding another nested `QtObject` to `GaugeTheme.qml` and a
-`case` to `setTheme()`.
+a preset = updating **three** co-located spots in `GaugeTheme.qml`: the nested
+`QtObject` token set, a `case` in `setTheme()`, and an entry in `presetNames` +
+`presetMetadata`.
 
 RadialGauge also exposes two empty-by-default decorative face-text slots —
 `scriptLabel` (a word just below the dial centre, rendered under the needle —
