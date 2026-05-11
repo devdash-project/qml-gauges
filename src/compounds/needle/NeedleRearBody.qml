@@ -134,10 +134,14 @@ Item {
     // === Advanced ===
 
     /**
-     * @brief Enable antialiasing.
+     * @brief Enable antialiasing on this component's shapes.
+     *
+     * Named `customAntialiasing` to avoid shadowing the inherited
+     * `QQuickItem.antialiasing` property (a qmllint [property-override] warning).
+     *
      * @default true
      */
-    property bool antialiasing: true
+    property bool customAntialiasing: true
 
     // === Internal Implementation ===
 
@@ -161,7 +165,7 @@ Item {
     Shape {
         id: bodyShape
         anchors.fill: parent
-        antialiasing: root.antialiasing
+        antialiasing: root.customAntialiasing
 
         // Use CurveRenderer for smooth edges (Qt 6.6+)
         preferredRendererType: typeof Shape.CurveRenderer !== 'undefined'

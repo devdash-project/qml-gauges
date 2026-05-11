@@ -42,7 +42,7 @@ Item {
          description: "Color at the bottom of the cap (shadow area). Typically darker."},
 
         // Advanced
-        {name: "antialiasing", type: "bool", default: true, category: "Advanced",
+        {name: "customAntialiasing", type: "bool", default: true, category: "Advanced",
          description: "Enable smooth edge rendering. Disable for pixel-perfect but jagged edges."}
     ]
 

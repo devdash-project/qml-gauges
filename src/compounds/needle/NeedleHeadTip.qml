@@ -124,10 +124,14 @@ Item {
     // === Advanced ===
 
     /**
-     * @brief Enable antialiasing.
+     * @brief Enable antialiasing on this component's shapes.
+     *
+     * Named `customAntialiasing` to avoid shadowing the inherited
+     * `QQuickItem.antialiasing` property (a qmllint [property-override] warning).
+     *
      * @default true
      */
-    property bool antialiasing: true
+    property bool customAntialiasing: true
 
     // === Internal Implementation ===
 
@@ -160,7 +164,7 @@ Item {
 
             Shape {
                 anchors.fill: parent
-                antialiasing: root.antialiasing
+                antialiasing: root.customAntialiasing
                 preferredRendererType: typeof Shape.CurveRenderer !== 'undefined'
                     ? Shape.CurveRenderer : Shape.GeometryRenderer
 
@@ -236,7 +240,7 @@ Item {
 
             Shape {
                 anchors.fill: parent
-                antialiasing: root.antialiasing
+                antialiasing: root.customAntialiasing
                 preferredRendererType: typeof Shape.CurveRenderer !== 'undefined'
                     ? Shape.CurveRenderer : Shape.GeometryRenderer
 
@@ -280,7 +284,7 @@ Item {
             color: root.color
             border.width: root.borderWidth
             border.color: root.borderColor
-            antialiasing: root.antialiasing
+            antialiasing: root.customAntialiasing
         }
     }
 
@@ -303,7 +307,7 @@ Item {
 
             Shape {
                 anchors.fill: parent
-                antialiasing: root.antialiasing
+                antialiasing: root.customAntialiasing
                 preferredRendererType: typeof Shape.CurveRenderer !== 'undefined'
                     ? Shape.CurveRenderer : Shape.GeometryRenderer
 
@@ -356,7 +360,7 @@ Item {
 
             Shape {
                 anchors.fill: parent
-                antialiasing: root.antialiasing
+                antialiasing: root.customAntialiasing
                 preferredRendererType: typeof Shape.CurveRenderer !== 'undefined'
                     ? Shape.CurveRenderer : Shape.GeometryRenderer
 

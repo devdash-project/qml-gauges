@@ -148,7 +148,7 @@ Item {
          description: "Shadow color for the right/bottom bevel edge. Darker than needle color."},
 
         // Advanced
-        {name: "antialiasing", type: "bool", default: true, category: "Advanced",
+        {name: "customAntialiasing", type: "bool", default: true, category: "Advanced",
          description: "Enable smooth edge rendering. Disable for pixel-perfect but jagged edges."},
         {name: "needleOpacity", type: "real", min: 0, max: 1, default: 1.0, category: "Advanced",
          description: "Overall opacity of the entire needle assembly. 0 = invisible, 1 = fully opaque."}

@@ -192,10 +192,14 @@ Item {
     // === Advanced ===
 
     /**
-     * @brief Enable antialiasing.
+     * @brief Enable antialiasing on this component's shapes.
+     *
+     * Named `customAntialiasing` to avoid shadowing the inherited
+     * `QQuickItem.antialiasing` property (a qmllint [property-override] warning).
+     *
      * @default true
      */
-    property bool antialiasing: true
+    property bool customAntialiasing: true
 
     // === Internal Implementation ===
 
@@ -228,7 +232,7 @@ Item {
             color: root.hasGradient && !root.domed ? "transparent" : (root.domed ? "transparent" : root.color)
             border.width: root.borderWidth
             border.color: root.borderColor
-            antialiasing: root.antialiasing
+            antialiasing: root.customAntialiasing
 
             // Radial gradient for metallic effect (only when not domed)
             gradient: root.hasGradient && !root.domed ? capGradient : undefined
@@ -319,7 +323,7 @@ Item {
             color: "transparent"
             border.width: root.highlightWidth
             border.color: root.highlightColor
-            antialiasing: root.antialiasing
+            antialiasing: root.customAntialiasing
             opacity: 0.4
         }
     }

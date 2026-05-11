@@ -169,11 +169,13 @@ Item {
     /**
      * @brief Enable antialiasing for smooth edges.
      *
-     * Disable for performance if many arcs are rendering.
+     * Disable for performance if many arcs are rendering. Named
+     * `customAntialiasing` to avoid shadowing the inherited
+     * `QQuickItem.antialiasing` property (a qmllint [property-override] warning).
      *
      * @default true
      */
-    property bool antialiasing: true
+    property bool customAntialiasing: true
 
     // === Internal Implementation ===
 
@@ -186,7 +188,7 @@ Item {
         opacity: root.arcOpacity
 
         // Antialiasing
-        antialiasing: root.antialiasing
+        antialiasing: root.customAntialiasing
         smooth: true
 
         // Use CurveRenderer for smooth edges (Qt 6.6+)

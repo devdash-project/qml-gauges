@@ -37,7 +37,7 @@ Item {
          description: "Fill color for the arc wedge area. Usually 'transparent' for gauge arcs."},
         {name: "arcOpacity", type: "real", min: 0, max: 1, default: 1.0, category: "Appearance",
          description: "Overall opacity of the arc. 0 = invisible, 1 = fully opaque."},
-        {name: "antialiasing", type: "bool", default: true, category: "Appearance",
+        {name: "customAntialiasing", type: "bool", default: true, category: "Appearance",
          description: "Enable smooth edge rendering. Disable for pixel-perfect but jagged edges."},
 
         // Animation

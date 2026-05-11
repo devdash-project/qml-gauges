@@ -456,10 +456,15 @@ Item {
     // === Advanced ===
 
     /**
-     * @brief Enable antialiasing on all shapes.
+     * @brief Enable antialiasing on all needle shapes (forwarded to the
+     *        sub-primitives' `customAntialiasing`).
+     *
+     * Named `customAntialiasing` to avoid shadowing the inherited
+     * `QQuickItem.antialiasing` property (a qmllint [property-override] warning).
+     *
      * @default true
      */
-    property bool antialiasing: true
+    property bool customAntialiasing: true
 
     /**
      * @brief Overall needle opacity.
@@ -532,7 +537,7 @@ Item {
                 shape: root.frontShape
                 color: root.shadowColor
                 hasGradient: false
-                antialiasing: root.antialiasing
+                customAntialiasing: root.customAntialiasing
             }
 
             NeedleHeadTip {
@@ -543,7 +548,7 @@ Item {
                 length: root.headTipLength
                 color: root.shadowColor
                 hasGradient: false
-                antialiasing: root.antialiasing
+                customAntialiasing: root.customAntialiasing
             }
 
             NeedleRearBody {
@@ -556,7 +561,7 @@ Item {
                 shape: root.rearShape
                 color: root.shadowColor
                 hasGradient: false
-                antialiasing: root.antialiasing
+                customAntialiasing: root.customAntialiasing
             }
 
             NeedleTailTip {
@@ -569,7 +574,7 @@ Item {
                 curveAmount: root.tailTipCurveAmount
                 color: root.shadowColor
                 hasGradient: false
-                antialiasing: root.antialiasing
+                customAntialiasing: root.customAntialiasing
             }
         }
     }
@@ -614,7 +619,7 @@ Item {
                 shape: root.frontShape
                 color: root.pivotShadowColor
                 hasGradient: false
-                antialiasing: root.antialiasing
+                customAntialiasing: root.customAntialiasing
             }
 
             NeedleHeadTip {
@@ -625,7 +630,7 @@ Item {
                 length: root.headTipLength
                 color: root.pivotShadowColor
                 hasGradient: false
-                antialiasing: root.antialiasing
+                customAntialiasing: root.customAntialiasing
             }
 
             NeedleRearBody {
@@ -638,7 +643,7 @@ Item {
                 shape: root.rearShape
                 color: root.pivotShadowColor
                 hasGradient: false
-                antialiasing: root.antialiasing
+                customAntialiasing: root.customAntialiasing
             }
 
             NeedleTailTip {
@@ -651,7 +656,7 @@ Item {
                 curveAmount: root.tailTipCurveAmount
                 color: root.pivotShadowColor
                 hasGradient: false
-                antialiasing: root.antialiasing
+                customAntialiasing: root.customAntialiasing
             }
         }
     }
@@ -693,7 +698,7 @@ Item {
                 shape: root.frontShape
                 color: root.outerGlowColor
                 hasGradient: false
-                antialiasing: root.antialiasing
+                customAntialiasing: root.customAntialiasing
             }
 
             NeedleHeadTip {
@@ -704,7 +709,7 @@ Item {
                 length: root.headTipLength
                 color: root.outerGlowColor
                 hasGradient: false
-                antialiasing: root.antialiasing
+                customAntialiasing: root.customAntialiasing
             }
 
             NeedleRearBody {
@@ -717,7 +722,7 @@ Item {
                 shape: root.rearShape
                 color: root.outerGlowColor
                 hasGradient: false
-                antialiasing: root.antialiasing
+                customAntialiasing: root.customAntialiasing
             }
 
             NeedleTailTip {
@@ -730,7 +735,7 @@ Item {
                 curveAmount: root.tailTipCurveAmount
                 color: root.outerGlowColor
                 hasGradient: false
-                antialiasing: root.antialiasing
+                customAntialiasing: root.customAntialiasing
             }
         }
     }
@@ -777,7 +782,7 @@ Item {
             bevelWidth: root.bevelWidth
             bevelHighlight: root.bevelHighlight
             bevelShadow: root.bevelShadow
-            antialiasing: root.antialiasing
+            customAntialiasing: root.customAntialiasing
         }
 
         // Head Tip (at end of front body)
@@ -798,7 +803,7 @@ Item {
             bevelWidth: root.bevelWidth
             bevelHighlight: root.bevelHighlight
             bevelShadow: root.bevelShadow
-            antialiasing: root.antialiasing
+            customAntialiasing: root.customAntialiasing
         }
 
         // Rear Body (extends downward from pivot)
@@ -822,7 +827,7 @@ Item {
             bevelWidth: root.bevelWidth
             bevelHighlight: root.bevelHighlight
             bevelShadow: root.bevelShadow
-            antialiasing: root.antialiasing
+            customAntialiasing: root.customAntialiasing
         }
 
         // Tail Tip (at end of rear body)
@@ -845,7 +850,7 @@ Item {
             bevelWidth: root.bevelWidth
             bevelHighlight: root.bevelHighlight
             bevelShadow: root.bevelShadow
-            antialiasing: root.antialiasing
+            customAntialiasing: root.customAntialiasing
         }
     }
 }

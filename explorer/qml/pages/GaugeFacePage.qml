@@ -42,7 +42,7 @@ Item {
          description: "Color at the edge of the radial gradient. Typically darker for depth effect."},
 
         // Advanced
-        {name: "antialiasing", type: "bool", default: true, category: "Advanced",
+        {name: "customAntialiasing", type: "bool", default: true, category: "Advanced",
          description: "Enable smooth edge rendering. Disable for pixel-perfect but jagged edges."}
     ]
 
