@@ -2,7 +2,6 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import DevDash.Gauges.Compounds 1.0
-import DevDash.Gauges.Primitives 1.0
 import "../components"
 
 Item {

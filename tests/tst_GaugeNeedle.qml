@@ -1,6 +1,6 @@
 import QtQuick
 import QtTest
-import DevDash.Gauges.Primitives 1.0
+import DevDash.Gauges.Compounds 1.0
 
 /**
  * @brief Unit tests for needle primitive components

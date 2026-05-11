@@ -9,6 +9,10 @@ qt_add_qml_module(devdash_gauges_compounds
         GaugeValueArc.qml
         GaugeZoneArc.qml
         RollingDigitReadout.qml
+        needle/NeedleFrontBody.qml
+        needle/NeedleHeadTip.qml
+        needle/NeedleRearBody.qml
+        needle/NeedleTailTip.qml
     RESOURCE_PREFIX /
     OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/qml/DevDash/Gauges/Compounds
 )
@@ -28,6 +32,10 @@ if(QMLLINT_EXECUTABLE)
         ${CMAKE_CURRENT_SOURCE_DIR}/GaugeValueArc.qml
         ${CMAKE_CURRENT_SOURCE_DIR}/GaugeZoneArc.qml
         ${CMAKE_CURRENT_SOURCE_DIR}/RollingDigitReadout.qml
+        ${CMAKE_CURRENT_SOURCE_DIR}/needle/NeedleFrontBody.qml
+        ${CMAKE_CURRENT_SOURCE_DIR}/needle/NeedleHeadTip.qml
+        ${CMAKE_CURRENT_SOURCE_DIR}/needle/NeedleRearBody.qml
+        ${CMAKE_CURRENT_SOURCE_DIR}/needle/NeedleTailTip.qml
     )
 
     add_custom_target(qmllint-compounds

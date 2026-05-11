@@ -10,10 +10,6 @@ qt_add_qml_module(devdash_gauges_primitives
         tick/GaugeTick.qml
         tick/GaugeTickLabel.qml
         overlays/GlassOverlay.qml
-        NeedleFrontBody.qml
-        NeedleHeadTip.qml
-        NeedleRearBody.qml
-        NeedleTailTip.qml
         overlays/PerformanceOverlay.qml
     RESOURCE_PREFIX /
     OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/qml/DevDash/Gauges/Primitives
@@ -59,10 +55,6 @@ if(QMLLINT_EXECUTABLE)
         ${CMAKE_CURRENT_SOURCE_DIR}/tick/GaugeTick.qml
         ${CMAKE_CURRENT_SOURCE_DIR}/tick/GaugeTickLabel.qml
         ${CMAKE_CURRENT_SOURCE_DIR}/overlays/GlassOverlay.qml
-        ${CMAKE_CURRENT_SOURCE_DIR}/NeedleFrontBody.qml
-        ${CMAKE_CURRENT_SOURCE_DIR}/NeedleHeadTip.qml
-        ${CMAKE_CURRENT_SOURCE_DIR}/NeedleRearBody.qml
-        ${CMAKE_CURRENT_SOURCE_DIR}/NeedleTailTip.qml
         ${CMAKE_CURRENT_SOURCE_DIR}/overlays/PerformanceOverlay.qml
     )
 

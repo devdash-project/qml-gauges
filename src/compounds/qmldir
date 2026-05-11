@@ -5,3 +5,7 @@ GaugeTickRing 1.0 GaugeTickRing.qml
 GaugeValueArc 1.0 GaugeValueArc.qml
 GaugeZoneArc 1.0 GaugeZoneArc.qml
 RollingDigitReadout 1.0 RollingDigitReadout.qml
+NeedleFrontBody 1.0 needle/NeedleFrontBody.qml
+NeedleHeadTip 1.0 needle/NeedleHeadTip.qml
+NeedleRearBody 1.0 needle/NeedleRearBody.qml
+NeedleTailTip 1.0 needle/NeedleTailTip.qml

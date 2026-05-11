@@ -7,7 +7,3 @@ GaugeTick 1.0 tick/GaugeTick.qml
 GaugeTickLabel 1.0 tick/GaugeTickLabel.qml
 GlassOverlay 1.0 overlays/GlassOverlay.qml
 PerformanceOverlay 1.0 overlays/PerformanceOverlay.qml
-NeedleFrontBody 1.0 NeedleFrontBody.qml
-NeedleHeadTip 1.0 NeedleHeadTip.qml
-NeedleRearBody 1.0 NeedleRearBody.qml
-NeedleTailTip 1.0 NeedleTailTip.qml

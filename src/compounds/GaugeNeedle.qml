@@ -1,6 +1,5 @@
 import QtQuick
 import QtQuick.Effects
-import DevDash.Gauges.Primitives
 
 /**
  * @brief Unified gauge needle compound component.
