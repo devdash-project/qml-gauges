@@ -1,6 +1,7 @@
 import QtQuick
 import DevDash.Gauges.Primitives 1.0
 import DevDash.Gauges.Compounds 1.0
+import DevDash.Gauges.Theme 1.0
 
 /**
  * @brief Complete analog radial gauge template.
@@ -152,16 +153,37 @@ Item {
     property real labelDivisor: 1
 
     // === Color Scheme ===
+    //
+    // Defaults are derived from the active theme (see GaugeTheme). Assigning
+    // any of these explicitly on an instance overrides the theme for that
+    // gauge — the theme only supplies the default expression.
 
-    property color faceColor: "#1a1a1a"
-    property color bezelColor: "#2a2a2a"
-    property color backgroundArcColor: "#333333"
-    property color valueArcColor: "#00aaff"
-    property color needleColor: "#ffffff"
-    property color tickColor: "#888888"
-    property color redlineColor: "#aa2222"
-    property color warningColor: "#ffaa00"
-    property color criticalColor: "#ff4444"
+    /** @brief Gauge face plate fill. @default GaugeTheme.colors.surface */
+    property color faceColor: GaugeTheme.colors.surface
+
+    /** @brief Decorative bezel ring fill. @default GaugeTheme.colors.surfaceElevated */
+    property color bezelColor: GaugeTheme.colors.surfaceElevated
+
+    /** @brief Background arc track color. @default surface, lightened */
+    property color backgroundArcColor: Qt.lighter(GaugeTheme.colors.surface, 1.3)
+
+    /** @brief Value arc fill (normal range). @default GaugeTheme.colors.primary */
+    property color valueArcColor: GaugeTheme.colors.primary
+
+    /** @brief Needle body color. @default GaugeTheme.colors.primary */
+    property color needleColor: GaugeTheme.colors.primary
+
+    /** @brief Tick mark / numeral / label color. @default GaugeTheme.colors.foreground */
+    property color tickColor: GaugeTheme.colors.foreground
+
+    /** @brief Redline zone arc color. @default GaugeTheme.colors.critical */
+    property color redlineColor: GaugeTheme.colors.critical
+
+    /** @brief Warning-range tick / arc color. @default GaugeTheme.colors.warning */
+    property color warningColor: GaugeTheme.colors.warning
+
+    /** @brief Critical-range tick / arc color. @default GaugeTheme.colors.critical */
+    property color criticalColor: GaugeTheme.colors.critical
 
     // === Needle Customization ===
 
@@ -358,9 +380,9 @@ Item {
 
     /**
      * @brief Font family for tick labels.
-     * @default "Roboto"
+     * @default GaugeTheme.typographyNumeralFontFamily
      */
-    property string tickLabelFontFamily: "Roboto"
+    property string tickLabelFontFamily: GaugeTheme.typographyNumeralFontFamily
 
     /**
      * @brief Font size for tick labels (pixels).
@@ -376,9 +398,9 @@ Item {
 
     /**
      * @brief Font family for gauge label.
-     * @default "Roboto"
+     * @default GaugeTheme.typographyFontFamily
      */
-    property string gaugeLabelFontFamily: "Roboto"
+    property string gaugeLabelFontFamily: GaugeTheme.typographyFontFamily
 
     /**
      * @brief Font size for gauge label (pixels).

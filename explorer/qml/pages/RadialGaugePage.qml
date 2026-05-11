@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import DevDash.Gauges 1.0
+import DevDash.Gauges.Theme 1.0
 import "../components"
 
 Item {
@@ -16,6 +17,28 @@ Item {
 
     // Expose property panel for external access
     property alias propertyPanel: propertyPanel
+
+    // --- Theme verification harness ---
+    //
+    // GaugeTheme is a singleton, not a page, so it can't be driven through
+    // PropertyPanel like the gauge's own properties. These two synthetic
+    // "properties" let the MCP exercise runtime theme switching:
+    //   qml_explorer_set_property(name="themeName", value="industrial"|"modernOEM")
+    //   qml_explorer_set_property(name="themeMode", value="light"|"dark")
+    // PropertyPanel ignores them (radialGauge has no such properties); this
+    // handler forwards them to GaugeTheme. Not production UI — a test hook.
+    Connections {
+        target: root.stateServer
+        enabled: root.stateServer !== null
+
+        function onSetPropertyRequested(name, value) {
+            if (name === "themeName") {
+                GaugeTheme.setTheme(value)
+            } else if (name === "themeMode") {
+                GaugeTheme.setMode(value)
+            }
+        }
+    }
 
     // Property definitions for the editor (with descriptions for documentation panel)
     property var properties: [
