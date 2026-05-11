@@ -92,6 +92,37 @@ Item {
      */
     property string fontFamily: "DIN, DIN 1451, sans-serif"
 
+    /**
+     * @brief Number of bezel fasteners (screws) rendered around the ring.
+     *
+     * The fasteners are the "real instrument" cue that the matte ring is
+     * a physical part rather than a painted disc. Set to 0 to disable
+     * the screws entirely. Typical values 4, 6, 8.
+     *
+     * @default 4
+     */
+    property int bezelScrewCount: 4
+
+    /**
+     * @brief Rotation offset for the first fastener (degrees).
+     *
+     * 0 places the first screw at 12 o'clock. 45 with count=4 produces
+     * intercardinal placement.
+     *
+     * @default 0
+     */
+    property real bezelScrewAngleOffset: 0
+
+    /**
+     * @brief Fastener head detail style.
+     *
+     * One of: "plain", "slot", "cross", "hex", "dot". Default "slot"
+     * matches the industrial / utility aesthetic.
+     *
+     * @default "slot"
+     */
+    property string bezelScrewHeadStyle: "slot"
+
     // === Implementation ===
 
     implicitWidth: 400
@@ -224,5 +255,25 @@ Item {
         style: "flat"
         color: root.bezelColor
         borderWidth: 0
+    }
+
+    // Layer 8: Bezel fasteners — sit inside the bezel ring
+    BezelScrews {
+        anchors.fill: parent
+        visible: root.bezelScrewCount > 0
+        count: root.bezelScrewCount
+        angleOffset: root.bezelScrewAngleOffset
+        // Place screws inside the bezel ring (outerRadius - half bezel thickness)
+        radius: root._gaugeSize / 2 - 7
+        screwDiameter: root._gaugeSize * 0.028
+        // Slightly lighter than the bezel so the heads read as raised
+        // painted metal sitting on the matte ring.
+        screwColor: Qt.lighter(root.bezelColor, 1.9)
+        headStyle: root.bezelScrewHeadStyle
+        // Slot/cross detail in a darker tone so the cut reads clearly.
+        headDetailColor: Qt.darker(root.bezelColor, 2.0)
+        hasShadow: true
+        shadowOffsetY: 1
+        shadowOpacity: 0.5
     }
 }
