@@ -1,10 +1,10 @@
 module DevDash.Gauges.Compounds
-DigitalReadout 1.0 DigitalReadout.qml
-GaugeNeedle 1.0 GaugeNeedle.qml
-GaugeTickRing 1.0 GaugeTickRing.qml
-GaugeValueArc 1.0 GaugeValueArc.qml
-GaugeZoneArc 1.0 GaugeZoneArc.qml
-RollingDigitReadout 1.0 RollingDigitReadout.qml
+DigitalReadout 1.0 readout/DigitalReadout.qml
+RollingDigitReadout 1.0 readout/RollingDigitReadout.qml
+GaugeNeedle 1.0 needle/GaugeNeedle.qml
+GaugeTickRing 1.0 tick/GaugeTickRing.qml
+GaugeValueArc 1.0 arc/GaugeValueArc.qml
+GaugeZoneArc 1.0 arc/GaugeZoneArc.qml
 NeedleFrontBody 1.0 needle/NeedleFrontBody.qml
 NeedleHeadTip 1.0 needle/NeedleHeadTip.qml
 NeedleRearBody 1.0 needle/NeedleRearBody.qml
