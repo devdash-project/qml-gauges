@@ -365,8 +365,10 @@ Item {
                     angle: -root.flatInnerHighlightAngle
 
                     GradientStop { position: 0.0;  color: root.flatInnerHighlightColor }
-                    GradientStop { position: 0.13; color: Qt.rgba(root.flatInnerHighlightColor.r, root.flatInnerHighlightColor.g, root.flatInnerHighlightColor.b, 0) }
-                    GradientStop { position: 0.87; color: Qt.rgba(root.flatInnerHighlightColor.r, root.flatInnerHighlightColor.g, root.flatInnerHighlightColor.b, 0) }
+                    GradientStop { position: 0.18; color: Qt.rgba(root.flatInnerHighlightColor.r, root.flatInnerHighlightColor.g, root.flatInnerHighlightColor.b, root.flatInnerHighlightColor.a * 0.35) }
+                    GradientStop { position: 0.32; color: Qt.rgba(root.flatInnerHighlightColor.r, root.flatInnerHighlightColor.g, root.flatInnerHighlightColor.b, 0) }
+                    GradientStop { position: 0.68; color: Qt.rgba(root.flatInnerHighlightColor.r, root.flatInnerHighlightColor.g, root.flatInnerHighlightColor.b, 0) }
+                    GradientStop { position: 0.82; color: Qt.rgba(root.flatInnerHighlightColor.r, root.flatInnerHighlightColor.g, root.flatInnerHighlightColor.b, root.flatInnerHighlightColor.a * 0.35) }
                     GradientStop { position: 1.0;  color: root.flatInnerHighlightColor }
                 }
 

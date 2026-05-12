@@ -266,11 +266,12 @@ Item {
     /**
      * @brief Pixel width of the bezel inner-edge highlight band.
      *
-     * Defaults to a fraction of the bezel width so it scales with the gauge.
+     * Defaults to a fraction of the bezel width so it scales with the gauge —
+     * roughly the curved "upper face" of a torus-shaped bezel rim.
      *
-     * @default 28% of bezelWidth
+     * @default 45% of bezelWidth
      */
-    property real bezelInnerHighlightWidth: root.bezelWidth * 0.28
+    property real bezelInnerHighlightWidth: root.bezelWidth * 0.45
 
     /**
      * @brief Render a bright highlight ring on the gauge face's outer edge.
@@ -291,9 +292,9 @@ Item {
 
     /**
      * @brief Pixel width of the face outer highlight ring.
-     * @default 4% of min(width, height)
+     * @default 4.5% of min(width, height)
      */
-    property real faceOuterHighlightWidth: Math.min(root.width, root.height) * 0.04
+    property real faceOuterHighlightWidth: Math.min(root.width, root.height) * 0.045
 
     // === Needle Customization ===
 

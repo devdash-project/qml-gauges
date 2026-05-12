@@ -263,7 +263,7 @@ QtObject {
             readonly property color critical: "#8f2c14"         // redline (deep red)
             readonly property color overlay: "transparent"      // no glass / lens overlay
             readonly property color bezelHighlight: "#e8e0d0"   // soft warm white along the bezel's inner edge
-            readonly property color faceHighlight: "#fdfcf8"    // near-white halo just inside the bezel
+            readonly property color faceHighlight: "#ffffff"    // crisp cool-white halo just inside the bezel
         }
         readonly property QtObject dark: QtObject {
             readonly property color background: "#0a0a0a"
