@@ -124,6 +124,47 @@ Item {
      */
     property color chrome3dMidtone: color
 
+    // === Flat-style inner-edge highlight ===
+    //
+    // An optional thin highlight band along the *inner* edge of the flat bezel
+    // ring, brightest at `flatInnerHighlightAngle` and fading symmetrically to
+    // either side. It makes the otherwise-uniform flat ring read as a gently
+    // curved (torus-like) form catching light from one direction — the matte
+    // painted-metal bezel look. Only affects `style: "flat"`.
+
+    /**
+     * @brief Render an inner-edge highlight band on the flat bezel.
+     * @default false
+     */
+    property bool flatHasInnerHighlight: false
+
+    /**
+     * @brief Colour the inner-edge highlight peaks at.
+     * @default color lightened
+     */
+    property color flatInnerHighlightColor: Qt.lighter(root.color, 1.5)
+
+    /**
+     * @brief Pixel width of the inner-edge highlight band.
+     * @default 2.0
+     */
+    property real flatInnerHighlightWidth: 2.0
+
+    /**
+     * @brief Peak opacity of the inner-edge highlight.
+     * @default 0.6
+     */
+    property real flatInnerHighlightOpacity: 0.6
+
+    /**
+     * @brief Angle (degrees) at which the inner-edge highlight is brightest.
+     *
+     * Gauge convention: 0 = right, 90 = top, 180 = left, 270 = bottom. The
+     * highlight fades symmetrically away from this angle.
+     * @default 90 (top)
+     */
+    property real flatInnerHighlightAngle: 90
+
     // === Advanced ===
 
     /**
@@ -287,6 +328,70 @@ Item {
             border.width: root.borderWidth
             border.color: root.borderColor
             antialiasing: root.customAntialiasing
+        }
+
+        // Flat-style inner-edge highlight: a thin annulus sitting on the inner
+        // edge of the bezel ring, painted with a conical gradient that peaks at
+        // `flatInnerHighlightAngle` and fades symmetrically to transparent — a
+        // curved-metal catching-light cue for the otherwise uniform flat ring.
+        Shape {
+            id: innerHighlightShape
+            visible: root.style === "flat" && root.flatHasInnerHighlight
+            anchors.fill: parent
+            opacity: root.flatInnerHighlightOpacity
+            antialiasing: root.customAntialiasing
+
+            preferredRendererType: typeof Shape.CurveRenderer !== 'undefined'
+                ? Shape.CurveRenderer
+                : Shape.GeometryRenderer
+
+            // The highlight band radii. `_hiOuter` is the inner edge of the
+            // bezel ring; the band grows inward from there.
+            readonly property real _hiOuter: root.innerRadius
+            readonly property real _hiInner: Math.max(0, root.innerRadius - root.flatInnerHighlightWidth)
+
+            ShapePath {
+                fillRule: ShapePath.OddEvenFill
+                strokeColor: "transparent"
+                fillColor: "transparent"
+
+                // ConicalGradient position 0 sits at `angle` (degrees, CCW from
+                // 3 o'clock on screen). We want position 0 at the highlight
+                // peak; the gauge convention is 0 = right, 90 = top, so on a
+                // y-down screen the screen angle is -flatInnerHighlightAngle.
+                fillGradient: ConicalGradient {
+                    centerX: root.outerRadius
+                    centerY: root.outerRadius
+                    angle: -root.flatInnerHighlightAngle
+
+                    GradientStop { position: 0.0;  color: root.flatInnerHighlightColor }
+                    GradientStop { position: 0.13; color: Qt.rgba(root.flatInnerHighlightColor.r, root.flatInnerHighlightColor.g, root.flatInnerHighlightColor.b, 0) }
+                    GradientStop { position: 0.87; color: Qt.rgba(root.flatInnerHighlightColor.r, root.flatInnerHighlightColor.g, root.flatInnerHighlightColor.b, 0) }
+                    GradientStop { position: 1.0;  color: root.flatInnerHighlightColor }
+                }
+
+                // Outer circle of the band
+                startX: root.outerRadius + innerHighlightShape._hiOuter
+                startY: root.outerRadius
+                PathAngleArc {
+                    centerX: root.outerRadius
+                    centerY: root.outerRadius
+                    radiusX: innerHighlightShape._hiOuter
+                    radiusY: innerHighlightShape._hiOuter
+                    startAngle: 0
+                    sweepAngle: 360
+                }
+                // Inner circle — cuts the hole so only the thin band fills
+                PathAngleArc {
+                    centerX: root.outerRadius
+                    centerY: root.outerRadius
+                    radiusX: innerHighlightShape._hiInner
+                    radiusY: innerHighlightShape._hiInner
+                    startAngle: 0
+                    sweepAngle: 360
+                    moveToStart: true
+                }
+            }
         }
     }
 }
