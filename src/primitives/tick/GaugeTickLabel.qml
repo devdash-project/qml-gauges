@@ -128,22 +128,35 @@ Item {
 
     // === Form-shading Properties ===
     //
-    // Form shading simulates a directional light hitting a slightly raised
-    // painted glyph. The base text is rendered as usual; a MultiEffect
-    // shadow is added behind it, offset away from the (notional) light
-    // source. With a small offset and a soft blur the result reads as
-    // "painted with depth" rather than "duplicated text" — the opposite
-    // visual goal of a regular drop shadow, which intentionally separates
-    // the glyph from the background.
+    // Form shading adds a MultiEffect-driven halo/shadow behind the glyph that
+    // makes a flat-rendered numeral read as a physical painted mark. Two modes:
+    //
+    //   "shadow" — a soft *offset* shadow cast away from a notional light
+    //              source (`lightAngle`). Small offset + soft blur reads as
+    //              "painted with depth" rather than "duplicated text" — the
+    //              opposite goal of a regular drop shadow, which deliberately
+    //              separates the glyph from the background.
+    //   "halo"   — a *centered* glow (no offset, larger blur, saturated colour).
+    //              This is the vintage white-face look: dark glyphs ringed by a
+    //              coloured aura. `lightAngle` is irrelevant in this mode.
 
     /**
-     * @brief Apply a directional shadow that reads as paint depth.
+     * @brief Apply a directional shadow / halo that reads as paint depth.
      *
-     * When true, the label gains a soft offset shadow whose direction is
-     * controlled by `lightAngle` and whose strength by `formShadingIntensity`.
+     * When true, the label gains the effect selected by `formShadingMode`,
+     * with strength controlled by `formShadingIntensity`.
      * @default false
      */
     property bool hasFormShading: false
+
+    /**
+     * @brief Which form-shading effect to apply: "shadow" | "halo".
+     *
+     * "shadow" — directional offset shadow (default; the painted-relief look).
+     * "halo"   — centered, blurred, saturated glow (the white-face numeral look).
+     * @default "shadow"
+     */
+    property string formShadingMode: "shadow"
 
     /**
      * @brief How pronounced the form shading is, in [0, 1].
@@ -167,13 +180,14 @@ Item {
     property real lightAngle: -45
 
     /**
-     * @brief Shadow color used by form shading.
+     * @brief Colour of the form-shading shadow / halo.
      *
-     * Defaults to a darkened version of the text colour, which keeps the
-     * shading hue-consistent with the glyph (the painted-paint look). Set
-     * explicitly to override (e.g., a fixed deep tone independent of text
-     * colour).
-     * @default Qt.darker(color, 1.8) with reduced alpha
+     * In "shadow" mode this defaults to a darkened version of the text colour,
+     * keeping the shading hue-consistent with the glyph (the painted-paint
+     * look). In "halo" mode you almost always want to set it explicitly to a
+     * *saturated* accent colour distinct from the (typically dark) glyph — the
+     * coloured aura is the whole point.
+     * @default Qt.darker(color, 1.8)
      */
     property color formShadingColor: Qt.darker(root.color, 1.8)
 
@@ -203,11 +217,22 @@ Item {
         return prefix + formatted + suffix
     }
 
-    // Shadow offset vector derived from lightAngle + intensity. Magnitude
-    // scales with font size so the depth cue looks proportional at any size.
-    readonly property real _shadowMagnitude: root.fontSize * 0.08 * root.formShadingIntensity
+    readonly property bool _haloMode: root.formShadingMode === "halo"
+
+    // Shadow offset vector derived from lightAngle + intensity (zero in halo
+    // mode — a halo is centered). Magnitude scales with font size so the depth
+    // cue looks proportional at any size.
+    readonly property real _shadowMagnitude: root._haloMode ? 0 : root.fontSize * 0.08 * root.formShadingIntensity
     readonly property real _shadowDx: -Math.cos(root.lightAngle * Math.PI / 180) * _shadowMagnitude
     readonly property real _shadowDy: -Math.sin(root.lightAngle * Math.PI / 180) * _shadowMagnitude
+
+    // Blur is gentle for the offset-shadow look; substantial and
+    // intensity-driven for the halo glow (starting near fontSize * 0.15 worth
+    // of spread, expressed in MultiEffect's normalised 0..1 blur scale).
+    readonly property real _shadowBlur: root._haloMode ? Math.min(1.0, 0.45 + root.formShadingIntensity * 0.55) : 0.6
+    readonly property real _shadowOpacity: root._haloMode
+        ? Math.min(1.0, root.formShadingIntensity * 1.3)
+        : Math.min(1.0, root.formShadingIntensity * 1.5)
 
     Text {
         id: label
@@ -245,8 +270,8 @@ Item {
             shadowColor: root.formShadingColor
             shadowHorizontalOffset: root._shadowDx
             shadowVerticalOffset: root._shadowDy
-            shadowBlur: 0.6
-            shadowOpacity: Math.min(1.0, root.formShadingIntensity * 1.5)
+            shadowBlur: root._shadowBlur
+            shadowOpacity: root._shadowOpacity
         }
     }
 }
