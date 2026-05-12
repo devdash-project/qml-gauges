@@ -118,6 +118,9 @@ QtObject {
     property FontLoader _barlowBoldLoader: FontLoader {
         source: "qrc:/DevDash/Gauges/Theme/fonts/BarlowCondensed-Bold.ttf"
     }
+    property FontLoader _barlowExtraBoldLoader: FontLoader {
+        source: "qrc:/DevDash/Gauges/Theme/fonts/BarlowCondensed-ExtraBold.ttf"
+    }
 
     /**
      * @brief Family name of the bundled Barlow Condensed font.

@@ -538,9 +538,12 @@ Item {
 
     /**
      * @brief Font weight for tick labels.
-     * @default Font.Bold
+     *
+     * Mirrors the theme's `typographyNumeralFontWeight` token.
+     *
+     * @default GaugeTheme.typographyNumeralFontWeight
      */
-    property int tickLabelFontWeight: Font.Bold
+    property int tickLabelFontWeight: GaugeTheme.typographyNumeralFontWeight
 
     /**
      * @brief Font family for gauge label.
