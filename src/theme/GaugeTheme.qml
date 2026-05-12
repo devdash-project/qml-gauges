@@ -121,6 +121,13 @@ QtObject {
     property FontLoader _barlowExtraBoldLoader: FontLoader {
         source: "qrc:/DevDash/Gauges/Theme/fonts/BarlowCondensed-ExtraBold.ttf"
     }
+    // Caveat (SIL OFL, see src/assets/fonts/OFL-Caveat.txt) — a flowing
+    // handwritten script with closed, readable forms even at small sizes. Used
+    // by the classicWhite preset for the script-italic unit ("mph") and the
+    // lower-dial wordmark slot, distinct from the geometric numeral font.
+    property FontLoader _caveatLoader: FontLoader {
+        source: "qrc:/DevDash/Gauges/Theme/fonts/Caveat.ttf"
+    }
 
     /**
      * @brief Family name of the bundled Barlow Condensed font.
@@ -130,6 +137,14 @@ QtObject {
      * bindings so the lookup is driven by the actual loaded font.
      */
     readonly property string barlowCondensedFamily: _barlowRegularLoader.name
+
+    /**
+     * @brief Family name of the bundled Caveat script font.
+     *
+     * Resolves once the FontLoader registers the font with Qt. Refer to this
+     * rather than the literal string "Caveat" in `font.family` bindings.
+     */
+    readonly property string caveatFamily: _caveatLoader.name
 
     // ===================================================================
     // Presets — each carries a `light` + `dark` color set plus the
@@ -156,7 +171,9 @@ QtObject {
             readonly property color critical: "#7a1f15"         // redline (oxidized red)
             readonly property color overlay: "transparent"      // no glass overlay
             readonly property color bezelHighlight: "#3a3530"   // unused (bezelHasInnerHighlight false)
+            readonly property color bezelOuterBand: "#3a3530"   // unused (bezelHasOuterBand false)
             readonly property color faceHighlight: "#ffffff"    // unused (faceHasOuterHighlight false)
+            readonly property color faceEdge: "#0a0905"         // unused (faceHasGradient false)
         }
         readonly property QtObject dark: QtObject {
             readonly property color background: "#000000"
@@ -168,7 +185,9 @@ QtObject {
             readonly property color critical: "#5a1010"
             readonly property color overlay: "transparent"
             readonly property color bezelHighlight: "#1f1c18"   // unused
+            readonly property color bezelOuterBand: "#1f1c18"   // unused
             readonly property color faceHighlight: "#2a2620"    // unused
+            readonly property color faceEdge: "#000000"         // unused
         }
         readonly property string typographyFontFamily: "DIN, DIN 1451, sans-serif"
         readonly property string typographyNumeralFontFamily: typographyFontFamily
@@ -182,9 +201,14 @@ QtObject {
         readonly property color effectsTextShadingColor: "#000000"
         readonly property string centerCapStyle: "flat"
         readonly property string tickStyle: "chevron"
+        readonly property string majorTickShape: "chevron"
+        readonly property string minorTickShape: "chevron"
         readonly property string bezelStyle: "flat"
         readonly property bool bezelHasInnerHighlight: false
+        readonly property bool bezelHasOuterBand: false
         readonly property bool faceHasOuterHighlight: false
+        readonly property bool faceHasGradient: false
+        readonly property string typographyScriptFontFamily: typographyFontFamily
     }
 
     /**
@@ -208,7 +232,9 @@ QtObject {
             readonly property color critical: "#cc2222"         // redline (bright red)
             readonly property color overlay: "#1affffff"        // glass highlight tint (white @ ~10%)
             readonly property color bezelHighlight: "#888888"   // unused (bezelHasInnerHighlight false)
+            readonly property color bezelOuterBand: "#888888"   // unused (bezelHasOuterBand false)
             readonly property color faceHighlight: "#ffffff"    // unused (faceHasOuterHighlight false)
+            readonly property color faceEdge: "#0d0d0d"         // unused (faceHasGradient false)
         }
         readonly property QtObject dark: QtObject {
             readonly property color background: "#05070a"
@@ -220,7 +246,9 @@ QtObject {
             readonly property color critical: "#8a1717"
             readonly property color overlay: "#0dffffff"        // fainter glass highlight
             readonly property color bezelHighlight: "#444444"   // unused
+            readonly property color bezelOuterBand: "#444444"   // unused
             readonly property color faceHighlight: "#202020"    // unused
+            readonly property color faceEdge: "#060606"         // unused
         }
         readonly property string typographyFontFamily: "Roboto, Helvetica Neue, Arial, sans-serif"
         readonly property string typographyNumeralFontFamily: typographyFontFamily
@@ -234,9 +262,14 @@ QtObject {
         readonly property color effectsTextShadingColor: "#000000"
         readonly property string centerCapStyle: "flat"
         readonly property string tickStyle: "rectangle"
+        readonly property string majorTickShape: "rectangle"
+        readonly property string minorTickShape: "rectangle"
         readonly property string bezelStyle: "chrome3d"
         readonly property bool bezelHasInnerHighlight: false
+        readonly property bool bezelHasOuterBand: false
         readonly property bool faceHasOuterHighlight: false
+        readonly property bool faceHasGradient: false
+        readonly property string typographyScriptFontFamily: typographyFontFamily
     }
 
     /**
@@ -263,7 +296,9 @@ QtObject {
             readonly property color critical: "#8f2c14"         // redline (deep red)
             readonly property color overlay: "transparent"      // no glass / lens overlay
             readonly property color bezelHighlight: "#e8e0d0"   // soft warm white along the bezel's inner edge
+            readonly property color bezelOuterBand: "#dadad8"   // bright warm-silver polished outer ring
             readonly property color faceHighlight: "#ffffff"    // crisp cool-white halo just inside the bezel
+            readonly property color faceEdge: "#e8e5e0"         // slightly darker warm-grey at the dial's edge
         }
         readonly property QtObject dark: QtObject {
             readonly property color background: "#0a0a0a"
@@ -275,7 +310,9 @@ QtObject {
             readonly property color critical: "#6e2410"
             readonly property color overlay: "transparent"
             readonly property color bezelHighlight: "#2e2820"   // faint warm highlight (night)
+            readonly property color bezelOuterBand: "#5a5852"   // dim warm-grey outer ring (night)
             readonly property color faceHighlight: "#574c3c"    // dim warm-grey halo (night, not bright white)
+            readonly property color faceEdge: "#221d17"         // near-black, faintly warm dial edge (night)
         }
         // Body text falls back to a generic stack; numerals use the bundled
         // Barlow Condensed for the geometric, condensed character of the
@@ -295,9 +332,14 @@ QtObject {
         readonly property color effectsTextShadingColor: "#d44820"  // orange-red aura around the dark glyphs
         readonly property string centerCapStyle: "dome"  // domed orange centre hub (3D cone, or 2D form-shaded dome)
         readonly property string tickStyle: "rectangle"
+        readonly property string majorTickShape: "rounded-rectangle"  // larger rounded-corner major ticks at numbered positions
+        readonly property string minorTickShape: "rectangle"          // plain short minor ticks
         readonly property string bezelStyle: "flat"
         readonly property bool bezelHasInnerHighlight: true  // curved-metal highlight on the matte bezel
+        readonly property bool bezelHasOuterBand: true       // bright polished outer ring (two-tone bezel)
         readonly property bool faceHasOuterHighlight: true   // bright halo ring just inside the bezel
+        readonly property bool faceHasGradient: true         // subtle radial gradient: brighter centre, greyer edge
+        readonly property string typographyScriptFontFamily: theme.caveatFamily  // script-italic unit / wordmark text
     }
 
     // ===================================================================
@@ -378,6 +420,7 @@ QtObject {
 
     readonly property string typographyFontFamily: activeTheme.typographyFontFamily
     readonly property string typographyNumeralFontFamily: activeTheme.typographyNumeralFontFamily
+    readonly property string typographyScriptFontFamily: activeTheme.typographyScriptFontFamily
     readonly property int typographyNumeralFontWeight: activeTheme.typographyNumeralFontWeight
     readonly property real typographyScale: activeTheme.typographyScale
     readonly property bool effectsGlow: activeTheme.effectsGlow
@@ -388,9 +431,13 @@ QtObject {
     readonly property color effectsTextShadingColor: activeTheme.effectsTextShadingColor
     readonly property string centerCapStyle: activeTheme.centerCapStyle
     readonly property string tickStyle: activeTheme.tickStyle
+    readonly property string majorTickShape: activeTheme.majorTickShape
+    readonly property string minorTickShape: activeTheme.minorTickShape
     readonly property string bezelStyle: activeTheme.bezelStyle
     readonly property bool bezelHasInnerHighlight: activeTheme.bezelHasInnerHighlight
+    readonly property bool bezelHasOuterBand: activeTheme.bezelHasOuterBand
     readonly property bool faceHasOuterHighlight: activeTheme.faceHasOuterHighlight
+    readonly property bool faceHasGradient: activeTheme.faceHasGradient
 
     // ===================================================================
     // Imperative API for C++ or QML to switch themes

@@ -27,6 +27,7 @@ set(THEME_FONT_FILES
     ${CMAKE_SOURCE_DIR}/src/assets/fonts/BarlowCondensed-SemiBold.ttf
     ${CMAKE_SOURCE_DIR}/src/assets/fonts/BarlowCondensed-Bold.ttf
     ${CMAKE_SOURCE_DIR}/src/assets/fonts/BarlowCondensed-ExtraBold.ttf
+    ${CMAKE_SOURCE_DIR}/src/assets/fonts/Caveat.ttf
 )
 foreach(font_file IN LISTS THEME_FONT_FILES)
     get_filename_component(font_name "${font_file}" NAME)
