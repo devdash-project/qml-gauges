@@ -242,10 +242,12 @@ QtObject {
     /**
      * @brief Vintage white-face aesthetic, inspired by classic aftermarket gauges.
      *
-     * A cool pearl-white dial in a thick matte-black bezel, bold geometric
-     * near-black numerals ringed by an orange-red halo, an orange-red painted
-     * needle, and a domed orange centre hub — no chrome, no glass, no glow.
-     * Light mode is the canonical daylight look; dark mode dims everything and
+     * A cool pearl-white dial — ringed by a bright halo just inside a thick
+     * matte-black bezel whose inner edge carries a soft warm-white highlight —
+     * with heavy (ExtraBold) geometric near-black numerals ringed by an
+     * orange-red halo, an orange-red painted needle, and a domed orange centre
+     * hub. No chrome, no glass, no glow. Light mode is the canonical daylight
+     * look; dark mode dims everything (highlights included) and
      * shifts the accent warmer (amber) to spare night vision, with the white
      * face dropped to a warm dark grey. Pair with RadialGauge's `scriptLabel` /
      * `brandLabel` slots for the lower-dial wordmark and branding line.
@@ -260,8 +262,8 @@ QtObject {
             readonly property color warning: "#c9851f"          // warning zone (muted amber)
             readonly property color critical: "#8f2c14"         // redline (deep red)
             readonly property color overlay: "transparent"      // no glass / lens overlay
-            readonly property color bezelHighlight: "#3a3530"   // placeholder — wired in a later commit
-            readonly property color faceHighlight: "#ffffff"    // placeholder — wired in a later commit
+            readonly property color bezelHighlight: "#e8e0d0"   // soft warm white along the bezel's inner edge
+            readonly property color faceHighlight: "#fdfcf8"    // near-white halo just inside the bezel
         }
         readonly property QtObject dark: QtObject {
             readonly property color background: "#0a0a0a"
@@ -272,8 +274,8 @@ QtObject {
             readonly property color warning: "#8a5810"
             readonly property color critical: "#6e2410"
             readonly property color overlay: "transparent"
-            readonly property color bezelHighlight: "#241f1a"   // placeholder — wired in a later commit
-            readonly property color faceHighlight: "#3a3328"    // placeholder — wired in a later commit
+            readonly property color bezelHighlight: "#2e2820"   // faint warm highlight (night)
+            readonly property color faceHighlight: "#574c3c"    // dim warm-grey halo (night, not bright white)
         }
         // Body text falls back to a generic stack; numerals use the bundled
         // Barlow Condensed for the geometric, condensed character of the
@@ -283,7 +285,7 @@ QtObject {
         // name is never hard-coded.
         readonly property string typographyFontFamily: "Helvetica Neue, Roboto Condensed, Arial, sans-serif"
         readonly property string typographyNumeralFontFamily: theme.barlowCondensedFamily
-        readonly property int typographyNumeralFontWeight: Font.Bold  // heavier weight wired in a later commit
+        readonly property int typographyNumeralFontWeight: Font.ExtraBold  // heavy, "painted-on" numerals
         readonly property real typographyScale: 1.0
         readonly property bool effectsGlow: false
         readonly property bool effectsShadow: true
@@ -294,8 +296,8 @@ QtObject {
         readonly property string centerCapStyle: "dome"  // domed orange centre hub (3D cone, or 2D form-shaded dome)
         readonly property string tickStyle: "rectangle"
         readonly property string bezelStyle: "flat"
-        readonly property bool bezelHasInnerHighlight: false  // wired in a later commit
-        readonly property bool faceHasOuterHighlight: false   // wired in a later commit
+        readonly property bool bezelHasInnerHighlight: true  // curved-metal highlight on the matte bezel
+        readonly property bool faceHasOuterHighlight: true   // bright halo ring just inside the bezel
     }
 
     // ===================================================================
