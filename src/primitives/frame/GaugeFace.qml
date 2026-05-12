@@ -89,6 +89,37 @@ Item {
      */
     property string textureSource: ""
 
+    // === Outer highlight ring ===
+    //
+    // A thin bright ring hugging the *outer* edge of the face — the bright
+    // halo just inside a bezel on classic white-face gauges, where the dial's
+    // curved edge catches light. It is part of the face's own appearance (the
+    // face is what catches the light), not a separate layered primitive.
+
+    /**
+     * @brief Render a bright ring on the outer edge of the face.
+     * @default false
+     */
+    property bool hasOuterHighlight: false
+
+    /**
+     * @brief Colour of the outer highlight ring.
+     * @default "#ffffff"
+     */
+    property color outerHighlightColor: "#ffffff"
+
+    /**
+     * @brief Pixel width of the outer highlight ring.
+     * @default 3.0
+     */
+    property real outerHighlightWidth: 3.0
+
+    /**
+     * @brief Opacity of the outer highlight ring.
+     * @default 1.0
+     */
+    property real outerHighlightOpacity: 1.0
+
     // === Advanced ===
 
     /**
@@ -138,6 +169,22 @@ Item {
             source: root.textureSource
             fillMode: Image.PreserveAspectCrop
             smooth: true
+        }
+
+        // Outer highlight ring: a centred border on a slightly inset circle so
+        // the band occupies exactly the outermost `outerHighlightWidth` pixels
+        // of the face. Painted last so it sits over fill / texture.
+        Rectangle {
+            visible: root.hasOuterHighlight
+            width: root.diameter - root.outerHighlightWidth
+            height: root.diameter - root.outerHighlightWidth
+            radius: width / 2
+            anchors.centerIn: parent
+            color: "transparent"
+            border.width: root.outerHighlightWidth
+            border.color: root.outerHighlightColor
+            opacity: root.outerHighlightOpacity
+            antialiasing: root.customAntialiasing
         }
     }
 }
