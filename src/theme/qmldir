@@ -1,2 +1,3 @@
 module DevDash.Gauges.Theme
 singleton GaugeTheme 1.0 GaugeTheme.qml
+singleton GaugeQuality 1.0 GaugeQuality.qml

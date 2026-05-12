@@ -10,8 +10,11 @@
 # qmldir's `prefer :/...` line breaks relative resolution of the referenced
 # types). See PLAN.md decisions log.
 
-# GaugeTheme must be registered as a QML singleton (before qt_add_qml_module).
+# Singletons must be registered before qt_add_qml_module.
+#   GaugeTheme   — active aesthetic preset + light/dark mode.
+#   GaugeQuality — active graphics-quality profile (2D vs 3D rendering paths).
 set_source_files_properties(GaugeTheme.qml PROPERTIES QT_QML_SINGLETON_TYPE TRUE)
+set_source_files_properties(GaugeQuality.qml PROPERTIES QT_QML_SINGLETON_TYPE TRUE)
 
 # Bundled fonts. Loaded at runtime by FontLoader in GaugeTheme.qml. We place
 # them in src/assets/fonts/ on disk and bundle them into the theme module's
@@ -35,6 +38,7 @@ qt_add_qml_module(devdash_gauges_theme
     VERSION 1.0
     QML_FILES
         GaugeTheme.qml
+        GaugeQuality.qml
     RESOURCES
         ${THEME_FONT_FILES}
     RESOURCE_PREFIX /
@@ -51,6 +55,7 @@ install(TARGETS devdash_gauges_theme
 if(QMLLINT_EXECUTABLE)
     set(THEME_QML_FILES
         ${CMAKE_CURRENT_SOURCE_DIR}/GaugeTheme.qml
+        ${CMAKE_CURRENT_SOURCE_DIR}/GaugeQuality.qml
     )
 
     add_custom_target(qmllint-theme
