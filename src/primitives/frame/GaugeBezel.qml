@@ -165,6 +165,54 @@ Item {
      */
     property real flatInnerHighlightAngle: 90
 
+    // === Flat-style two-tone outer band ===
+    //
+    // An optional bright band sitting on the *outer* edge of the flat bezel
+    // ring, outboard of the dark inner band — the polished-metal outer ring of
+    // a two-tone bezel (bright outer band + dark matte inner ring). The band
+    // covers the outermost `flatOuterBandWidth` pixels of the bezel; the dark
+    // ring shows through the remaining inner portion. Only affects `style:
+    // "flat"`.
+
+    /**
+     * @brief Render a bright outer band on the flat bezel (two-tone construction).
+     * @default false
+     */
+    property bool flatHasOuterBand: false
+
+    /**
+     * @brief Pixel width of the outer band.
+     * @default outerRadius * 0.05 (about a third of a typical bezel width)
+     */
+    property real flatOuterBandWidth: outerRadius * 0.05
+
+    /**
+     * @brief Base colour of the outer band.
+     * @default color lightened (bright metal)
+     */
+    property color flatOuterBandColor: Qt.lighter(root.color, 1.8)
+
+    /**
+     * @brief Give the outer band a polished-metal gradient (light from one side).
+     * @default true
+     */
+    property bool flatOuterBandHasGradient: true
+
+    /**
+     * @brief Angle (degrees) at which the outer band's gradient is brightest.
+     *
+     * Gauge convention: 0 = right, 90 = top, 180 = left, 270 = bottom. The band
+     * fades symmetrically to either side. Matches the inner-highlight convention.
+     * @default 90 (top)
+     */
+    property real flatOuterBandHighlightAngle: 90
+
+    /**
+     * @brief Strength of the outer band's metal gradient, in [0, 1].
+     * @default 0.5
+     */
+    property real flatOuterBandGradientIntensity: 0.5
+
     // === Advanced ===
 
     /**
@@ -393,6 +441,76 @@ Item {
                     sweepAngle: 360
                     moveToStart: true
                 }
+            }
+        }
+
+        // Flat-style two-tone outer band: a bright annulus painted over the
+        // outermost `flatOuterBandWidth` pixels of the bezel ring, with an
+        // optional conical gradient peaking at `flatOuterBandHighlightAngle`
+        // for the "polished metal catches light from above" reading. The dark
+        // inner band shows through the remaining inboard portion of the ring.
+        Shape {
+            id: outerBandShape
+            visible: root.style === "flat" && root.flatHasOuterBand
+            anchors.fill: parent
+            antialiasing: root.customAntialiasing
+
+            preferredRendererType: typeof Shape.CurveRenderer !== 'undefined'
+                ? Shape.CurveRenderer
+                : Shape.GeometryRenderer
+
+            // Band radii: from the bezel's outer edge inward by the band width.
+            readonly property real _obOuter: root.outerRadius
+            readonly property real _obInner: Math.max(root.innerRadius, root.outerRadius - root.flatOuterBandWidth)
+
+            // Peak (lit) and trough (shadowed) tints around the base colour.
+            readonly property color _obPeak: Qt.lighter(root.flatOuterBandColor, 1 + root.flatOuterBandGradientIntensity * 0.6)
+            readonly property color _obTrough: Qt.darker(root.flatOuterBandColor, 1 + root.flatOuterBandGradientIntensity * 0.5)
+
+            ShapePath {
+                fillRule: ShapePath.OddEvenFill
+                strokeColor: "transparent"
+                fillColor: root.flatOuterBandHasGradient ? "transparent" : root.flatOuterBandColor
+
+                // ConicalGradient position 0 sits at `angle` degrees (CCW from
+                // 3 o'clock on a y-down screen). We want position 0 at the
+                // highlight peak, so the screen angle is -flatOuterBandHighlightAngle.
+                fillGradient: root.flatOuterBandHasGradient ? outerBandGradient : null
+
+                // Outer circle of the band
+                startX: root.outerRadius + outerBandShape._obOuter
+                startY: root.outerRadius
+                PathAngleArc {
+                    centerX: root.outerRadius
+                    centerY: root.outerRadius
+                    radiusX: outerBandShape._obOuter
+                    radiusY: outerBandShape._obOuter
+                    startAngle: 0
+                    sweepAngle: 360
+                }
+                // Inner circle — cuts the hole so only the band fills
+                PathAngleArc {
+                    centerX: root.outerRadius
+                    centerY: root.outerRadius
+                    radiusX: outerBandShape._obInner
+                    radiusY: outerBandShape._obInner
+                    startAngle: 0
+                    sweepAngle: 360
+                    moveToStart: true
+                }
+            }
+
+            ConicalGradient {
+                id: outerBandGradient
+                centerX: root.outerRadius
+                centerY: root.outerRadius
+                angle: -root.flatOuterBandHighlightAngle
+
+                GradientStop { position: 0.0;  color: outerBandShape._obPeak }
+                GradientStop { position: 0.25; color: root.flatOuterBandColor }
+                GradientStop { position: 0.5;  color: outerBandShape._obTrough }
+                GradientStop { position: 0.75; color: root.flatOuterBandColor }
+                GradientStop { position: 1.0;  color: outerBandShape._obPeak }
             }
         }
     }
