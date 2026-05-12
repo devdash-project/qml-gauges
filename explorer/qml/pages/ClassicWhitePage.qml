@@ -46,9 +46,12 @@ Item {
         {name: "unit", type: "string", default: "mph", category: "Value",
          description: "Unit (used by the optional digital readout)."},
 
-        // Face text (decorative slots — empty ships nothing; the library has no wordmark of its own)
-        {name: "scriptLabel", type: "string", default: "", category: "Face Text",
-         description: "Decorative script word just below the dial centre, under the needle — the spot a vintage-gauge wordmark traditionally sits. Empty by default; supply your own word."},
+        // Face text (decorative slots — the library ships no wordmark of its own;
+        // these demo values are generic words, not any real product's marks)
+        {name: "scriptLabel", type: "string", default: "Cruiser", category: "Face Text",
+         description: "Decorative script word just below the dial centre, under the needle — the spot a vintage-gauge wordmark traditionally sits. Rendered in the preset's script font. Demo value is a generic word; supply your own."},
+        {name: "unitLabel", type: "string", default: "mph", category: "Face Text",
+         description: "Small script unit word near the dial centre (e.g. \"mph\"). Distinct from `unit` (which feeds the digital readout). Rendered in the preset's script font."},
         {name: "brandLabel", type: "string", default: "", category: "Face Text",
          description: "Small branding line low on the dial face near 6 o'clock. Empty by default; supply your own text."},
 
@@ -123,6 +126,8 @@ Item {
                 maxValue: 160
                 label: "MPH"
                 unit: "mph"
+                unitLabel: "mph"
+                scriptLabel: "Cruiser"
                 majorTickInterval: 20
                 minorTickInterval: 5
                 labelDivisor: 1
