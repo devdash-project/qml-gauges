@@ -114,10 +114,11 @@ Two orthogonal axes:
   `GaugeTheme.setTheme("industrial" | "modernOEM" | "classicWhite")`) — the
   aesthetic family. `industrial` = warm-black painted / aged-cream / oxidized
   red; `modernOEM` = near-black gradient / bright-orange accent / chrome bezel;
-  `classicWhite` = pearl-white dial / matte-black bezel / near-black numerals
-  with an orange-red halo / orange-red needle / domed orange centre hub (a
-  vintage white-face look, inspired by classic aftermarket gauges — no specific
-  product is reproduced).
+  `classicWhite` = pearl-white dial with a bright halo ring just inside a thick
+  matte-black bezel whose inner edge carries a soft warm-white highlight /
+  heavy (ExtraBold) near-black numerals with an orange-red halo / orange-red
+  needle / domed orange centre hub (a vintage white-face look, inspired by
+  classic aftermarket gauges — no specific product is reproduced).
 - **Mode** (`GaugeTheme.mode`, `"light"` | `"dark"`; switch with
   `GaugeTheme.setMode(...)`) — day vs. night colour set. Independent of preset.
 
@@ -138,15 +139,24 @@ Colour tokens (vary by mode; read from `GaugeTheme.colors`):
 | `warning`        | warning-zone colour (amber range, typically)                   |
 | `critical`       | critical / redline zone colour (red range, typically)          |
 | `overlay`        | glass / lens overlay tint (often `transparent`, or white at low opacity) |
+| `bezelHighlight` | colour of the flat bezel's inner-edge highlight band (only meaningful when `bezelHasInnerHighlight`) |
+| `faceHighlight`  | colour of the face's outer highlight ring (only meaningful when `faceHasOuterHighlight`) |
 
 Non-colour tokens (mode-independent; read directly off `GaugeTheme`):
-`typographyFontFamily`, `typographyNumeralFontFamily`, `typographyScale`,
-`effectsGlow`, `effectsShadow`, `effectsTexture`, `effectsTextShading`,
-`effectsTextShadingMode` (`"shadow"|"halo"` — directional painted-relief
-shadow vs. centered saturated glow on numerals), `effectsTextShadingColor`
-(colour of that shadow/halo; a deliberately mode-independent colour token),
+`typographyFontFamily`, `typographyNumeralFontFamily`,
+`typographyNumeralFontWeight` (numeral weight, e.g. `Font.Bold` /
+`Font.ExtraBold` — ExtraBold has a real bundled Barlow Condensed face),
+`typographyScale`, `effectsGlow`, `effectsShadow`, `effectsTexture`,
+`effectsTextShading`, `effectsTextShadingMode` (`"shadow"|"halo"` — directional
+painted-relief shadow vs. centered saturated glow on numerals),
+`effectsTextShadingColor` (colour of that shadow/halo; a deliberately
+mode-independent colour token),
 `tickStyle` (`"rectangle"|"chevron"|"triangle"|"rounded-dot"|"block"`),
 `bezelStyle` (`"flat"|"chrome"|"chrome3d"`),
+`bezelHasInnerHighlight` (flat-bezel inner-edge highlight band — curved-metal
+catching-light cue; conical-gradient annulus peaking at the top),
+`faceHasOuterHighlight` (a bright ring on the face's outer edge — the bright
+halo just inside the bezel on classic white-face gauges),
 `centerCapStyle` (`"flat"|"dome"` — a plain disc vs. a raised cone/dome hub;
 the dome renders as Quick3D's `CenterCap3D` when `GaugeQuality.effects3DEnabled`,
 else a form-shaded 2D `GaugeCenterCap`).
@@ -174,6 +184,8 @@ defaults, so a preset can change a gauge's structure, not just its palette:
 | `colors.critical` | `redlineColor`, `criticalColor` | redline zone / critical ticks |
 | `tickStyle` | `tickShape` | `GaugeTickRing.tickShape` |
 | `bezelStyle` | `bezelStyle` | `GaugeBezel.style` |
+| `bezelHasInnerHighlight` | `bezelInnerHighlight` | `GaugeBezel.flatHasInnerHighlight` (+ `bezelInnerHighlightColor` ← `colors.bezelHighlight`, `bezelInnerHighlightWidth` default 45 % of `bezelWidth`) |
+| `faceHasOuterHighlight` | `faceOuterHighlight` | `GaugeFace.hasOuterHighlight` (+ `faceOuterHighlightColor` ← `colors.faceHighlight`, `faceOuterHighlightWidth` default 4.5 % of gauge size) |
 | `effectsGlow` | `tickGlow`, `needleOuterGlow` | tick glow + needle neon halo |
 | `effectsShadow` | `needleShadow` | needle drop shadow |
 | `effectsTexture` | `faceTexture` | gates `faceTextureSource` → `GaugeFace.textureSource` |
@@ -184,6 +196,7 @@ defaults, so a preset can change a gauge's structure, not just its palette:
 | `typographyScale` | `tickLabelFontSize`, `gaugeLabelFontSize` | ×-multiplies those + the digital readout's value size |
 | `typographyFontFamily` | `gaugeLabelFontFamily` | gauge label font |
 | `typographyNumeralFontFamily` | `tickLabelFontFamily` | tick numeral font |
+| `typographyNumeralFontWeight` | `tickLabelFontWeight` | tick numeral weight (ClassicWhite = `Font.ExtraBold`; others `Font.Bold`) |
 
 Every one of these is still per-instance overridable — the token only supplies
 the default expression. (The `RadialGauge3D`-era glass overlay has no token yet;
