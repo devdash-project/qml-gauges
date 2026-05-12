@@ -245,6 +245,56 @@ Item {
      */
     property string faceTextureSource: ""
 
+    /**
+     * @brief Render the flat bezel's inner-edge highlight band.
+     *
+     * A thin highlight along the bezel ring's inner edge that makes a flat
+     * (uniform-colour) bezel read as gently curved metal catching light from
+     * above — the matte painted-metal bezel look. Only affects the "flat"
+     * bezel style. Mirrors the theme's `bezelHasInnerHighlight` token.
+     *
+     * @default GaugeTheme.bezelHasInnerHighlight
+     */
+    property bool bezelInnerHighlight: GaugeTheme.bezelHasInnerHighlight
+
+    /**
+     * @brief Colour the bezel inner-edge highlight peaks at.
+     * @default GaugeTheme.colors.bezelHighlight
+     */
+    property color bezelInnerHighlightColor: GaugeTheme.colors.bezelHighlight
+
+    /**
+     * @brief Pixel width of the bezel inner-edge highlight band.
+     *
+     * Defaults to a fraction of the bezel width so it scales with the gauge.
+     *
+     * @default 28% of bezelWidth
+     */
+    property real bezelInnerHighlightWidth: root.bezelWidth * 0.28
+
+    /**
+     * @brief Render a bright highlight ring on the gauge face's outer edge.
+     *
+     * The bright halo just inside the bezel on classic white-face gauges,
+     * where the dial's curved edge catches light. Mirrors the theme's
+     * `faceHasOuterHighlight` token.
+     *
+     * @default GaugeTheme.faceHasOuterHighlight
+     */
+    property bool faceOuterHighlight: GaugeTheme.faceHasOuterHighlight
+
+    /**
+     * @brief Colour of the face outer highlight ring.
+     * @default GaugeTheme.colors.faceHighlight
+     */
+    property color faceOuterHighlightColor: GaugeTheme.colors.faceHighlight
+
+    /**
+     * @brief Pixel width of the face outer highlight ring.
+     * @default 4% of min(width, height)
+     */
+    property real faceOuterHighlightWidth: Math.min(root.width, root.height) * 0.04
+
     // === Needle Customization ===
 
     /**
@@ -669,6 +719,9 @@ Item {
         diameter: Math.min(root.width, root.height)
         color: root.faceColor
         textureSource: root.faceTexture ? root.faceTextureSource : ""
+        hasOuterHighlight: root.faceOuterHighlight
+        outerHighlightColor: root.faceOuterHighlightColor
+        outerHighlightWidth: root.faceOuterHighlightWidth
     }
 
     // Layer 2: Background arc track
@@ -932,5 +985,8 @@ Item {
         borderColor: root.bezelColor
         color: root.bezelColor
         style: root.bezelStyle
+        flatHasInnerHighlight: root.bezelInnerHighlight
+        flatInnerHighlightColor: root.bezelInnerHighlightColor
+        flatInnerHighlightWidth: root.bezelInnerHighlightWidth
     }
 }
