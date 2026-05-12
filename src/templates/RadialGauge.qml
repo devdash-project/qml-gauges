@@ -153,14 +153,32 @@ Item {
     property real labelDivisor: 1
 
     /**
-     * @brief Tick mark shape for major and minor ticks.
+     * @brief Default tick mark shape for both tiers.
      *
-     * Supported: "rectangle", "chevron", "triangle", "rounded-dot", "block".
-     * Mirrors the theme's `tickStyle` token; per-instance assignment overrides.
+     * Supported: "rectangle", "rounded-rectangle", "chevron", "triangle",
+     * "rounded-dot", "block". Mirrors the theme's `tickStyle` token; per-tier
+     * overrides come from `majorTickShape` / `minorTickShape`.
      *
      * @default GaugeTheme.tickStyle
      */
     property string tickShape: GaugeTheme.tickStyle
+
+    /**
+     * @brief Shape for the major (numbered-position) ticks.
+     *
+     * Lets the major tier carry a heavier shape (e.g. "rounded-rectangle" for
+     * the painted-on white-face look, or "chevron") while the minor tier stays
+     * plain. Mirrors the theme's `majorTickShape` token.
+     *
+     * @default GaugeTheme.majorTickShape
+     */
+    property string majorTickShape: GaugeTheme.majorTickShape
+
+    /**
+     * @brief Shape for the minor ticks. Mirrors the theme's `minorTickShape`.
+     * @default GaugeTheme.minorTickShape
+     */
+    property string minorTickShape: GaugeTheme.minorTickShape
 
     // === Color Scheme ===
     //
@@ -272,6 +290,70 @@ Item {
      * @default 45% of bezelWidth
      */
     property real bezelInnerHighlightWidth: root.bezelWidth * 0.45
+
+    /**
+     * @brief Render a bright outer band on the flat bezel (two-tone construction).
+     *
+     * A bright "polished metal" band on the bezel's outermost edge, outboard of
+     * the dark matte inner ring — the two-tone bezel of classic white-face
+     * gauges. Only affects the "flat" bezel style. Mirrors the theme's
+     * `bezelHasOuterBand` token.
+     *
+     * @default GaugeTheme.bezelHasOuterBand
+     */
+    property bool bezelOuterBand: GaugeTheme.bezelHasOuterBand
+
+    /**
+     * @brief Base colour of the bezel outer band.
+     * @default GaugeTheme.colors.bezelOuterBand
+     */
+    property color bezelOuterBandColor: GaugeTheme.colors.bezelOuterBand
+
+    /**
+     * @brief Pixel width of the bezel outer band.
+     *
+     * Defaults to about a third of the bezel width — the dark inner ring keeps
+     * the rest.
+     *
+     * @default 32% of bezelWidth
+     */
+    property real bezelOuterBandWidth: root.bezelWidth * 0.32
+
+    /**
+     * @brief Give the bezel outer band a polished-metal gradient.
+     * @default true
+     */
+    property bool bezelOuterBandGradient: true
+
+    /**
+     * @brief Render a subtle radial gradient on the gauge face.
+     *
+     * Centre brighter than edge — the gentle depth of a real white-face dial,
+     * and what gives the outer highlight ring contrast to read against. Mirrors
+     * the theme's `faceHasGradient` token.
+     *
+     * @default GaugeTheme.faceHasGradient
+     */
+    property bool faceGradient: GaugeTheme.faceHasGradient
+
+    /**
+     * @brief Face-gradient colour at the dial centre.
+     * @default faceColor (unchanged centre)
+     */
+    property color faceGradientCenterColor: root.faceColor
+
+    /**
+     * @brief Face-gradient colour at the dial's outer edge.
+     * @default GaugeTheme.colors.faceEdge
+     */
+    property color faceGradientEdgeColor: GaugeTheme.colors.faceEdge
+
+    /**
+     * @brief Fraction of the dial radius held at the centre colour before the
+     * face gradient starts transitioning to the edge colour.
+     * @default 0.3
+     */
+    property real faceGradientCenterStop: 0.3
 
     /**
      * @brief Render a bright highlight ring on the gauge face's outer edge.
@@ -611,6 +693,30 @@ Item {
      */
     property string brandLabel: ""
 
+    /**
+     * @brief Small unit word rendered near the dial centre (e.g. "mph", "psi").
+     *
+     * The script-style unit label of a classic white-face dial — distinct from
+     * `unit` (which feeds the digital readout). Rendered in `scriptFontFamily`,
+     * italic, under the needle. Empty by default (hidden).
+     *
+     * @default "" (hidden)
+     */
+    property string unitLabel: ""
+
+    /**
+     * @brief Font family for the decorative script slots (`scriptLabel`,
+     * `unitLabel`).
+     *
+     * Mirrors the theme's `typographyScriptFontFamily` token — a script-italic
+     * face for presets that want one (classicWhite), or the preset's normal
+     * body font otherwise (Industrial / ModernOEM render these slots in their
+     * standard font).
+     *
+     * @default GaugeTheme.typographyScriptFontFamily
+     */
+    property string scriptFontFamily: GaugeTheme.typographyScriptFontFamily
+
     // === Tick Mark Customization ===
 
     /**
@@ -723,6 +829,10 @@ Item {
         diameter: Math.min(root.width, root.height)
         color: root.faceColor
         textureSource: root.faceTexture ? root.faceTextureSource : ""
+        hasFaceGradient: root.faceGradient
+        faceGradientCenterColor: root.faceGradientCenterColor
+        faceGradientEdgeColor: root.faceGradientEdgeColor
+        faceGradientCenterStop: root.faceGradientCenterStop
         hasOuterHighlight: root.faceOuterHighlight
         outerHighlightColor: root.faceOuterHighlightColor
         outerHighlightWidth: root.faceOuterHighlightWidth
@@ -768,6 +878,8 @@ Item {
         startAngle: root.startAngle
         sweepAngle: root.sweepAngle
         tickShape: root.tickShape
+        majorTickShape: root.majorTickShape
+        minorTickShape: root.minorTickShape
 
         // Colors
         warningStart: root.warningThreshold
@@ -822,11 +934,24 @@ Item {
         anchors.verticalCenterOffset: Math.min(root.width, root.height) * 0.14
         text: root.scriptLabel
         visible: root.scriptLabel !== ""
-        font.family: root.gaugeLabelFontFamily
+        font.family: root.scriptFontFamily
         font.pixelSize: Math.round(Math.min(root.width, root.height) * 0.075)
         font.italic: true
         font.weight: Font.DemiBold
         font.letterSpacing: 1
+        color: root.tickColor
+    }
+
+    // Layer 5b': Small script unit word near the dial centre (under the needle)
+    Text {
+        anchors.centerIn: parent
+        anchors.verticalCenterOffset: Math.min(root.width, root.height) * 0.235
+        text: root.unitLabel
+        visible: root.unitLabel !== ""
+        font.family: root.scriptFontFamily
+        font.pixelSize: Math.round(Math.min(root.width, root.height) * 0.045)
+        font.italic: true
+        font.letterSpacing: 0.5
         color: root.tickColor
     }
 
@@ -992,5 +1117,9 @@ Item {
         flatHasInnerHighlight: root.bezelInnerHighlight
         flatInnerHighlightColor: root.bezelInnerHighlightColor
         flatInnerHighlightWidth: root.bezelInnerHighlightWidth
+        flatHasOuterBand: root.bezelOuterBand
+        flatOuterBandColor: root.bezelOuterBandColor
+        flatOuterBandWidth: root.bezelOuterBandWidth
+        flatOuterBandHasGradient: root.bezelOuterBandGradient
     }
 }
