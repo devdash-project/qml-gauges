@@ -236,6 +236,12 @@ ApplicationWindow {
                     Layout.alignment: Qt.AlignVCenter
                 }
 
+                // Gauge-quality control: 3D-on/off toggle driving the
+                // GaugeQuality singleton globally.
+                GaugeQualityControls {
+                    Layout.alignment: Qt.AlignVCenter
+                }
+
                 Label {
                     text: "v1.0.0"
                     font.pixelSize: 12
