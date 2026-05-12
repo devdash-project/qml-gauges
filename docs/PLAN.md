@@ -4,7 +4,7 @@ This document tracks the active development plan for the qml-gauges library.
 For the durable architectural reference, see CLAUDE.md. For audit outputs and
 historical investigations, see docs/audits/.
 
-Last updated: 2026-05-11 (ClassicWhite typographic-character refinement landed: Barlow Condensed bundled into the theme module via a FontLoader on `GaugeTheme` and pointed at by ClassicWhite's `typographyNumeralFontFamily`; `GaugeTickLabel` gained a `hasFormShading` capability driven by a `MultiEffect` directional shadow; a new theme token `effectsTextShading` opts a preset into form-shaded numerals — true on classicWhite, false on industrial / modernOEM so their rendered output is unchanged. See "ClassicWhite refinement (2026-05-11)" below for the capability-test outcome. Before that — same date — the `chrome3d` `GaugeBezel` fill bug was fixed in commit `29d00cf` (chrome3d rebuilt as a true annulus). And MCP-follow-up explorer fixes: PropertyPanel now mirrors binding-derived target changes into the editor UI and the state server, so `qml_explorer_get_state` is no longer stale after `GaugeTheme.setTheme()`; and a new `resetProperty` WS action / `qml_explorer_reset_property` tool re-establishes a property's binding after `set_property` pinned it — see the Decisions log. Earlier the same day: theme Phase 5 — the explorer's header bar gained a preset selector + gauge mode toggle (`GaugeThemeControls`) driving the `GaugeTheme` singleton globally, populated declaratively from `presetNames` / `presetMetadata` and reflecting `activeTheme` / `mode` reactively. And Phases 3–4 — legacy IndustrialGauge / RadialGauge3D templates retired in favour of GaugeTheme presets; ClassicWhite preset added; RadialGauge gained scriptLabel / brandLabel; the Phase-3 follow-up wired the structural theme tokens — tickStyle, bezelStyle, effectsGlow/effectsShadow/effectsTexture, typographyScale — into RadialGauge so the three presets render structurally distinct, not just colour-shifted (Industrial-vs-ModernOEM SSIM 0.965 → 0.77). The whole theme track (Phases 1–5) is complete.)
+Last updated: 2026-05-12 (ClassicWhite 2D/3D variants + `GaugeQuality` singleton landed — new `effects3DEnabled` flag selects `CenterCap3D` vs. a form-shaded 2D `GaugeCenterCap` for the domed hub; `GaugeTickLabel` gained a `"halo"` form-shading mode; new theme tokens `centerCapStyle`, `effectsTextShadingMode`, `effectsTextShadingColor`; ClassicWhite numerals are now dark glyphs with an orange-red halo. See "ClassicWhite 2D/3D variants + GaugeQuality singleton (2026-05-12)" below. Previously — 2026-05-11 — ClassicWhite typographic-character refinement landed: Barlow Condensed bundled into the theme module via a FontLoader on `GaugeTheme` and pointed at by ClassicWhite's `typographyNumeralFontFamily`; `GaugeTickLabel` gained a `hasFormShading` capability driven by a `MultiEffect` directional shadow; a new theme token `effectsTextShading` opts a preset into form-shaded numerals — true on classicWhite, false on industrial / modernOEM so their rendered output is unchanged. See "ClassicWhite refinement (2026-05-11)" below for the capability-test outcome. Before that — same date — the `chrome3d` `GaugeBezel` fill bug was fixed in commit `29d00cf` (chrome3d rebuilt as a true annulus). And MCP-follow-up explorer fixes: PropertyPanel now mirrors binding-derived target changes into the editor UI and the state server, so `qml_explorer_get_state` is no longer stale after `GaugeTheme.setTheme()`; and a new `resetProperty` WS action / `qml_explorer_reset_property` tool re-establishes a property's binding after `set_property` pinned it — see the Decisions log. Earlier the same day: theme Phase 5 — the explorer's header bar gained a preset selector + gauge mode toggle (`GaugeThemeControls`) driving the `GaugeTheme` singleton globally, populated declaratively from `presetNames` / `presetMetadata` and reflecting `activeTheme` / `mode` reactively. And Phases 3–4 — legacy IndustrialGauge / RadialGauge3D templates retired in favour of GaugeTheme presets; ClassicWhite preset added; RadialGauge gained scriptLabel / brandLabel; the Phase-3 follow-up wired the structural theme tokens — tickStyle, bezelStyle, effectsGlow/effectsShadow/effectsTexture, typographyScale — into RadialGauge so the three presets render structurally distinct, not just colour-shifted (Industrial-vs-ModernOEM SSIM 0.965 → 0.77). The whole theme track (Phases 1–5) is complete.)
 
 ## Project framing
 
@@ -328,6 +328,49 @@ Technical notes for future similar work:
 - Backlog item to consider: extract the "Text + form-shading shadow" pattern
   to a reusable `FormShadedText` primitive if a second consumer appears (e.g.
   the `gaugeLabel` slot or a future face wordmark wants the same treatment).
+
+#### ClassicWhite 2D/3D variants + GaugeQuality singleton (2026-05-12)
+
+- New singleton `GaugeQuality` (in `DevDash.Gauges.Theme`, alongside
+  `GaugeTheme`) — the foundation for a *graphics-settings architecture*.
+  Currently one flag, `effects3DEnabled`, plus `setQuality("full"|"reduced")`.
+  It's the lever for "best with 3D / best without 3D" choices: elements that
+  ship both a Quick3D and a 2D rendering path pick between them off this flag,
+  switchable at runtime parallel to theme switching. Deliberately minimal — add
+  flags as more effects become quality-sensitive (textures, MultiEffect chains,
+  a low-fidelity typography scale override are the obvious next ones).
+- ClassicWhite now has **two first-class variants**, not a degraded fallback
+  pair:
+  - **Numerals** (same in both variants): near-black glyphs (`foreground` =
+    `#1a1a1a`) ringed by an orange-red **halo** — `GaugeTickLabel` gained
+    `formShadingMode: "shadow" | "halo"` ("halo" = centered, no offset, larger
+    intensity-driven blur, saturated colour); the preset's old orange-red glyph
+    colour became the halo colour via the new `effectsTextShadingMode` /
+    `effectsTextShadingColor` theme tokens.
+  - **Centre hub**: new `centerCapStyle` theme token (`"flat" | "dome"`).
+    ClassicWhite is `"dome"`; RadialGauge then renders `CenterCap3D` (Quick3D
+    cone, painted-matte material, upper-left key light) when
+    `GaugeQuality.effects3DEnabled`, else a form-shaded 2D `GaugeCenterCap`
+    (`hasFormShading` — a single radial gradient with the focal point pulled
+    ~30% of the radius toward `lightAngle`). Industrial / ModernOEM are
+    `"flat"` and unchanged.
+- Verification (2026-05-12): both variants render the white-face look — dark
+  numerals + visible orange halo, orange needle, orange domed hub. At the
+  default 30 px centre-cap diameter the 2D form-shaded dome and the 3D cone are
+  hard to tell apart; the 3D advantage only really shows at larger hub sizes.
+  CenterCap3D's API exposes `diameter` / `color` / `metalness` / `roughness` /
+  `specularAmount` / `iblExposure` / `lightBrightness` / `lightAngle` only — the
+  mesh is a *dome*, not a cone, and there's no geometry control to make it one.
+  Dark-mode halo is muddier (amber glyphs under a brighter-orange aura — low
+  separation); not perfected this pass. Frame-time MCP tool returned 0 samples
+  on the gauge pages (no continuous animation; the needle tween completes faster
+  than the sampling window engages), so per-variant cost wasn't quantified — but
+  the 2D variant only adds one cached-able `Shape`, the halo reuses the existing
+  per-numeral `MultiEffect` layer with different params, and the 3D variant adds
+  a `View3D` (a full 3D render pass — the expensive one).
+- Backlog: keep adding quality-sensitive effects to `GaugeQuality` as they're
+  built; give CenterCap3D a cone mesh + geometry knobs; consider a mode-dependent
+  `effectsTextShadingColor` so dark-mode halos dim with the rest of the palette.
 
 ## Known capabilities and gaps
 

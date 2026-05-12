@@ -48,7 +48,7 @@ property-default sets moved into the theme.)
 import DevDash.Gauges 1.0            // Templates (RadialGauge)
 import DevDash.Gauges.Primitives 1.0 // Atomic building blocks
 import DevDash.Gauges.Compounds 1.0  // Functional sub-assemblies
-import DevDash.Gauges.Theme 1.0      // GaugeTheme singleton (active aesthetic state)
+import DevDash.Gauges.Theme 1.0      // GaugeTheme + GaugeQuality singletons (active aesthetic / graphics-quality state)
 ```
 
 ### Directory Layout
@@ -59,7 +59,8 @@ src/
 │   └── RadialGauge.qml          # the one template; aesthetics come from the theme
 ├── theme/                      # DevDash.Gauges.Theme
 │   ├── GaugeTheme.qml           # singleton: active preset + light/dark mode
-│   └── qmldir                   # advertises only GaugeTheme (presets are internal)
+│   ├── GaugeQuality.qml         # singleton: active graphics-quality (2D vs 3D paths)
+│   └── qmldir                   # advertises GaugeTheme + GaugeQuality (presets are internal)
 ├── primitives/                 # DevDash.Gauges.Primitives
 │   ├── arc/GaugeArc.qml
 │   ├── frame/                  # face + bezel + fasteners together
@@ -113,9 +114,10 @@ Two orthogonal axes:
   `GaugeTheme.setTheme("industrial" | "modernOEM" | "classicWhite")`) — the
   aesthetic family. `industrial` = warm-black painted / aged-cream / oxidized
   red; `modernOEM` = near-black gradient / bright-orange accent / chrome bezel;
-  `classicWhite` = pearl-white dial / matte-black bezel / orange-red numerals &
-  needle (a vintage white-face look, inspired by classic aftermarket gauges —
-  no specific product is reproduced).
+  `classicWhite` = pearl-white dial / matte-black bezel / near-black numerals
+  with an orange-red halo / orange-red needle / domed orange centre hub (a
+  vintage white-face look, inspired by classic aftermarket gauges — no specific
+  product is reproduced).
 - **Mode** (`GaugeTheme.mode`, `"light"` | `"dark"`; switch with
   `GaugeTheme.setMode(...)`) — day vs. night colour set. Independent of preset.
 
@@ -139,9 +141,25 @@ Colour tokens (vary by mode; read from `GaugeTheme.colors`):
 
 Non-colour tokens (mode-independent; read directly off `GaugeTheme`):
 `typographyFontFamily`, `typographyNumeralFontFamily`, `typographyScale`,
-`effectsGlow`, `effectsShadow`, `effectsTexture`,
+`effectsGlow`, `effectsShadow`, `effectsTexture`, `effectsTextShading`,
+`effectsTextShadingMode` (`"shadow"|"halo"` — directional painted-relief
+shadow vs. centered saturated glow on numerals), `effectsTextShadingColor`
+(colour of that shadow/halo; a deliberately mode-independent colour token),
 `tickStyle` (`"rectangle"|"chevron"|"triangle"|"rounded-dot"|"block"`),
-`bezelStyle` (`"flat"|"chrome"|"chrome3d"`).
+`bezelStyle` (`"flat"|"chrome"|"chrome3d"`),
+`centerCapStyle` (`"flat"|"dome"` — a plain disc vs. a raised cone/dome hub;
+the dome renders as Quick3D's `CenterCap3D` when `GaugeQuality.effects3DEnabled`,
+else a form-shaded 2D `GaugeCenterCap`).
+
+`GaugeQuality` (the singleton beside `GaugeTheme` in
+`DevDash.Gauges.Theme`) holds the active **graphics-quality** state — the
+runtime equivalent of a graphics-settings panel. Currently one flag,
+`effects3DEnabled` (default `true`), plus `setQuality("full"|"reduced")`.
+Elements that ship *both* a Quick3D and a 2D rendering path (today: the centre
+hub) pick between them off this flag; the choice is dynamic, switchable at
+runtime parallel to `GaugeTheme` switching. The 2D path is a deliberate
+variant, not a degraded fallback. More flags will be added as more effects
+become quality-sensitive.
 
 `RadialGauge` consumes **all** of these tokens — colour and structural — as
 defaults, so a preset can change a gauge's structure, not just its palette:
@@ -159,14 +177,25 @@ defaults, so a preset can change a gauge's structure, not just its palette:
 | `effectsGlow` | `tickGlow`, `needleOuterGlow` | tick glow + needle neon halo |
 | `effectsShadow` | `needleShadow` | needle drop shadow |
 | `effectsTexture` | `faceTexture` | gates `faceTextureSource` → `GaugeFace.textureSource` |
+| `effectsTextShading` | `tickLabelFormShading` | gates the numeral form-shading effect |
+| `effectsTextShadingMode` | `tickLabelFormShadingMode` | `"shadow"` (offset relief) vs `"halo"` (centered glow) on numerals |
+| `effectsTextShadingColor` | `tickLabelFormShadingColor` | colour of that shadow/halo |
+| `centerCapStyle` | `centerCapStyle` | `"flat"` → flat `GaugeCenterCap`; `"dome"` → `CenterCap3D` (if `GaugeQuality.effects3DEnabled`) else form-shaded 2D `GaugeCenterCap` |
 | `typographyScale` | `tickLabelFontSize`, `gaugeLabelFontSize` | ×-multiplies those + the digital readout's value size |
 | `typographyFontFamily` | `gaugeLabelFontFamily` | gauge label font |
 | `typographyNumeralFontFamily` | `tickLabelFontFamily` | tick numeral font |
 
 Every one of these is still per-instance overridable — the token only supplies
-the default expression. (The `RadialGauge3D`-era glass overlay and domed centre
-cap have no token yet; they stay instance-only options — see docs/PLAN.md
-backlog.)
+the default expression. (The `RadialGauge3D`-era glass overlay has no token yet;
+it stays an instance-only option — see docs/PLAN.md backlog.)
+
+Some primitives have **two rendering paths — a 2D one and a Quick3D one —
+selected by `GaugeQuality`**, not just by the theme. Today that's the centre
+hub (`CenterCap3D` vs. a `hasFormShading` `GaugeCenterCap`); the theme picks
+the *form* (`centerCapStyle`), `GaugeQuality.effects3DEnabled` picks the *path*.
+Both paths are deliberate variants — the 2D one approximates the look with 2D
+techniques (here an off-centre radial gradient = a form-shaded dome), it is not
+a degraded fallback.
 
 `GaugeTheme.presetNames` (ordered list of the internal preset names, matching
 what `setTheme()` accepts) and `GaugeTheme.presetMetadata` (a `{displayName,
