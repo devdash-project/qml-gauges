@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Shapes
 
 /**
  * @brief Atomic gauge face/dial plate primitive.
@@ -89,6 +90,39 @@ Item {
      */
     property string textureSource: ""
 
+    // === Subtle face gradient ===
+    //
+    // A soft radial gradient making the dial centre slightly brighter than its
+    // edge — the gentle depth of a real white-face dial, and what gives the
+    // outer highlight ring something to read against. Distinct from
+    // `useGradient` (a plain top-to-bottom linear fill): this is a centred
+    // radial wash, deliberately subtle. When both are set, this one wins.
+
+    /**
+     * @brief Render the face fill as a subtle centre-to-edge radial gradient.
+     * @default false
+     */
+    property bool hasFaceGradient: false
+
+    /**
+     * @brief Gradient colour at (and around) the dial centre.
+     * @default color (unchanged centre)
+     */
+    property color faceGradientCenterColor: color
+
+    /**
+     * @brief Gradient colour at the dial's outer edge.
+     * @default Qt.darker(color, 1.05) (a hair darker)
+     */
+    property color faceGradientEdgeColor: Qt.darker(color, 1.05)
+
+    /**
+     * @brief Radius (fraction of the dial radius) held at the centre colour
+     * before the gradient begins transitioning toward the edge colour.
+     * @default 0.3
+     */
+    property real faceGradientCenterStop: 0.3
+
     // === Outer highlight ring ===
     //
     // A thin bright ring hugging the *outer* edge of the face — the bright
@@ -144,7 +178,7 @@ Item {
         radius: root.diameter / 2
         anchors.centerIn: parent
 
-        color: root.useGradient ? "transparent" : root.color
+        color: (root.useGradient || root.hasFaceGradient) ? "transparent" : root.color
         border.width: root.borderWidth
         border.color: root.borderColor
         opacity: root.faceOpacity
@@ -152,13 +186,50 @@ Item {
         antialiasing: root.customAntialiasing
         clip: true  // Enable clipping for circular texture
 
-        // Radial gradient (if enabled)
-        gradient: root.useGradient ? faceGradient : undefined
+        // Linear gradient (if enabled and the radial face gradient isn't)
+        gradient: (root.useGradient && !root.hasFaceGradient) ? faceGradient : undefined
 
         Gradient {
             id: faceGradient
             GradientStop { position: 0.0; color: root.gradientCenter }
             GradientStop { position: 1.0; color: root.gradientEdge }
+        }
+
+        // Subtle radial face gradient (drawn under texture / highlight).
+        Shape {
+            id: faceGradientShape
+            visible: root.hasFaceGradient
+            anchors.fill: parent
+            antialiasing: root.customAntialiasing
+            preferredRendererType: typeof Shape.CurveRenderer !== 'undefined'
+                ? Shape.CurveRenderer
+                : Shape.GeometryRenderer
+
+            ShapePath {
+                strokeColor: "transparent"
+                fillColor: "transparent"
+                fillGradient: RadialGradient {
+                    centerX: root.diameter / 2
+                    centerY: root.diameter / 2
+                    centerRadius: root.diameter / 2
+                    focalX: root.diameter / 2
+                    focalY: root.diameter / 2
+                    focalRadius: 0
+                    GradientStop { position: 0.0; color: root.faceGradientCenterColor }
+                    GradientStop { position: Math.max(0, Math.min(1, root.faceGradientCenterStop)); color: root.faceGradientCenterColor }
+                    GradientStop { position: 1.0; color: root.faceGradientEdgeColor }
+                }
+                startX: root.diameter
+                startY: root.diameter / 2
+                PathAngleArc {
+                    centerX: root.diameter / 2
+                    centerY: root.diameter / 2
+                    radiusX: root.diameter / 2
+                    radiusY: root.diameter / 2
+                    startAngle: 0
+                    sweepAngle: 360
+                }
+            }
         }
 
         // Texture overlay (if set) - clipped to circle by parent
