@@ -387,6 +387,20 @@ Item {
     // === Center Cap Customization ===
 
     /**
+     * @brief Centre-hub form: "flat" (plain disc) | "dome" (raised cone/dome).
+     *
+     * Mirrors the theme's `centerCapStyle` token. When "dome", the gauge picks
+     * the rendering path from GaugeQuality: a Quick3D CenterCap3D cone when
+     * `GaugeQuality.effects3DEnabled` is true, otherwise a form-shaded 2D
+     * GaugeCenterCap that approximates the dome with an off-centre radial
+     * gradient. Both are deliberate variants — the 2D one is not a degraded
+     * fallback.
+     *
+     * @default GaugeTheme.centerCapStyle
+     */
+    property string centerCapStyle: GaugeTheme.centerCapStyle
+
+    /**
      * @brief Diameter of center cap (pixels).
      * @default 30
      */
@@ -394,9 +408,22 @@ Item {
 
     /**
      * @brief Center cap fill color.
-     * @default faceColor
+     *
+     * Defaults to the face colour for a flat hub, but to the theme's `primary`
+     * accent for a domed hub (a domed centre is a styled feature, not part of
+     * the dial surface).
+     * @default centerCapStyle === "dome" ? GaugeTheme.colors.primary : faceColor
      */
-    property color centerCapColor: faceColor
+    property color centerCapColor: centerCapStyle === "dome" ? GaugeTheme.colors.primary : faceColor
+
+    /**
+     * @brief Strength of the 2D dome's form shading, in [0, 1].
+     *
+     * Only used when `centerCapStyle` is "dome" and the 2D path is active
+     * (`GaugeQuality.effects3DEnabled` is false).
+     * @default 0.6
+     */
+    property real centerCapFormShadingIntensity: 0.6
 
     /**
      * @brief Center cap border color.
@@ -604,6 +631,25 @@ Item {
      */
     property real tickLabelFormShadingIntensity: 0.4
 
+    /**
+     * @brief Tick-label form-shading mode: "shadow" | "halo".
+     *
+     * "shadow" = directional painted-relief offset shadow; "halo" = centered
+     * saturated glow (the vintage white-face numeral look). Mirrors the theme's
+     * `effectsTextShadingMode` token.
+     * @default GaugeTheme.effectsTextShadingMode
+     */
+    property string tickLabelFormShadingMode: GaugeTheme.effectsTextShadingMode
+
+    /**
+     * @brief Colour of the tick-label form-shading shadow / halo.
+     *
+     * Mirrors the theme's `effectsTextShadingColor` token. For "halo" mode this
+     * should be a saturated accent distinct from the (dark) glyph colour.
+     * @default GaugeTheme.effectsTextShadingColor
+     */
+    property color tickLabelFormShadingColor: GaugeTheme.effectsTextShadingColor
+
     // === Implementation ===
 
     implicitWidth: 400
@@ -692,6 +738,8 @@ Item {
         tickShadowBlur: root.tickShadowBlur
         labelFormShading: root.tickLabelFormShading
         labelFormShadingIntensity: root.tickLabelFormShadingIntensity
+        labelFormShadingMode: root.tickLabelFormShadingMode
+        labelFormShadingColor: root.tickLabelFormShadingColor
     }
 
     // Layer 5: Value arc
@@ -787,26 +835,64 @@ Item {
     }
 
     // Layer 7: Center cap
-    GaugeCenterCap {
+    //
+    // Three rendering paths, picked by the theme's centerCapStyle token and the
+    // global GaugeQuality flag:
+    //   flat                       → capFlatComponent       (plain disc)
+    //   dome + effects3DEnabled    → cap3DComponent         (Quick3D cone)
+    //   dome + !effects3DEnabled   → capFlatDomeComponent   (form-shaded 2D dome)
+    // The switch is dynamic: toggling GaugeQuality.effects3DEnabled at runtime
+    // swaps the 3D cone and the 2D dome live. Either dome path shows a domed hub.
+    Loader {
+        id: centerCapLoader
         anchors.centerIn: parent
         visible: root.showCenterCap
+        active: root.showCenterCap
+        sourceComponent: root.centerCapStyle === "dome"
+            ? (GaugeQuality.effects3DEnabled ? cap3DComponent : capFlatDomeComponent)
+            : capFlatComponent
+    }
 
-        // Geometry
-        diameter: root.centerCapDiameter
-        borderWidth: root.centerCapBorderWidth
+    Component {
+        id: capFlatComponent
+        GaugeCenterCap {
+            diameter: root.centerCapDiameter
+            borderWidth: root.centerCapBorderWidth
+            color: root.centerCapColor
+            borderColor: root.centerCapBorderColor
+            hasGradient: root.centerCapGradient
+            gradientTop: root.centerCapGradientTop
+            gradientBottom: root.centerCapGradientBottom
+            hasShadow: root.centerCapShadow
+            hasHighlight: root.centerCapHighlight
+        }
+    }
 
-        // Appearance
-        color: root.centerCapColor
-        borderColor: root.centerCapBorderColor
+    Component {
+        id: capFlatDomeComponent
+        GaugeCenterCap {
+            diameter: root.centerCapDiameter
+            borderWidth: root.centerCapBorderWidth
+            color: root.centerCapColor
+            borderColor: root.centerCapBorderColor
+            hasFormShading: true
+            formShadingIntensity: root.centerCapFormShadingIntensity
+            lightAngle: root.needleLightAngle
+            hasShadow: root.centerCapShadow
+        }
+    }
 
-        // Gradient effect (for metallic look)
-        hasGradient: root.centerCapGradient
-        gradientTop: root.centerCapGradientTop
-        gradientBottom: root.centerCapGradientBottom
-
-        // 3D Effects
-        hasShadow: root.centerCapShadow
-        hasHighlight: root.centerCapHighlight
+    Component {
+        id: cap3DComponent
+        CenterCap3D {
+            diameter: root.centerCapDiameter
+            color: root.centerCapColor
+            // Painted hub, not chrome: low metalness, matte-ish roughness.
+            metalness: 0.0
+            roughness: 0.5
+            // Light from the upper-left to match the reference's apparent lighting.
+            lightAngle: -45
+        }
     }
 
     // Layer 8: Digital readout (center)

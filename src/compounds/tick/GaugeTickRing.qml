@@ -205,6 +205,24 @@ Item {
      */
     property real labelFormShadingIntensity: 0.4
 
+    /**
+     * @brief Form-shading mode for numeral labels: "shadow" | "halo".
+     *
+     * Passes through to each GaugeTickLabel's formShadingMode.
+     * @default "shadow"
+     */
+    property string labelFormShadingMode: "shadow"
+
+    /**
+     * @brief Colour of the label form-shading shadow / halo.
+     *
+     * Passes through to each GaugeTickLabel's formShadingColor. When transparent
+     * (the default sentinel) the label keeps its own derived default (a darkened
+     * tick colour) — set an explicit, saturated colour for the "halo" look.
+     * @default transparent (use the label's own default)
+     */
+    property color labelFormShadingColor: "transparent"
+
     // === Tick 3D Effect Properties ===
 
     /**
@@ -347,6 +365,10 @@ Item {
                 outlineColor: root.labelOutlineColor
                 hasFormShading: root.labelFormShading
                 formShadingIntensity: root.labelFormShadingIntensity
+                formShadingMode: root.labelFormShadingMode
+                formShadingColor: root.labelFormShadingColor.a > 0
+                    ? root.labelFormShadingColor
+                    : Qt.darker(majorTickDelegate.tickColor, 1.8)
                 keepUpright: true
             }
         }
