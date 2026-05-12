@@ -43,6 +43,17 @@ import QtQuick
  *                                   painted depth on its numerals without
  *                                   implying every glyph has a drop shadow,
  *                                   and vice versa
+ *   - effectsTextShadingMode      — when effectsTextShading is on, which look:
+ *                                   "shadow" (directional offset shadow —
+ *                                   painted relief) | "halo" (centered coloured
+ *                                   glow — the vintage white-face numeral look)
+ *   - effectsTextShadingColor     — colour of that shadow/halo (a colour token
+ *                                   that is deliberately mode-independent — it
+ *                                   reads as paint/aura, not as a lit surface)
+ *   - centerCapStyle              — preferred centre-hub form: "flat" (a plain
+ *                                   disc) | "dome" (a raised cone/dome — renders
+ *                                   as Quick3D's CenterCap3D when GaugeQuality
+ *                                   allows 3D, else a form-shaded 2D GaugeCenterCap)
  *   - tickStyle                   — preferred tick shape: "rectangle" | "chevron"
  *                                   | "triangle" | "rounded-dot" | "block"
  *   - bezelStyle                  — preferred bezel: "flat" | "chrome" | "chrome3d"
@@ -150,6 +161,9 @@ QtObject {
         readonly property bool effectsShadow: true
         readonly property bool effectsTexture: false
         readonly property bool effectsTextShading: false
+        readonly property string effectsTextShadingMode: "shadow"
+        readonly property color effectsTextShadingColor: "#000000"
+        readonly property string centerCapStyle: "flat"
         readonly property string tickStyle: "chevron"
         readonly property string bezelStyle: "flat"
     }
@@ -192,6 +206,9 @@ QtObject {
         readonly property bool effectsShadow: true
         readonly property bool effectsTexture: false
         readonly property bool effectsTextShading: false
+        readonly property string effectsTextShadingMode: "shadow"
+        readonly property color effectsTextShadingColor: "#000000"
+        readonly property string centerCapStyle: "flat"
         readonly property string tickStyle: "rectangle"
         readonly property string bezelStyle: "chrome3d"
     }
@@ -200,8 +217,8 @@ QtObject {
      * @brief Vintage white-face aesthetic, inspired by classic aftermarket gauges.
      *
      * A cool pearl-white dial in a thick matte-black bezel, bold geometric
-     * orange-red numerals and ticks, an orange-red painted needle with form
-     * shading, and a small orange centre hub — no chrome, no glass, no glow.
+     * near-black numerals ringed by an orange-red halo, an orange-red painted
+     * needle, and a domed orange centre hub — no chrome, no glass, no glow.
      * Light mode is the canonical daylight look; dark mode dims everything and
      * shifts the accent warmer (amber) to spare night vision, with the white
      * face dropped to a warm dark grey. Pair with RadialGauge's `scriptLabel` /
@@ -213,7 +230,7 @@ QtObject {
             readonly property color surface: "#f4f3f0"          // pearl-white dial (cool, not cream)
             readonly property color surfaceElevated: "#171717"  // thick matte-black bezel
             readonly property color primary: "#d44820"          // orange-red painted needle
-            readonly property color foreground: "#c2401c"        // orange-red numerals & ticks
+            readonly property color foreground: "#1a1a1a"        // dark warm numerals & ticks (haloed orange — see effectsTextShadingColor)
             readonly property color warning: "#c9851f"          // warning zone (muted amber)
             readonly property color critical: "#8f2c14"         // redline (deep red)
             readonly property color overlay: "transparent"      // no glass / lens overlay
@@ -240,7 +257,10 @@ QtObject {
         readonly property bool effectsGlow: false
         readonly property bool effectsShadow: true
         readonly property bool effectsTexture: false
-        readonly property bool effectsTextShading: true  // painted-depth numerals
+        readonly property bool effectsTextShading: true  // dark numerals with a coloured halo
+        readonly property string effectsTextShadingMode: "halo"
+        readonly property color effectsTextShadingColor: "#d44820"  // orange-red aura around the dark glyphs
+        readonly property string centerCapStyle: "dome"  // domed orange centre hub (3D cone, or 2D form-shaded dome)
         readonly property string tickStyle: "rectangle"
         readonly property string bezelStyle: "flat"
     }
@@ -328,6 +348,9 @@ QtObject {
     readonly property bool effectsShadow: activeTheme.effectsShadow
     readonly property bool effectsTexture: activeTheme.effectsTexture
     readonly property bool effectsTextShading: activeTheme.effectsTextShading
+    readonly property string effectsTextShadingMode: activeTheme.effectsTextShadingMode
+    readonly property color effectsTextShadingColor: activeTheme.effectsTextShadingColor
+    readonly property string centerCapStyle: activeTheme.centerCapStyle
     readonly property string tickStyle: activeTheme.tickStyle
     readonly property string bezelStyle: activeTheme.bezelStyle
 
