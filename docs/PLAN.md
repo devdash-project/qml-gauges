@@ -4,7 +4,7 @@ This document tracks the active development plan for the qml-gauges library.
 For the durable architectural reference, see CLAUDE.md. For audit outputs and
 historical investigations, see docs/audits/.
 
-Last updated: 2026-05-12 (ClassicWhite dimensionality refinement landed — `GaugeBezel` flat-style inner-edge highlight (`flatHasInnerHighlight` + conical-gradient band), `GaugeFace` outer highlight ring (`hasOuterHighlight`), bundled BarlowCondensed-ExtraBold + new `typographyNumeralFontWeight` token; new theme tokens `bezelHasInnerHighlight` / `faceHasOuterHighlight` + `colors.bezelHighlight` / `colors.faceHighlight`; ClassicWhite wired to all three with light/dark-adapted highlight colours and ExtraBold numerals; Industrial / ModernOEM unchanged. Bezel highlight + heavier numerals read well; the face ring barely shows in light mode against a near-white dial (fine in dark mode). See "ClassicWhite refinement — bezel/face dimensionality + numeral weight (2026-05-12)" below. Earlier 2026-05-12 — ClassicWhite 2D/3D variants + `GaugeQuality` singleton landed — new `effects3DEnabled` flag selects `CenterCap3D` vs. a form-shaded 2D `GaugeCenterCap` for the domed hub; `GaugeTickLabel` gained a `"halo"` form-shading mode; new theme tokens `centerCapStyle`, `effectsTextShadingMode`, `effectsTextShadingColor`; ClassicWhite numerals are now dark glyphs with an orange-red halo. See "ClassicWhite 2D/3D variants + GaugeQuality singleton (2026-05-12)" below. Previously — 2026-05-11 — ClassicWhite typographic-character refinement landed: Barlow Condensed bundled into the theme module via a FontLoader on `GaugeTheme` and pointed at by ClassicWhite's `typographyNumeralFontFamily`; `GaugeTickLabel` gained a `hasFormShading` capability driven by a `MultiEffect` directional shadow; a new theme token `effectsTextShading` opts a preset into form-shaded numerals — true on classicWhite, false on industrial / modernOEM so their rendered output is unchanged. See "ClassicWhite refinement (2026-05-11)" below for the capability-test outcome. Before that — same date — the `chrome3d` `GaugeBezel` fill bug was fixed in commit `29d00cf` (chrome3d rebuilt as a true annulus). And MCP-follow-up explorer fixes: PropertyPanel now mirrors binding-derived target changes into the editor UI and the state server, so `qml_explorer_get_state` is no longer stale after `GaugeTheme.setTheme()`; and a new `resetProperty` WS action / `qml_explorer_reset_property` tool re-establishes a property's binding after `set_property` pinned it — see the Decisions log. Earlier the same day: theme Phase 5 — the explorer's header bar gained a preset selector + gauge mode toggle (`GaugeThemeControls`) driving the `GaugeTheme` singleton globally, populated declaratively from `presetNames` / `presetMetadata` and reflecting `activeTheme` / `mode` reactively. And Phases 3–4 — legacy IndustrialGauge / RadialGauge3D templates retired in favour of GaugeTheme presets; ClassicWhite preset added; RadialGauge gained scriptLabel / brandLabel; the Phase-3 follow-up wired the structural theme tokens — tickStyle, bezelStyle, effectsGlow/effectsShadow/effectsTexture, typographyScale — into RadialGauge so the three presets render structurally distinct, not just colour-shifted (Industrial-vs-ModernOEM SSIM 0.965 → 0.77). The whole theme track (Phases 1–5) is complete.)
+Last updated: 2026-05-12 (ClassicWhite final pass landed — two-tone flat bezel (`GaugeBezel.flatHasOuterBand` bright outer band over the dark inner ring), subtle face radial gradient (`GaugeFace.hasFaceGradient`), tick hierarchy (`GaugeTick` `"rounded-rectangle"` shape + `GaugeTickRing.majorTickShape` / `minorTickShape`), bundled **Caveat** script font + `typographyScriptFontFamily` token + RadialGauge `scriptFontFamily` / new `unitLabel` slot; new theme tokens `bezelHasOuterBand`, `faceHasGradient`, `majorTickShape`, `minorTickShape` + `colors.bezelOuterBand` / `colors.faceEdge`; ClassicWhite wired to all five, Industrial / ModernOEM unchanged. See "ClassicWhite final pass — two-tone bezel, face gradient, tick hierarchy, script labels (2026-05-12)" below. Earlier 2026-05-12 — ClassicWhite dimensionality refinement landed — `GaugeBezel` flat-style inner-edge highlight (`flatHasInnerHighlight` + conical-gradient band), `GaugeFace` outer highlight ring (`hasOuterHighlight`), bundled BarlowCondensed-ExtraBold + new `typographyNumeralFontWeight` token; new theme tokens `bezelHasInnerHighlight` / `faceHasOuterHighlight` + `colors.bezelHighlight` / `colors.faceHighlight`; ClassicWhite wired to all three with light/dark-adapted highlight colours and ExtraBold numerals; Industrial / ModernOEM unchanged. Bezel highlight + heavier numerals read well; the face ring barely shows in light mode against a near-white dial (fine in dark mode). See "ClassicWhite refinement — bezel/face dimensionality + numeral weight (2026-05-12)" below. Earlier 2026-05-12 — ClassicWhite 2D/3D variants + `GaugeQuality` singleton landed — new `effects3DEnabled` flag selects `CenterCap3D` vs. a form-shaded 2D `GaugeCenterCap` for the domed hub; `GaugeTickLabel` gained a `"halo"` form-shading mode; new theme tokens `centerCapStyle`, `effectsTextShadingMode`, `effectsTextShadingColor`; ClassicWhite numerals are now dark glyphs with an orange-red halo. See "ClassicWhite 2D/3D variants + GaugeQuality singleton (2026-05-12)" below. Previously — 2026-05-11 — ClassicWhite typographic-character refinement landed: Barlow Condensed bundled into the theme module via a FontLoader on `GaugeTheme` and pointed at by ClassicWhite's `typographyNumeralFontFamily`; `GaugeTickLabel` gained a `hasFormShading` capability driven by a `MultiEffect` directional shadow; a new theme token `effectsTextShading` opts a preset into form-shaded numerals — true on classicWhite, false on industrial / modernOEM so their rendered output is unchanged. See "ClassicWhite refinement (2026-05-11)" below for the capability-test outcome. Before that — same date — the `chrome3d` `GaugeBezel` fill bug was fixed in commit `29d00cf` (chrome3d rebuilt as a true annulus). And MCP-follow-up explorer fixes: PropertyPanel now mirrors binding-derived target changes into the editor UI and the state server, so `qml_explorer_get_state` is no longer stale after `GaugeTheme.setTheme()`; and a new `resetProperty` WS action / `qml_explorer_reset_property` tool re-establishes a property's binding after `set_property` pinned it — see the Decisions log. Earlier the same day: theme Phase 5 — the explorer's header bar gained a preset selector + gauge mode toggle (`GaugeThemeControls`) driving the `GaugeTheme` singleton globally, populated declaratively from `presetNames` / `presetMetadata` and reflecting `activeTheme` / `mode` reactively. And Phases 3–4 — legacy IndustrialGauge / RadialGauge3D templates retired in favour of GaugeTheme presets; ClassicWhite preset added; RadialGauge gained scriptLabel / brandLabel; the Phase-3 follow-up wired the structural theme tokens — tickStyle, bezelStyle, effectsGlow/effectsShadow/effectsTexture, typographyScale — into RadialGauge so the three presets render structurally distinct, not just colour-shifted (Industrial-vs-ModernOEM SSIM 0.965 → 0.77). The whole theme track (Phases 1–5) is complete.)
 
 ## Project framing
 
@@ -425,6 +425,90 @@ Velocity White reference; the centre cap was explicitly out of scope this pass.
   creamier (out of scope here) or the ring would need a companion inner-shadow
   to read as a bevel. Other ClassicWhite gaps untouched this pass: face texture,
   tick hierarchy, script labels, mph/units text styling, CenterCap3D cone mesh.
+
+#### ClassicWhite final pass — two-tone bezel, face gradient, tick hierarchy, script labels (2026-05-12)
+
+Five more 2D techniques to close the remaining gap to the Classic Instruments
+Velocity White reference; new primitive infrastructure (cone mesh, redline pip,
+custom typography) stays out of scope.
+
+- **Two-tone bezel.** `GaugeBezel` (flat style) gained `flatHasOuterBand` +
+  `flatOuterBandWidth / Color / HasGradient / HighlightAngle / GradientIntensity`.
+  When on, a bright annulus is painted over the outermost `flatOuterBandWidth` px
+  of the bezel ring (the dark inner ring shows through the rest), optionally with
+  a `ConicalGradient` peaking at `flatOuterBandHighlightAngle` for the
+  polished-metal reading. Implemented as an overlay over the existing dark ring
+  rather than shrinking it — no geometry shuffle. New token `bezelHasOuterBand` +
+  `colors.bezelOuterBand`; RadialGauge exposes `bezelOuterBand / *Color / *Width`
+  (default 32 % of `bezelWidth`) ` / *Gradient`.
+- **Face radial gradient.** `GaugeFace` gained `hasFaceGradient` +
+  `faceGradientCenterColor / EdgeColor / CenterStop` — a `Shape` circle filled
+  with a `RadialGradient` (centre colour held to `faceGradientCenterStop`, then
+  transitioning to the edge colour), drawn under texture / highlight. Distinct
+  from the existing top-to-bottom `useGradient`; the radial one wins if both set.
+  New token `faceHasGradient` + `colors.faceEdge`; RadialGauge exposes
+  `faceGradient / faceGradientCenterColor / *EdgeColor / *CenterStop`.
+- **Tick hierarchy.** `GaugeTick` gained a `"rounded-rectangle"` shape (a
+  rectangle with `radius = 0.3·min(width,length)` — softly rounded, not a pill).
+  `GaugeTickRing` gained `majorTickShape` / `minorTickShape` (each defaulting to
+  `tickShape`) so the major tier can carry a heavier shape while minor ticks stay
+  plain; combined with the pre-existing major/minor length+width split this is
+  the full two-tier hierarchy. New tokens `majorTickShape` / `minorTickShape`;
+  RadialGauge exposes both. ClassicWhite = rounded-rectangle majors over
+  rectangle minors; Industrial = chevron/chevron; ModernOEM = rectangle/rectangle
+  (= each preset's existing `tickStyle`, so rendered output unchanged).
+- **Script unit / wordmark text.** Bundled **Caveat** (Google Fonts, SIL OFL —
+  `src/assets/fonts/OFL-Caveat.txt`) into the theme module + a `FontLoader` on
+  `GaugeTheme` exposing `caveatFamily`. New token `typographyScriptFontFamily`
+  (ClassicWhite = Caveat; Industrial / ModernOEM = their body font, so their
+  text is unchanged). RadialGauge gained `scriptFontFamily` and a new `unitLabel`
+  slot (the small script "mph"-style word near the dial centre, distinct from
+  `unit` which feeds the digital readout); `scriptLabel` and `unitLabel` now
+  render in `scriptFontFamily`, italic. The explorer's ClassicWhite page demos
+  `unitLabel: "mph"` + `scriptLabel: "Cruiser"` (generic words — no real product
+  mark). Caveat was picked over Pacifico (too casual) / Allura (too formal /
+  illegible at small sizes) — the task's own middle-ground suggestion; it's a
+  flowing handwritten script that stays readable for a 3–4-letter unit word.
+- **Outer highlight ring re-evaluation.** With the face gradient giving the dial
+  a slightly darker (`faceEdge`) edge, the existing `faceHasOuterHighlight` ring
+  now has a little contrast to read against — in light mode it reads as a faint
+  gleam just inside the bezel (still subtle; the dial is near-white), in dark
+  mode it reads clearly. Left as-is — no re-tune needed.
+- **Verification (2026-05-12).** Rendered ClassicWhite light + dark and
+  Industrial + ModernOEM via an offscreen `qml6` harness (`grabToImage`), since
+  the `devdash-mcp` explorer-screenshot tools weren't available in the session.
+  ClassicWhite light: the two-tone bezel reads clearly (bright outer band + dark
+  inner ring, the band's gradient gives a subtle polished look); the face
+  gradient is visible (centre brighter than the warm-grey edge); rounded major
+  ticks at the numbered positions are clearly larger than the plain minors with
+  visible rounded corners; "Cruiser" / "mph" render in Caveat, distinctly
+  different from the Barlow numerals. Dark mode adapts — dimmer warm outer band,
+  dim warm dial edge, amber script. Industrial / ModernOEM render unchanged. The
+  halo'd numerals don't show under the offscreen software rasterizer (the
+  `MultiEffect`-based halo needs a real GPU context — confirmed by re-rendering
+  with `tickLabelFormShading: false`, which brings the Barlow ExtraBold glyphs
+  back); unaffected by this pass. Highest-impact item: the two-tone bezel —
+  it's the single most "reference-like" change. Hardest / least satisfying: the
+  face outer-highlight ring (Part 4) — even with the gradient's contrast room a
+  brighter ring on a near-white dial barely registers in light mode; a companion
+  inner-shadow (bevel cue) would help but is out of scope. Frame-time: the new
+  geometry is all static (`Shape` annulus only when the band is on, `Shape`
+  circle only when the face gradient is on, an extra rounded `Rectangle` per
+  major tick) with no per-frame work — comparable to the existing `chrome3d`
+  `Shape`, no realistic regression; the frame-time MCP tool wasn't available to
+  sample.
+- **Architectural notes.** The bezel two-tone work stayed cheap by overlaying
+  the bright band on the existing dark ring rather than re-deriving the dark
+  ring's radii — the inner highlight band (already on the ring's inner edge) and
+  the new outer band don't interact, so no coordination was needed. The tick
+  hierarchy split is a thin pass-through: `GaugeTickRing` already had separate
+  major/minor *sizes*; adding separate *shapes* (both defaulting to `tickShape`)
+  was the only missing piece — the per-tier delegates just read the per-tier
+  property. No new primitives.
+- **Backlog (still untouched).** Cone-mesh centre hub, redline pip indicator,
+  dial surface texture/grain, a third tick tier, and the near-white-face limit
+  on the outer highlight ring (would want a creamier `surface` or an inner-shadow
+  companion).
 
 ## Known capabilities and gaps
 

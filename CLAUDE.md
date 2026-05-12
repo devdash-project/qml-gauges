@@ -140,10 +140,15 @@ Colour tokens (vary by mode; read from `GaugeTheme.colors`):
 | `critical`       | critical / redline zone colour (red range, typically)          |
 | `overlay`        | glass / lens overlay tint (often `transparent`, or white at low opacity) |
 | `bezelHighlight` | colour of the flat bezel's inner-edge highlight band (only meaningful when `bezelHasInnerHighlight`) |
+| `bezelOuterBand` | colour of the flat bezel's bright outer band (only meaningful when `bezelHasOuterBand`) |
 | `faceHighlight`  | colour of the face's outer highlight ring (only meaningful when `faceHasOuterHighlight`) |
+| `faceEdge`       | the face radial gradient's edge colour (only meaningful when `faceHasGradient`) |
 
 Non-colour tokens (mode-independent; read directly off `GaugeTheme`):
 `typographyFontFamily`, `typographyNumeralFontFamily`,
+`typographyScriptFontFamily` (font for the decorative script slots —
+`scriptLabel` / `unitLabel`; ClassicWhite uses the bundled **Caveat** script
+face, the other presets just point it at their normal body font),
 `typographyNumeralFontWeight` (numeral weight, e.g. `Font.Bold` /
 `Font.ExtraBold` — ExtraBold has a real bundled Barlow Condensed face),
 `typographyScale`, `effectsGlow`, `effectsShadow`, `effectsTexture`,
@@ -151,12 +156,21 @@ Non-colour tokens (mode-independent; read directly off `GaugeTheme`):
 painted-relief shadow vs. centered saturated glow on numerals),
 `effectsTextShadingColor` (colour of that shadow/halo; a deliberately
 mode-independent colour token),
-`tickStyle` (`"rectangle"|"chevron"|"triangle"|"rounded-dot"|"block"`),
+`tickStyle` (`"rectangle"|"rounded-rectangle"|"chevron"|"triangle"|"rounded-dot"|"block"`
+— the default shape both tick tiers fall back to),
+`majorTickShape` / `minorTickShape` (per-tier overrides of `tickStyle` — e.g.
+ClassicWhite's heavier `"rounded-rectangle"` majors over plain `"rectangle"`
+minors; Industrial / ModernOEM set both equal to their `tickStyle`),
 `bezelStyle` (`"flat"|"chrome"|"chrome3d"`),
 `bezelHasInnerHighlight` (flat-bezel inner-edge highlight band — curved-metal
 catching-light cue; conical-gradient annulus peaking at the top),
+`bezelHasOuterBand` (flat-bezel two-tone construction — a bright "polished
+metal" band on the bezel's outer edge, outboard of the dark matte inner ring),
 `faceHasOuterHighlight` (a bright ring on the face's outer edge — the bright
 halo just inside the bezel on classic white-face gauges),
+`faceHasGradient` (a subtle centre-to-edge radial gradient on the dial — centre
+brighter than edge, the gentle depth that gives the outer highlight ring
+contrast to read against),
 `centerCapStyle` (`"flat"|"dome"` — a plain disc vs. a raised cone/dome hub;
 the dome renders as Quick3D's `CenterCap3D` when `GaugeQuality.effects3DEnabled`,
 else a form-shaded 2D `GaugeCenterCap`).
@@ -182,10 +196,13 @@ defaults, so a preset can change a gauge's structure, not just its palette:
 | `colors.foreground` | `tickColor` | ticks, numerals, on-face labels |
 | `colors.warning` | `warningColor` | warning-range ticks/arc |
 | `colors.critical` | `redlineColor`, `criticalColor` | redline zone / critical ticks |
-| `tickStyle` | `tickShape` | `GaugeTickRing.tickShape` |
+| `tickStyle` | `tickShape` | `GaugeTickRing.tickShape` (the per-tier fallback) |
+| `majorTickShape` / `minorTickShape` | `majorTickShape` / `minorTickShape` | `GaugeTickRing.majorTickShape` / `.minorTickShape` (each defaults to `tickShape`) |
 | `bezelStyle` | `bezelStyle` | `GaugeBezel.style` |
 | `bezelHasInnerHighlight` | `bezelInnerHighlight` | `GaugeBezel.flatHasInnerHighlight` (+ `bezelInnerHighlightColor` ← `colors.bezelHighlight`, `bezelInnerHighlightWidth` default 45 % of `bezelWidth`) |
+| `bezelHasOuterBand` | `bezelOuterBand` | `GaugeBezel.flatHasOuterBand` (+ `bezelOuterBandColor` ← `colors.bezelOuterBand`, `bezelOuterBandWidth` default 32 % of `bezelWidth`, `bezelOuterBandGradient` default true) |
 | `faceHasOuterHighlight` | `faceOuterHighlight` | `GaugeFace.hasOuterHighlight` (+ `faceOuterHighlightColor` ← `colors.faceHighlight`, `faceOuterHighlightWidth` default 4.5 % of gauge size) |
+| `faceHasGradient` | `faceGradient` | `GaugeFace.hasFaceGradient` (+ `faceGradientCenterColor` ← `faceColor`, `faceGradientEdgeColor` ← `colors.faceEdge`, `faceGradientCenterStop` default 0.3) |
 | `effectsGlow` | `tickGlow`, `needleOuterGlow` | tick glow + needle neon halo |
 | `effectsShadow` | `needleShadow` | needle drop shadow |
 | `effectsTexture` | `faceTexture` | gates `faceTextureSource` → `GaugeFace.textureSource` |
@@ -197,6 +214,7 @@ defaults, so a preset can change a gauge's structure, not just its palette:
 | `typographyFontFamily` | `gaugeLabelFontFamily` | gauge label font |
 | `typographyNumeralFontFamily` | `tickLabelFontFamily` | tick numeral font |
 | `typographyNumeralFontWeight` | `tickLabelFontWeight` | tick numeral weight (ClassicWhite = `Font.ExtraBold`; others `Font.Bold`) |
+| `typographyScriptFontFamily` | `scriptFontFamily` | font for the `scriptLabel` / `unitLabel` slots (ClassicWhite = bundled Caveat; others = their body font) |
 
 Every one of these is still per-instance overridable — the token only supplies
 the default expression. (The `RadialGauge3D`-era glass overlay has no token yet;
@@ -227,10 +245,14 @@ a preset = updating **three** co-located spots in `GaugeTheme.qml`: the nested
 `QtObject` token set, a `case` in `setTheme()`, and an entry in `presetNames` +
 `presetMetadata`.
 
-RadialGauge also exposes two empty-by-default decorative face-text slots —
+RadialGauge also exposes three empty-by-default decorative face-text slots —
 `scriptLabel` (a word just below the dial centre, rendered under the needle —
-the place a vintage-gauge wordmark sits) and `brandLabel` (a small line low on
-the face near 6 o'clock). The library ships no wordmark of its own; these are
+the place a vintage-gauge wordmark sits), `unitLabel` (a small unit word near
+the dial centre, e.g. "mph" — distinct from `unit`, which feeds the digital
+readout) and `brandLabel` (a small line low on the face near 6 o'clock).
+`scriptLabel` and `unitLabel` render in `scriptFontFamily` (← the theme's
+`typographyScriptFontFamily` token — a script-italic face on `classicWhite`,
+the body font elsewhere). The library ships no wordmark of its own; these are
 for user-supplied text (e.g. Moon Patrol's own word behind the needle on a
 `classicWhite`-themed gauge).
 
