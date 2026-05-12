@@ -189,6 +189,42 @@ Item {
      */
     property bool domedChromeReflection: false
 
+    // === Form-shaded dome (2D dome approximation) ===
+    //
+    // A lightweight alternative to the Quick3D CenterCap3D for the "domed hub"
+    // look: a single radial-gradient disc whose focal point is pulled toward a
+    // notional light source, so the highlight sits off-centre and the rim falls
+    // into shadow. It reads as a cone/dome under directional light without any
+    // 3D pipeline. (Distinct from `domed` above, which is the older multi-stop
+    // chrome-sphere treatment; this one is tuned for matte painted hubs.)
+
+    /**
+     * @brief Render as a form-shaded dome (radial gradient with off-centre
+     * highlight) instead of a flat disc.
+     * @default false
+     */
+    property bool hasFormShading: false
+
+    /**
+     * @brief Direction of the simulated light for form shading, in degrees.
+     *
+     * Same convention as elsewhere in the library: -45° ≈ light from the
+     * upper-left (the conventional drawing direction). The gradient focal point
+     * is offset toward this direction by ~30% of the cap radius.
+     * @default -45
+     */
+    property real lightAngle: -45
+
+    /**
+     * @brief Strength of the form-shading highlight/shadow contrast, in [0, 1].
+     * @default 0.4
+     */
+    property real formShadingIntensity: 0.4
+
+    // Focal-point offset for the form-shaded dome: pulled toward the light.
+    readonly property real _fsFocalX: root.diameter / 2 + Math.cos(root.lightAngle * Math.PI / 180) * root.diameter * 0.30
+    readonly property real _fsFocalY: root.diameter / 2 + Math.sin(root.lightAngle * Math.PI / 180) * root.diameter * 0.30
+
     // === Advanced ===
 
     /**
@@ -229,13 +265,13 @@ Item {
             anchors.fill: parent
             radius: root.diameter / 2
 
-            color: root.hasGradient && !root.domed ? "transparent" : (root.domed ? "transparent" : root.color)
+            color: (root.domed || root.hasFormShading || root.hasGradient) ? "transparent" : root.color
             border.width: root.borderWidth
             border.color: root.borderColor
             antialiasing: root.customAntialiasing
 
-            // Radial gradient for metallic effect (only when not domed)
-            gradient: root.hasGradient && !root.domed ? capGradient : undefined
+            // Radial gradient for metallic effect (only when not domed / form-shaded)
+            gradient: (root.hasGradient && !root.domed && !root.hasFormShading) ? capGradient : undefined
 
             Gradient {
                 id: capGradient
@@ -273,6 +309,44 @@ Item {
                 }
 
                 // Circle path
+                PathAngleArc {
+                    centerX: root.diameter / 2
+                    centerY: root.diameter / 2
+                    radiusX: root.diameter / 2 - root.borderWidth
+                    radiusY: root.diameter / 2 - root.borderWidth
+                    startAngle: 0
+                    sweepAngle: 360
+                }
+            }
+        }
+
+        // Form-shaded dome: a single radial gradient with an off-centre focal
+        // point. Highlight (lighter than base) at the light side, base in the
+        // middle, shadow (darker than base) at the far rim.
+        Shape {
+            id: formShadedShape
+            visible: root.hasFormShading
+            anchors.fill: parent
+
+            preferredRendererType: typeof Shape.CurveRenderer !== 'undefined'
+                ? Shape.CurveRenderer
+                : Shape.GeometryRenderer
+
+            ShapePath {
+                strokeColor: "transparent"
+                fillGradient: RadialGradient {
+                    centerX: root.diameter / 2
+                    centerY: root.diameter / 2
+                    centerRadius: root.diameter / 2
+                    focalX: root._fsFocalX
+                    focalY: root._fsFocalY
+                    focalRadius: 0
+
+                    GradientStop { position: 0.0; color: Qt.lighter(root.color, 1.0 + root.formShadingIntensity * 0.5) }
+                    GradientStop { position: 0.5; color: root.color }
+                    GradientStop { position: 1.0; color: Qt.darker(root.color, 1.0 + root.formShadingIntensity * 0.4) }
+                }
+
                 PathAngleArc {
                     centerX: root.diameter / 2
                     centerY: root.diameter / 2
