@@ -75,6 +75,8 @@ Item {
      *
      * Supported shapes:
      * - "rectangle": Standard rectangular tick (default)
+     * - "rounded-rectangle": Rectangle with softly rounded corners (a heavier,
+     *   "painted-on" major-tick look — recognisably a rectangle, not a pill)
      * - "rounded-dot": Circle at outer end, tapers to point inward
      * - "triangle": Pointed at inner end, flat base at outer
      * - "chevron": V-shaped tick pointing inward
@@ -288,15 +290,18 @@ Item {
             GradientStop { position: 1.0; color: root.gradientEnd }
         }
 
-        // Rectangle shape (default)
+        // Rectangle shape (default) — also serves "rounded-rectangle" (same
+        // body, softly rounded corners rather than fully pill-capped ends).
         Rectangle {
             id: rectangleTick
-            visible: root.tickShape === "rectangle"
+            visible: root.tickShape === "rectangle" || root.tickShape === "rounded-rectangle"
             x: root.tickX
             y: root.tickY
             width: root.tickWidth
             height: root.length
-            radius: root.roundedEnds ? root.tickWidth / 2 : 0
+            radius: root.tickShape === "rounded-rectangle"
+                ? Math.min(root.tickWidth, root.length) * 0.3
+                : (root.roundedEnds ? root.tickWidth / 2 : 0)
             color: root.hasGradient ? "transparent" : root.color
             gradient: root.hasGradient ? rectGradient : null
 
